@@ -40,8 +40,8 @@ public class PlaynextCmd extends DJCommand
         super(bot);
         this.loadingEmoji = bot.getConfig().getLoading();
         this.name = "playnext";
-        this.arguments = "<title|URL>";
-        this.help = "plays a single song next";
+        this.arguments = "<\uC81C\uBAA9|URL>";
+        this.help = "\uD604\uC7AC \uACE1\uC774 \uB05D\uB098\uACE0 \uC0C8\uCE58\uAE30 \uD558\uC5EC \uC81C\uACF5\uB41C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
@@ -52,7 +52,7 @@ public class PlaynextCmd extends DJCommand
     {
         if(event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
         {
-            event.replyWarning("Please include a song title or URL!");
+            event.replyWarning("\uB178\uB798 \uC81C\uBAA9 \uB610\uB294 URL\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624!");
             return;
         }
         String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") 
@@ -84,8 +84,8 @@ public class PlaynextCmd extends DJCommand
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrackToFront(new QueuedTrack(track, event.getAuthor()))+1;
-            String addMsg = FormatUtil.filter(event.getClient().getSuccess()+" Added **"+track.getInfo().title
-                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" to the queue at position "+pos));
+            String addMsg = FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
+                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" (\uC774)\uAC00 "+pos+"\uC704\uCE58\uC5D0 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4"));
             m.editMessage(addMsg).queue();
         }
         

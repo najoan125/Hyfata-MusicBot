@@ -18,7 +18,7 @@ package com.jagrosh.jmusicbot.commands.dj;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
-import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 
@@ -26,14 +26,14 @@ import com.jagrosh.jmusicbot.utils.FormatUtil;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class VolumeCmd extends DJCommand
+public class VolumeCmd extends MusicCommand
 {
     public VolumeCmd(Bot bot)
     {
         super(bot);
-        this.name = "volume";
+        this.name = "\uC74C\uB7C9";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.help = "sets or shows volume";
+        this.help = "\uBCFC\uB968\uC744 \uC124\uC815\uD558\uAC70\uB098 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
         this.arguments = "[0-150]";
     }
 
@@ -45,7 +45,7 @@ public class VolumeCmd extends DJCommand
         int volume = handler.getPlayer().getVolume();
         if(event.getArgs().isEmpty())
         {
-            event.reply(FormatUtil.volumeIcon(volume)+" Current volume is `"+volume+"`");
+            event.reply(FormatUtil.volumeIcon(volume)+" \uD604\uC7AC \uC74C\uB7C9\uC740 `"+volume+"` \uC785\uB2C8\uB2E4");
         }
         else
         {
@@ -56,12 +56,12 @@ public class VolumeCmd extends DJCommand
                 nvolume = -1;
             }
             if(nvolume<0 || nvolume>150)
-                event.reply(event.getClient().getError()+" Volume must be a valid integer between 0 and 150!");
+                event.reply(event.getClient().getError()+" \uC74C\uB7C9\uC740 0\uACFC 150 \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
             else
             {
                 handler.getPlayer().setVolume(nvolume);
                 settings.setVolume(nvolume);
-                event.reply(FormatUtil.volumeIcon(nvolume)+" Volume changed from `"+volume+"` to `"+nvolume+"`");
+                event.reply(FormatUtil.volumeIcon(nvolume)+" \uC74C\uB7C9\uC774 `"+volume+"` \uC5D0\uC11C `"+nvolume+"` (\uC73C)\uB85C \uBCC0\uACBD\uB418\uC5C8\uC2B5\uB2C8\uB2E4");
             }
         }
     }

@@ -38,7 +38,7 @@ public class ForceRemoveCmd extends DJCommand
     {
         super(bot);
         this.name = "forceremove";
-        this.help = "removes all entries by a user from the queue";
+        this.help = "\uB300\uAE30\uC5F4\uC5D0\uC11C \uC0AC\uC6A9\uC790\uAC00 \uC785\uB825\uD55C \uBAA8\uB4E0 \uD56D\uBAA9\uC744 \uC81C\uAC70\uD569\uB2C8\uB2E4.";
         this.arguments = "<user>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = false;
@@ -51,14 +51,14 @@ public class ForceRemoveCmd extends DJCommand
     {
         if (event.getArgs().isEmpty())
         {
-            event.replyError("You need to mention a user!");
+            event.replyError("\uC0AC\uC6A9\uC790\uB97C \uBA58\uC158\uD574\uC57C \uD569\uB2C8\uB2E4!");
             return;
         }
 
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (handler.getQueue().isEmpty())
         {
-            event.replyError("There is nothing in the queue!");
+            event.replyError("\uB300\uAE30\uC5F4\uC5D0 \uC544\uBB34\uAC83\uB3C4 \uC5C6\uC2B5\uB2C8\uB2E4!");
             return;
         }
 
@@ -68,7 +68,7 @@ public class ForceRemoveCmd extends DJCommand
 
         if(found.isEmpty())
         {
-            event.replyError("Unable to find the user!");
+            event.replyError("\uC0AC\uC6A9\uC790\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!");
             return;
         }
         else if(found.size()>1)
@@ -82,7 +82,7 @@ public class ForceRemoveCmd extends DJCommand
 
             builder
             .setSelection((msg, i) -> removeAllEntries(found.get(i-1).getUser(), event))
-            .setText("Found multiple users:")
+            .setText("\uBC1C\uACAC\uB41C \uC5EC\uB7EC \uC0AC\uC6A9\uC790:")
             .setColor(event.getSelfMember().getColor())
             .useNumbers()
             .setUsers(event.getAuthor())
@@ -109,11 +109,11 @@ public class ForceRemoveCmd extends DJCommand
         int count = ((AudioHandler) event.getGuild().getAudioManager().getSendingHandler()).getQueue().removeAll(target.getIdLong());
         if (count == 0)
         {
-            event.replyWarning("**"+target.getName()+"** doesn't have any songs in the queue!");
+            event.replyWarning("**"+target.getName()+"** (\uC740)\uB294 \uB300\uAE30\uC5F4\uC5D0 \uB178\uB798\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4!");
         }
         else
         {
-            event.replySuccess("Successfully removed `"+count+"` entries from **"+target.getName()+"**#"+target.getDiscriminator()+".");
+            event.replySuccess("`"+count+"` \uAC00 **"+target.getName()+"**#"+target.getDiscriminator()+"\uC5D0\uC11C \uC131\uACF5\uC801\uC73C\uB85C \uC81C\uAC70\uB428.");
         }
     }
 }

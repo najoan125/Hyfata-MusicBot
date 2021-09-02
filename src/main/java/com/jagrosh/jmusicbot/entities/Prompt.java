@@ -40,7 +40,7 @@ public class Prompt
     
     public Prompt(String title, String noguiMessage)
     {
-        this(title, noguiMessage, "true".equalsIgnoreCase(System.getProperty("nogui")), "true".equalsIgnoreCase(System.getProperty("noprompt")));
+    	this(title, noguiMessage, "true".equalsIgnoreCase(System.getProperty("nogui")), "true".equalsIgnoreCase(System.getProperty("noprompt")));
     }
     
     public Prompt(String title, String noguiMessage, boolean nogui, boolean noprompt)
@@ -110,7 +110,7 @@ public class Prompt
     
     public String prompt(String content)
     {
-        if(noprompt)
+    	if(noprompt)
             return null;
         if(nogui)
         {

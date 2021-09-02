@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
  */
 public class JMusicBot 
 {
-    public final static String PLAY_EMOJI  = "\u25B6"; // ▶
-    public final static String PAUSE_EMOJI = "\u23F8"; // ⏸
-    public final static String STOP_EMOJI  = "\u23F9"; // ⏹
+    public final static String PLAY_EMOJI  = "\u25B6"; // �뼳
+    public final static String PAUSE_EMOJI = "\u23F8"; // �뤈
+    public final static String STOP_EMOJI  = "\u23F9"; // �뤉
     public final static Permission[] RECOMMENDED_PERMS = {Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_HISTORY, Permission.MESSAGE_ADD_REACTION,
                                 Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_MANAGE, Permission.MESSAGE_EXT_EMOJI,
                                 Permission.MANAGE_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.NICKNAME_CHANGE};
@@ -54,7 +54,7 @@ public class JMusicBot
      * @param args the command line arguments
      */
     public static void main(String[] args)
-    {
+    {	
         // startup log
         Logger log = LoggerFactory.getLogger("Startup");
         
@@ -80,11 +80,11 @@ public class JMusicBot
         Bot bot = new Bot(waiter, config, settings);
         
         AboutCommand aboutCommand = new AboutCommand(Color.BLUE.brighter(),
-                                "a music bot that is [easy to host yourself!](https://github.com/jagrosh/MusicBot) (v"+version+")",
-                                new String[]{"High-quality music playback", "FairQueue™ Technology", "Easy to host yourself"},
+                                "\uC774 \uBBA4\uC9C1\uBD07\uC740 \uC624\uD508\uC18C\uC2A4\uB97C \uCC38\uACE0\uD558\uC5EC \uB9CC\uB4E4\uC5B4\uC84C\uC5B4\uC694 [\uC624\uD508\uC18C\uC2A4](https://github.com/jagrosh/MusicBot) (v"+version+")",
+                                new String[]{"\uACE0\uC74C\uC9C8 \uC74C\uC545 \uC7AC\uC0DD", "FairQueue™ \uAE30\uC220"},
                                 RECOMMENDED_PERMS);
         aboutCommand.setIsAuthor(false);
-        aboutCommand.setReplacementCharacter("\uD83C\uDFB6"); // 🎶
+        aboutCommand.setReplacementCharacter("\uD83C\uDFB6"); // �윃�
         
         // set up the command client
         CommandClientBuilder cb = new CommandClientBuilder()
@@ -109,16 +109,16 @@ public class JMusicBot
                         new SCSearchCmd(bot),
                         new ShuffleCmd(bot),
                         new SkipCmd(bot),
+                        new MoveTrackCmd(bot),
+                        new PauseCmd(bot),
+                        new RepeatCmd(bot),
+                        new StopCmd(bot),
+                        new VolumeCmd(bot),
 
                         new ForceRemoveCmd(bot),
                         new ForceskipCmd(bot),
-                        new MoveTrackCmd(bot),
-                        new PauseCmd(bot),
                         new PlaynextCmd(bot),
-                        new RepeatCmd(bot),
                         new SkiptoCmd(bot),
-                        new StopCmd(bot),
-                        new VolumeCmd(bot),
                         
                         new PrefixCmd(bot),
                         new SetdjCmd(bot),
@@ -173,7 +173,7 @@ public class JMusicBot
             JDA jda = JDABuilder.create(config.getToken(), Arrays.asList(INTENTS))
                     .enableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.EMOTE, CacheFlag.ONLINE_STATUS)
-                    .setActivity(nogame ? null : Activity.playing("loading..."))
+                    .setActivity(nogame ? null : Activity.playing("\uB85C\uB529..."))
                     .setStatus(config.getStatus()==OnlineStatus.INVISIBLE || config.getStatus()==OnlineStatus.OFFLINE 
                             ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
                     .addEventListeners(cb.build(), waiter, new Listener(bot))

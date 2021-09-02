@@ -30,7 +30,7 @@ public class PlaylistsCmd extends MusicCommand
     {
         super(bot);
         this.name = "playlists";
-        this.help = "shows the available playlists";
+        this.help = "\uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uC7AC\uC0DD \uBAA9\uB85D\uC744 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
         this.beListening = false;
@@ -44,19 +44,19 @@ public class PlaylistsCmd extends MusicCommand
             bot.getPlaylistLoader().createFolder();
         if(!bot.getPlaylistLoader().folderExists())
         {
-            event.reply(event.getClient().getWarning()+" Playlists folder does not exist and could not be created!");
+            event.reply(event.getClient().getWarning()+" \uC7AC\uC0DD \uBAA9\uB85D \uD3F4\uB354\uAC00 \uC5C6\uC73C\uBBC0\uB85C \uB9CC\uB4E4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!");
             return;
         }
         List<String> list = bot.getPlaylistLoader().getPlaylistNames();
         if(list==null)
-            event.reply(event.getClient().getError()+" Failed to load available playlists!");
+            event.reply(event.getClient().getError()+" \uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uC7AC\uC0DD \uBAA9\uB85D\uC744 \uB85C\uB4DC\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4!");
         else if(list.isEmpty())
-            event.reply(event.getClient().getWarning()+" There are no playlists in the Playlists folder!");
+            event.reply(event.getClient().getWarning()+" \uC7AC\uC0DD \uBAA9\uB85D \uD3F4\uB354\uC5D0 \uC7AC\uC0DD \uBAA9\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
         else
         {
-            StringBuilder builder = new StringBuilder(event.getClient().getSuccess()+" Available playlists:\n");
-            list.forEach(str -> builder.append("`").append(str).append("` "));
-            builder.append("\nType `").append(event.getClient().getTextualPrefix()).append("play playlist <name>` to play a playlist");
+            StringBuilder builder = new StringBuilder(event.getClient().getSuccess()+" \uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uC7AC\uC0DD \uBAA9\uB85D:\n");
+            list.forEach(str -> builder.append("| `").append(str).append("` "));
+            builder.append("|\n`").append(event.getClient().getTextualPrefix()).append("\uBC14\uB85C\uC7AC\uC0DD pl <name>` (\uC744)\uB97C \uC785\uB825\uD558\uC5EC \uC7AC\uC0DD \uBAA9\uB85D\uC744 \uC7AC\uC0DD\uD558\uC138\uC694");
             event.reply(builder.toString());
         }
     }

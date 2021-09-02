@@ -31,7 +31,7 @@ public class ForceskipCmd extends DJCommand
     {
         super(bot);
         this.name = "forceskip";
-        this.help = "skips the current song";
+        this.help = "\uD604\uC7AC \uB178\uB798\uB97C \uAC74\uB108\uB701\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
     }
@@ -41,8 +41,8 @@ public class ForceskipCmd extends DJCommand
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         User u = event.getJDA().getUserById(handler.getRequester());
-        event.reply(event.getClient().getSuccess()+" Skipped **"+handler.getPlayer().getPlayingTrack().getInfo().title
-                +"** (requested by "+(u==null ? "someone" : "**"+u.getName()+"**")+")");
+        event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title
+                +"** (\uC744)\uB97C \uAC74\uB108\uB6F0\uC5C8\uC2B5\uB2C8\uB2E4 ("+(u==null ? "someone" : "**"+u.getName()+"** \uB2D8\uC5D0 \uC758\uD574 \uC694\uCCAD\uB428")+")");
         handler.getPlayer().stopTrack();
     }
 }

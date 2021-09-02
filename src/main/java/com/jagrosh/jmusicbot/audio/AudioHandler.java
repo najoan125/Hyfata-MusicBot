@@ -195,7 +195,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
             Guild guild = guild(jda);
             AudioTrack track = audioPlayer.getPlayingTrack();
             MessageBuilder mb = new MessageBuilder();
-            mb.append(FormatUtil.filter(manager.getBot().getConfig().getSuccess()+" **Now Playing in "+guild.getSelfMember().getVoiceState().getChannel().getName()+"...**"));
+            mb.append("**\uD604\uC7AC "+guild.getSelfMember().getVoiceState().getChannel().getName()+":notes: \uC5D0\uC11C \uC7AC\uC0DD\uC911...**");
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(guild.getSelfMember().getColor());
             if(getRequester() != 0)
@@ -222,7 +222,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
             }
             
             if(track.getInfo().author != null && !track.getInfo().author.isEmpty())
-                eb.setFooter("Source: " + track.getInfo().author, null);
+                eb.setFooter("\uCD9C\uCC98: " + track.getInfo().author, null);
 
             double progress = (double)audioPlayer.getPlayingTrack().getPosition()/track.getDuration();
             eb.setDescription((audioPlayer.isPaused() ? JMusicBot.PAUSE_EMOJI : JMusicBot.PLAY_EMOJI)
@@ -239,9 +239,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
     {
         Guild guild = guild(jda);
         return new MessageBuilder()
-                .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess()+" **Now Playing...**"))
+                .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess()+" **\uC7AC\uC0DD\uC911\uC778 \uC74C\uC545 \uC5C6\uC74C...**"))
                 .setEmbed(new EmbedBuilder()
-                .setTitle("No music playing")
+                .setTitle("\uC7AC\uC0DD\uC911\uC778 \uC74C\uC545 \uC5C6\uC74C")
                 .setDescription(JMusicBot.STOP_EMOJI+" "+FormatUtil.progressBar(-1)+" "+FormatUtil.volumeIcon(audioPlayer.getVolume()))
                 .setColor(guild.getSelfMember().getColor())
                 .build()).build();
@@ -261,7 +261,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
                     + "[" + FormatUtil.formatTime(track.getDuration()) + "] "
                     + FormatUtil.volumeIcon(audioPlayer.getVolume());
         }
-        else return "No music playing " + JMusicBot.STOP_EMOJI + " " + FormatUtil.volumeIcon(audioPlayer.getVolume());
+        else return "\uC74C\uC545\uC774 \uC7AC\uC0DD\uB418\uACE0\uC788\uC9C0 \uC54A\uC74C " + JMusicBot.STOP_EMOJI + " " + FormatUtil.volumeIcon(audioPlayer.getVolume());
     }
     
     // Audio Send Handler methods

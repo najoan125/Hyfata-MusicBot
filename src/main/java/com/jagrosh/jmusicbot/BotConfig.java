@@ -300,7 +300,7 @@ public class BotConfig
     {
         return FormatUtil.formatTime(maxSeconds * 1000);
     }
-
+    
     public long getAloneTimeUntilStop()
     {
         return aloneTimeUntilStop;
@@ -324,7 +324,7 @@ public class BotConfig
             return new String[0];
         }
     }
-    
+
     public Config getTransforms()
     {
         return transforms;

@@ -33,8 +33,8 @@ public class SetdjCmd extends AdminCommand
     public SetdjCmd(Bot bot)
     {
         this.name = "setdj";
-        this.help = "sets the DJ role for certain music commands";
-        this.arguments = "<rolename|NONE>";
+        this.help = "\uD2B9\uC815 \uC74C\uC545 \uBA85\uB839\uC758 DJ \uC5ED\uD560\uC744 \uC124\uC815\uD569\uB2C8\uB2E4";
+        this.arguments = "<\uC5ED\uD560\uC774\uB984|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
     
@@ -43,26 +43,26 @@ public class SetdjCmd extends AdminCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" Please include a role name or NONE");
+            event.reply(event.getClient().getError()+" \uC5ED\uD560 \uC774\uB984 \uB610\uB294 NONE\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setDJRole(null);
-            event.reply(event.getClient().getSuccess()+" DJ role cleared; Only Admins can use the DJ commands.");
+            event.reply(event.getClient().getSuccess()+" DJ\uC5ED\uD560 \uCD08\uAE30\uD654\uB428; \uAD00\uB9AC\uC790\uB9CC DJ\uBA85\uB839\uC5B4\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
         }
         else
         {
             List<Role> list = FinderUtil.findRoles(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" No Roles found matching \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" \uC77C\uCE58\uD558\uB294 \uC5ED\uD560\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4 \""+event.getArgs()+"\"");
             else if (list.size()>1)
                 event.reply(event.getClient().getWarning()+FormatUtil.listOfRoles(list, event.getArgs()));
             else
             {
                 s.setDJRole(list.get(0));
-                event.reply(event.getClient().getSuccess()+" DJ commands can now be used by users with the **"+list.get(0).getName()+"** role.");
+                event.reply(event.getClient().getSuccess()+" \uC774\uC81C **"+list.get(0).getName()+"** \uC5ED\uD560\uC758 \uC0AC\uC6A9\uC790\uAC00 DJ \uBA85\uB839\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
             }
         }
     }

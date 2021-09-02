@@ -17,21 +17,21 @@ package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 
 /**
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RepeatCmd extends DJCommand
+public class RepeatCmd extends MusicCommand
 {
     public RepeatCmd(Bot bot)
     {
         super(bot);
-        this.name = "repeat";
-        this.help = "re-adds music to the queue when finished";
-        this.arguments = "[on|off]";
+        this.name = "\uBC18\uBCF5";
+        this.help = "\uD604\uC7AC \uB178\uB798\uAC00 \uB05D\uB098\uBA74 \uADF8 \uB178\uB798\uB97C \uB300\uAE30\uC5F4\uC5D0 \uB2E4\uC2DC \uB123\uC2B5\uB2C8\uB2E4.";
+        this.arguments = "[\uCF1C\uAE30|\uB044\uAE30]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
     }
@@ -46,21 +46,21 @@ public class RepeatCmd extends DJCommand
         {
             value = !settings.getRepeatMode();
         }
-        else if(event.getArgs().equalsIgnoreCase("true") || event.getArgs().equalsIgnoreCase("on"))
+        else if(event.getArgs().equalsIgnoreCase("on") || event.getArgs().equalsIgnoreCase("\uCF1C\uAE30"))
         {
             value = true;
         }
-        else if(event.getArgs().equalsIgnoreCase("false") || event.getArgs().equalsIgnoreCase("off"))
+        else if(event.getArgs().equalsIgnoreCase("off") || event.getArgs().equalsIgnoreCase("\uB044\uAE30"))
         {
             value = false;
         }
         else
         {
-            event.replyError("Valid options are `on` or `off` (or leave empty to toggle)");
+            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `on` \uB610\uB294 `off` \uC785\uB2C8\uB2E4 (\uB610\uB294 \uBE44\uC6CC \uB450\uBA74 \uC804\uD658\uB429\uB2C8\uB2E4)");
             return;
         }
         settings.setRepeatMode(value);
-        event.replySuccess("Repeat mode is now `"+(value ? "ON" : "OFF")+"`");
+        event.replySuccess("\uBC18\uBCF5 \uBAA8\uB4DC\uAC00 `"+(value ? "\uCF1C\uC9D0" : "\uAEBC\uC9D0")+"`");
     }
 
     @Override

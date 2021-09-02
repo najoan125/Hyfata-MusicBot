@@ -38,12 +38,12 @@ public class TransformativeAudioSourceManager extends YoutubeAudioSourceManager
 {
     private final static Logger log = LoggerFactory.getLogger(TransformativeAudioSourceManager.class);
     private final String name, regex, replacement, selector, format;
-    
+
     public TransformativeAudioSourceManager(String name, Config object)
     {
         this(name, object.getString("regex"), object.getString("replacement"), object.getString("selector"), object.getString("format"));
     }
-    
+
     public TransformativeAudioSourceManager(String name, String regex, String replacement, String selector, String format)
     {
         this.name = name;
@@ -86,7 +86,7 @@ public class TransformativeAudioSourceManager extends YoutubeAudioSourceManager
         }
         return null;
     }
-    
+
     public static List<TransformativeAudioSourceManager> createTransforms(Config transforms)
     {
         try
