@@ -73,9 +73,17 @@ public class AloneInVoiceHandler
 
     public void onVoiceUpdate(GuildVoiceUpdateEvent event)
     {
+    	Guild guild = event.getEntity().getGuild();
+    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+    	if(guild != null && isAlone(guild)) {
+    		handler.getPlayer().setPaused(true);
+    	}
+    	if(guild != null && !isAlone(guild)) {
+    		handler.getPlayer().setPaused(false);
+    	}
         if(aloneTimeUntilStop <= 0) return;
 
-        Guild guild = event.getEntity().getGuild();
+        //Guild guild = event.getEntity().getGuild();
         if(!bot.getPlayerManager().hasHandler(guild)) return;
 
         boolean alone = isAlone(guild);
