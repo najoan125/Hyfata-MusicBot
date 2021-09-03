@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -96,6 +97,12 @@ public class Listener extends ListenerAdapter
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event)
     {
         bot.getAloneInVoiceHandler().onVoiceUpdate(event);
+    }
+    
+    @Override
+    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) 
+    {
+    	bot.getAloneInVoiceHandler().Deafen(event);
     }
 
     @Override

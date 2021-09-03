@@ -17,6 +17,8 @@ package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.Bot;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMuteEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 
 import java.time.Instant;
@@ -79,7 +81,11 @@ public class AloneInVoiceHandler
     		handler.getPlayer().setPaused(true);
     	}
     	if(guild != null && !isAlone(guild)) {
-    		handler.getPlayer().setPaused(false);
+    		try {
+    			handler.getPlayer().setPaused(false);
+    		}catch (NullPointerException e) {
+				// TODO: handle exception
+			}
     	}
         if(aloneTimeUntilStop <= 0) return;
 
@@ -102,5 +108,20 @@ public class AloneInVoiceHandler
                 .noneMatch(x ->
                         !x.getVoiceState().isDeafened()
                         && !x.getUser().isBot());
+    }
+    
+    public void Deafen(GuildVoiceSelfDeafenEvent event) {
+    	Guild guild = event.getMember().getGuild();
+    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+    	if(guild != null && isAlone(guild)) {
+    		handler.getPlayer().setPaused(true);
+    	}
+    	if(guild != null && !isAlone(guild)) {
+    		try {
+    			handler.getPlayer().setPaused(false);
+    		}catch (NullPointerException e) {
+				// TODO: handle exception
+			}
+    	}
     }
 }
