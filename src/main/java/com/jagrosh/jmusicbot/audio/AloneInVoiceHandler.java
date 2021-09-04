@@ -76,18 +76,6 @@ public class AloneInVoiceHandler
         }
         toRemove.forEach(id -> aloneSince.remove(id));
     }
-    
-    public void onVoiceJoin(GuildVoiceJoinEvent event) {
-    	Guild guild = event.getEntity().getGuild();
-    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-    	if(guild != null && !isAlone(guild) && NumMember(guild) == 2) {
-    		try {
-    			handler.getPlayer().setPaused(false);
-    		}catch (NullPointerException e) {
-				// TODO: handle exception
-			}
-    	}
-    }
 
     public void onVoiceUpdate(GuildVoiceUpdateEvent event)
     {
@@ -96,6 +84,14 @@ public class AloneInVoiceHandler
     	
     	if(guild != null && isAlone(guild)) {
     		handler.getPlayer().setPaused(true);
+    	}
+    	
+    	if(guild != null && !isAlone(guild) && NumMember(guild) == 2) {
+    		try {
+    			handler.getPlayer().setPaused(false);
+    		}catch (NullPointerException e) {
+				// TODO: handle exception
+			}
     	}
     	
         if(aloneTimeUntilStop <= 0) return;
@@ -132,19 +128,19 @@ public class AloneInVoiceHandler
     	return intmembers;
     }
     
-//    public void Deafen(GuildVoiceSelfDeafenEvent event) {
-//    	Guild guild = event.getMember().getGuild();
-//    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-//    	
-//    	if(guild != null && isAlone(guild)) {
-//    		handler.getPlayer().setPaused(true);
-//    	}
-//    	if(guild != null && !isAlone(guild)) {
-//    		try {
-//    			handler.getPlayer().setPaused(false);
-//    		}catch (NullPointerException e) {
-//				// TODO: handle exception
-//			}
-//    	}
-//    }
+    public void Deafen(GuildVoiceSelfDeafenEvent event) {
+    	Guild guild = event.getMember().getGuild();
+    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+    	
+    	if(guild != null && isAlone(guild) && NumMember(guild) == 2) {
+    		handler.getPlayer().setPaused(true);
+    	}
+    	if(guild != null && !isAlone(guild) && NumMember(guild) == 2) {
+    		try {
+    			handler.getPlayer().setPaused(false);
+    		}catch (NullPointerException e) {
+				// TODO: handle exception
+			}
+    	}
+    }
 }

@@ -101,15 +101,10 @@ public class Listener extends ListenerAdapter
     }
     
     @Override
-    public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-    	bot.getAloneInVoiceHandler().onVoiceJoin(event);
+    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) 
+    {
+    	bot.getAloneInVoiceHandler().Deafen(event);
     }
-    
-//    @Override
-//    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) 
-//    {
-//    	bot.getAloneInVoiceHandler().Deafen(event);
-//    }
 
     @Override
     public void onShutdown(ShutdownEvent event) 
