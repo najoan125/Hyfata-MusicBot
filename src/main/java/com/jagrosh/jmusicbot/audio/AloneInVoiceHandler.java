@@ -17,13 +17,16 @@ package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.Bot;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMuteEvent;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +40,7 @@ public class AloneInVoiceHandler
     private final Bot bot;
     private final HashMap<Long, Instant> aloneSince = new HashMap<>();
     private long aloneTimeUntilStop = 0;
+    private boolean JustJoined = false;
 
     public AloneInVoiceHandler(Bot bot)
     {
@@ -72,21 +76,28 @@ public class AloneInVoiceHandler
         }
         toRemove.forEach(id -> aloneSince.remove(id));
     }
-
-    public void onVoiceUpdate(GuildVoiceUpdateEvent event)
-    {
+    
+    public void onVoiceJoin(GuildVoiceJoinEvent event) {
     	Guild guild = event.getEntity().getGuild();
     	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-    	if(guild != null && isAlone(guild)) {
-    		handler.getPlayer().setPaused(true);
-    	}
-    	if(guild != null && !isAlone(guild)) {
+    	if(guild != null && !isAlone(guild) && NumMember(guild) == 2) {
     		try {
     			handler.getPlayer().setPaused(false);
     		}catch (NullPointerException e) {
 				// TODO: handle exception
 			}
     	}
+    }
+
+    public void onVoiceUpdate(GuildVoiceUpdateEvent event)
+    {
+    	Guild guild = event.getEntity().getGuild();
+    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+    	
+    	if(guild != null && isAlone(guild)) {
+    		handler.getPlayer().setPaused(true);
+    	}
+    	
         if(aloneTimeUntilStop <= 0) return;
 
         //Guild guild = event.getEntity().getGuild();
@@ -110,18 +121,30 @@ public class AloneInVoiceHandler
                         && !x.getUser().isBot());
     }
     
-    public void Deafen(GuildVoiceSelfDeafenEvent event) {
-    	Guild guild = event.getMember().getGuild();
-    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-    	if(guild != null && isAlone(guild)) {
-    		handler.getPlayer().setPaused(true);
-    	}
-    	if(guild != null && !isAlone(guild)) {
-    		try {
-    			handler.getPlayer().setPaused(false);
-    		}catch (NullPointerException e) {
-				// TODO: handle exception
-			}
-    	}
+    private int NumMember(Guild guild)
+    {
+    	if(guild.getAudioManager().getConnectedChannel() == null) return 0;
+    	//Get Number of Members
+    	List<Member> members= guild.getAudioManager().getConnectedChannel().getMembers();
+    	String numOfMembers = String.valueOf(members.size());
+    	//And convert string to integer
+    	int intmembers = Integer.parseInt(numOfMembers);
+    	return intmembers;
     }
+    
+//    public void Deafen(GuildVoiceSelfDeafenEvent event) {
+//    	Guild guild = event.getMember().getGuild();
+//    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+//    	
+//    	if(guild != null && isAlone(guild)) {
+//    		handler.getPlayer().setPaused(true);
+//    	}
+//    	if(guild != null && !isAlone(guild)) {
+//    		try {
+//    			handler.getPlayer().setPaused(false);
+//    		}catch (NullPointerException e) {
+//				// TODO: handle exception
+//			}
+//    	}
+//    }
 }
