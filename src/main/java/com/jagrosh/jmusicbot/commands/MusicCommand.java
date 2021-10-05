@@ -89,7 +89,7 @@ public abstract class MusicCommand extends Command
                 }
                 catch(PermissionException ex) 
                 {
-                    event.reply(event.getClient().getError()+" **"+userState.getChannel().getName()+"** *\uC73C*\uB85C \uC5F0\uACB0\uD558\uB294 \uAC83\uC774 \uBD88\uAC00\uB2A5\uD569\uB2C8\uB2E4!");
+                    event.reply(event.getClient().getError()+" "+userState.getChannel().getAsMention()+" *\uC73C*\uB85C \uC5F0\uACB0\uD558\uB294 \uAC83\uC774 \uBD88\uAC00\uB2A5\uD569\uB2C8\uB2E4!");
                     return;
                 }
             }

@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.commands.music;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import net.dv8tion.jda.api.entities.User;
 
@@ -41,7 +42,8 @@ public class SkipCmd extends MusicCommand
     public void doCommand(CommandEvent event) 
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        if(event.getAuthor().getIdLong()==handler.getRequester())
+        RequestMetadata rm = handler.getRequestMetadata();
+        if(event.getAuthor().getIdLong() == rm.getOwner())
         {
             event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uAC74\uB108\uB6F0\uC5B4\uC9D0");
             handler.getPlayer().stopTrack();
@@ -60,13 +62,12 @@ public class SkipCmd extends MusicCommand
             }
             int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
-            int required = (int)Math.ceil(listeners * .55);
-            msg+= skippers+" votes, "+required+"/"+listeners+" needed]`";
+            int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
+            msg += skippers + " votes, " + required + "/" + listeners + " needed]`";
             if(skippers>=required)
             {
-                User u = event.getJDA().getUserById(handler.getRequester());
-                msg+="\n"+event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title
-                    +"**"+(handler.getRequester()==0 ? "" : " (\uC744)\uB97C \uAC74\uB108\uB6F0\uC5C8\uC2B5\uB2C8\uB2E4 ("+(u==null ? "someone" : "**"+u.getName()+"** \uB2D8\uC5D0 \uC758\uD574 \uC694\uCCAD\uB428")+")");
+                msg += "\n" + event.getClient().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
+                        + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
                 handler.getPlayer().stopTrack();
             }
             event.reply(msg);

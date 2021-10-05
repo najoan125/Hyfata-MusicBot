@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.commands.general;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -56,10 +57,12 @@ public class SettingsCmd extends Command
         EmbedBuilder ebuilder = new EmbedBuilder()
                 .setColor(event.getSelfMember().getColor())
                 .setDescription("\uCC44\uD305 \uCC44\uB110: " + (tchan == null ? "Any" : "**#" + tchan.getName() + "**")
-                        + "\n\uC74C\uC131 \uCC44\uB110: " + (vchan == null ? "Any" : "**" + vchan.getName() + "**")
+                        + "\n\uC74C\uC131 \uCC44\uB110: " + (vchan == null ? "Any" : vchan.getAsMention())
                         + "\nDJ \uC5ED\uD560: " + (role == null ? "\uC5C6\uC74C" : "**" + role.getName() + "**")
                         + "\n\uB9DE\uCDA4 \uCE6D\uD638: " + (s.getPrefix() == null ? "\uC5C6\uC74C" : "`" + s.getPrefix() + "`")
-                        + "\n\uBC18\uBCF5 \uBAA8\uB4DC: **" + (s.getRepeatMode() ? "\uCF1C\uC9D0" : "\uAEBC\uC9D0") + "**"
+                        + "\nRepeat Mode: " + (s.getRepeatMode() == RepeatMode.OFF
+                        ? s.getRepeatMode().getUserFriendlyName()
+                        : "**"+s.getRepeatMode().getUserFriendlyName()+"**")
                         + "\n\uAE30\uBCF8 \uC7AC\uC0DD\uBAA9\uB85D: " + (s.getDefaultPlaylist() == null ? "\uC5C6\uC74C" : "**" + s.getDefaultPlaylist() + "**")
                         )
                 .setFooter(event.getJDA().getGuilds().size() + " \uC11C\uBC84 | "

@@ -19,6 +19,8 @@ import com.jagrosh.jdautilities.command.*;
 import com.jagrosh.jdautilities.command.Command.Category;
 import com.jagrosh.jdautilities.commons.utils.FixedSizeCache;
 import com.jagrosh.jdautilities.commons.utils.SafeIdUtil;
+import com.jagrosh.jmusicbot.utils.OtherUtil;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
@@ -474,7 +476,7 @@ public class CommandClientImpl implements CommandClient, EventListener
         }
         textPrefix = prefix.equals(DEFAULT_PREFIX) ? "@"+event.getJDA().getSelfUser().getName()+" " : prefix;
         event.getJDA().getPresence().setPresence(status==null ? OnlineStatus.ONLINE : status, 
-                activity ==null ? null : "default".equals(activity.getName()) ? Activity.playing(textPrefix+helpWord+" \uB97C \uC785\uB825\uD558\uC138\uC694! | ver 0.3.5 | Made by Najoan") : activity);
+                activity ==null ? null : "default".equals(activity.getName()) ? Activity.playing(textPrefix+helpWord+" \uB97C \uC785\uB825\uD558\uC138\uC694! | ver " + OtherUtil.getCurrentVersion() + " | Made by Najoan") : activity);
 
         // Start SettingsManager if necessary
         GuildSettingsManager<?> manager = getSettingsManager();

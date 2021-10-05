@@ -18,8 +18,8 @@ package com.jagrosh.jmusicbot.commands.dj;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.DJCommand;
-import net.dv8tion.jda.api.entities.User;
 
 /**
  *
@@ -40,9 +40,9 @@ public class ForceskipCmd extends DJCommand
     public void doCommand(CommandEvent event) 
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        User u = event.getJDA().getUserById(handler.getRequester());
+        RequestMetadata rm = handler.getRequestMetadata();
         event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title
-                +"** (\uC744)\uB97C \uAC74\uB108\uB6F0\uC5C8\uC2B5\uB2C8\uB2E4 ("+(u==null ? "someone" : "**"+u.getName()+"** \uB2D8\uC5D0 \uC758\uD574 \uC694\uCCAD\uB428")+")");
+        		+"** "+(rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)"));
         handler.getPlayer().stopTrack();
     }
 }

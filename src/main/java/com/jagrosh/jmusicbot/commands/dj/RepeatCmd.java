@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.commands.dj;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 
 /**
@@ -30,8 +31,8 @@ public class RepeatCmd extends MusicCommand
     {
         super(bot);
         this.name = "\uBC18\uBCF5";
-        this.help = "\uD604\uC7AC \uB178\uB798\uAC00 \uB05D\uB098\uBA74 \uADF8 \uB178\uB798\uB97C \uB300\uAE30\uC5F4\uC5D0 \uB2E4\uC2DC \uB123\uC2B5\uB2C8\uB2E4.";
-        this.arguments = "[\uCF1C\uAE30|\uB044\uAE30]";
+        this.help = "대기열 전체를 반복하거나 노래 한곡만 단일 반복 합니다.";
+        this.arguments = "[끄기|켜기(전체)|단일]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
     }
@@ -40,27 +41,35 @@ public class RepeatCmd extends MusicCommand
     @Override
     protected void execute(CommandEvent event) 
     {
-        boolean value;
+        String args = event.getArgs();
+        RepeatMode value;
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        if(event.getArgs().isEmpty())
+        if(args.isEmpty())
         {
-            value = !settings.getRepeatMode();
+            if(settings.getRepeatMode() == RepeatMode.OFF)
+                value = RepeatMode.ALL;
+            else
+                value = RepeatMode.OFF;
         }
-        else if(event.getArgs().equalsIgnoreCase("on") || event.getArgs().equalsIgnoreCase("\uCF1C\uAE30"))
+        else if(args.equalsIgnoreCase("false") || args.equalsIgnoreCase("off") || args.equalsIgnoreCase("끄기"))
         {
-            value = true;
+        	value = RepeatMode.OFF;
         }
-        else if(event.getArgs().equalsIgnoreCase("off") || event.getArgs().equalsIgnoreCase("\uB044\uAE30"))
+        else if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("on") || args.equalsIgnoreCase("all") || args.equalsIgnoreCase("켜기") || args.equalsIgnoreCase("전체"))
         {
-            value = false;
+            value = RepeatMode.ALL;
+        }
+        else if(args.equalsIgnoreCase("one") || args.equalsIgnoreCase("single") || args.equalsIgnoreCase("단일"))
+        {
+            value = RepeatMode.SINGLE;
         }
         else
         {
-            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `on` \uB610\uB294 `off` \uC785\uB2C8\uB2E4 (\uB610\uB294 \uBE44\uC6CC \uB450\uBA74 \uC804\uD658\uB429\uB2C8\uB2E4)");
+            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `on` \uB610\uB294 `off` 또는 `single` \uC785\uB2C8\uB2E4 (또는 비워두면 `off` 와 `all` 로 전환됩니다)");
             return;
         }
         settings.setRepeatMode(value);
-        event.replySuccess("\uBC18\uBCF5 \uBAA8\uB4DC\uAC00 `"+(value ? "\uCF1C\uC9D0" : "\uAEBC\uC9D0")+"`");
+        event.replySuccess("반복 모드: `"+value.getUserFriendlyName()+"`");
     }
 
     @Override

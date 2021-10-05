@@ -62,7 +62,7 @@ public class SetvcCmd extends AdminCommand
             else
             {
                 s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uC74C\uC545\uC740 \uC624\uC9C1 **"+list.get(0).getName()+"** \uC5D0\uC11C\uB9CC \uC7AC\uC0DD\uB429\uB2C8\uB2E4");
+                event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uC74C\uC545\uC740 \uC624\uC9C1 "+list.get(0).getAsMention()+" \uC5D0\uC11C\uB9CC \uC7AC\uC0DD\uB429\uB2C8\uB2E4");
             }
         }
     }

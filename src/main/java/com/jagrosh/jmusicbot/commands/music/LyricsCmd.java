@@ -39,18 +39,26 @@ public class LyricsCmd extends MusicCommand
         this.help = "\uD604\uC7AC \uC7AC\uC0DD \uC911\uC778 \uB178\uB798\uC758 \uAC00\uC0AC\uB97C \uBCF4\uC5EC\uC90D\uB2C8\uB2E4.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.bePlaying = true;
     }
 
     @Override
     public void doCommand(CommandEvent event)
     {
-        event.getChannel().sendTyping().queue();
         String title;
         if(event.getArgs().isEmpty())
-            title = ((AudioHandler)event.getGuild().getAudioManager().getSendingHandler()).getPlayer().getPlayingTrack().getInfo().title;
+        {
+            AudioHandler sendingHandler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+            if (sendingHandler.isMusicPlaying(event.getJDA()))
+                title = sendingHandler.getPlayer().getPlayingTrack().getInfo().title;
+            else
+            {
+                event.replyError("There must be music playing to use that!");
+                return;
+            }
+        }
         else
             title = event.getArgs();
+        event.getChannel().sendTyping().queue();
         client.getLyrics(title).thenAccept(lyrics -> 
         {
             if(lyrics == null)

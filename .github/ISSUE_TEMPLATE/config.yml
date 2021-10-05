@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Question
-    url: https://github.com/jagrosh/MusicBot/discussions/categories/questions
-    about: For general questions, please check the Discussions
+  - name: Community Support Server
+    url: https://discord.gg/0p9LSGoRLu6Pet0k
+    about: For general questions, please ask in the support server
+  - name: Troubleshooting
+    url: https://github.com/jagrosh/MusicBot/discussions/categories/troubleshooting
+    about: For troubleshooting help, please check the Discussions
