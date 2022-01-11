@@ -73,12 +73,12 @@ public class PlayCmd extends MusicCommand
                     event.replySuccess("**"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uB2E4\uC2DC \uC7AC\uC0DD\uB428.");
                 }
                 else
-                    event.replyError("Only DJs can unpause the player!");
+                    event.replyError("DJ\uB9CC\uC774 \uD50C\uB808\uC774\uC5B4\uC758 \uC77C\uC2DC \uC911\uC9C0\uB97C \uD574\uC81C\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4!");
                 return;
             }
             StringBuilder builder = new StringBuilder(event.getClient().getWarning()+" \uC7AC\uC0DD \uBA85\uB839\uC5B4:\n");
             builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <\uB178\uB798 \uC81C\uBAA9>` - \uC720\uD29C\uBE0C\uC5D0\uC11C \uCCAB\uBC88\uC9F8 \uACB0\uACFC\uB97C \uC7AC\uC0DD\uD569\uB2C8\uB2E4");
-            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <URL>` - \uC81C\uACF5\uB41C \uB178\uB798\2C \uC7AC\uC0DD \uBAA9\uB85D \uB610\uB294 \uC2E4\uC2DC\uAC04 \uC601\uC0C1\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4.");
+            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <URL>` - \uC81C\uACF5\uB41C \uB178\uB798, \uC7AC\uC0DD \uBAA9\uB85D \uB610\uB294 \uC2E4\uC2DC\uAC04 \uC601\uC0C1\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4.");
             for(Command cmd: children)
                 builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" ").append(cmd.getName()).append(" ").append(cmd.getArguments()).append("` - ").append(cmd.getHelp());
             event.reply(builder.toString());
@@ -216,7 +216,7 @@ public class PlayCmd extends MusicCommand
             this.name = "playlist";
             this.aliases = new String[]{"pl"};
             this.arguments = "<name>";
-            this.help = "plays the provided playlist";
+            this.help = "제공된 재생 목록을 재생합니다";
             this.beListening = true;
             this.bePlaying = false;
         }
@@ -226,13 +226,13 @@ public class PlayCmd extends MusicCommand
         {
             if(event.getArgs().isEmpty())
             {
-                event.reply(event.getClient().getError()+" Please include a playlist name.");
+                event.reply(event.getClient().getError()+" \uC7AC\uC0DD \uBAA9\uB85D \uC774\uB984\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
                 return;
             }
             Playlist playlist = bot.getPlaylistLoader().getPlaylist(event.getArgs());
             if(playlist==null)
             {
-                event.replyError("I could not find `"+event.getArgs()+".txt` in the Playlists folder.");
+                event.replyError("`"+event.getArgs()+".txt` 를 플레이리스트 폴더에서 찾을 수 없습니다.");
                 return;
             }
             event.getChannel().sendMessage(loadingEmoji+" \uC7AC\uC0DD \uBAA9\uB85D **"+event.getArgs()+"** \uB85C\uB529\uC911... ("+playlist.getItems().size()+" \uD56D\uBAA9)").queue(m -> 
@@ -240,10 +240,10 @@ public class PlayCmd extends MusicCommand
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
                 playlist.loadTracks(bot.getPlayerManager(), (at)->handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
                     StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty() 
-                            ? event.getClient().getWarning()+" No tracks were loaded!" 
+                            ? event.getClient().getWarning()+" 트랙이 로드되지 않았습니다!" 
                             : event.getClient().getSuccess()+" **"+playlist.getTracks().size()+"** \uD2B8\uB799 \uB85C\uB4DC\uB428!");
                     if(!playlist.getErrors().isEmpty())
-                        builder.append("\nThe following tracks failed to load:");
+                        builder.append("\n이 트랙들을 로드하는 데 실패하였습니다:");
                     playlist.getErrors().forEach(err -> builder.append("\n`[").append(err.getIndex()+1).append("]` **").append(err.getItem()).append("**: ").append(err.getReason()));
                     String str = builder.toString();
                     if(str.length()>2000)

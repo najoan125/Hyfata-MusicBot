@@ -65,7 +65,7 @@ public class RepeatCmd extends MusicCommand
         }
         else
         {
-            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `on` \uB610\uB294 `off` 또는 `single` \uC785\uB2C8\uB2E4 (또는 비워두면 `off` 와 `all` 로 전환됩니다)");
+            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `전체` \uB610\uB294 `끄기` 또는 `단일` \uC785\uB2C8\uB2E4 (또는 비워두면 `꺼짐` 과 `전체` 로 전환됩니다)");
             return;
         }
         settings.setRepeatMode(value);
