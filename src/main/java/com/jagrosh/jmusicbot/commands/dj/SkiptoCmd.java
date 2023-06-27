@@ -30,8 +30,8 @@ public class SkiptoCmd extends DJCommand
     {
         super(bot);
         this.name = "skipto";
-        this.help = "skips to the specified song";
-        this.arguments = "<position>";
+        this.help = "\uC9C0\uC815\uB41C \uB178\uB798\uB85C \uAC74\uB108\uB701\uB2C8\uB2E4";
+        this.arguments = "<\uC704\uCE58>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
     }
@@ -46,17 +46,17 @@ public class SkiptoCmd extends DJCommand
         }
         catch(NumberFormatException e)
         {
-            event.reply(event.getClient().getError()+" `"+event.getArgs()+"` is not a valid integer!");
+            event.reply(event.getClient().getError()+" `"+event.getArgs()+"` (\uC740)\uB294 \uC62C\uBC14\uB978 \uC815\uC218\uAC00 \uC544\uB2D9\uB2C8\uB2E4!");
             return;
         }
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         if(index<1 || index>handler.getQueue().size())
         {
-            event.reply(event.getClient().getError()+" Position must be a valid integer between 1 and "+handler.getQueue().size()+"!");
+            event.reply(event.getClient().getError()+" \uC704\uCE58\uB294 1\uACFC "+handler.getQueue().size()+" \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
             return;
         }
         handler.getQueue().skip(index-1);
-        event.reply(event.getClient().getSuccess()+" Skipped to **"+handler.getQueue().get(0).getTrack().getInfo().title+"**");
+        event.reply(event.getClient().getSuccess()+" **"+handler.getQueue().get(0).getTrack().getInfo().title+"** (\uC73C)\uB85C \uAC74\uB108\uB700");
         handler.getPlayer().stopTrack();
     }
 }

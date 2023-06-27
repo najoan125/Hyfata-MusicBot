@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
@@ -43,8 +42,8 @@ public class QueueCmd extends MusicCommand
     public QueueCmd(Bot bot)
     {
         super(bot);
-        this.name = "queue";
-        this.help = "shows the current queue";
+        this.name = "\uB300\uAE30\uC5F4";
+        this.help = "\uD604\uC7AC \uB300\uAE30\uC5F4\uC744 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
         this.arguments = "[pagenum]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
@@ -77,7 +76,7 @@ public class QueueCmd extends MusicCommand
             Message nowp = ah.getNowPlaying(event.getJDA());
             Message nonowp = ah.getNoMusicPlaying(event.getJDA());
             Message built = new MessageBuilder()
-                    .setContent(event.getClient().getWarning() + " There is no music in the queue!")
+                    .setContent(event.getClient().getWarning() + " \uB300\uAE30\uC5F4\uC5D0 \uC74C\uC545\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!")
                     .setEmbeds((nowp==null ? nonowp : nowp).getEmbeds().get(0)).build();
             event.reply(built, m -> 
             {
@@ -108,11 +107,11 @@ public class QueueCmd extends MusicCommand
         StringBuilder sb = new StringBuilder();
         if(ah.getPlayer().getPlayingTrack()!=null)
         {
-            sb.append(ah.getStatusEmoji()).append(" **")
+        	sb.append(ah.getStatusEmoji()).append(" **")
                     .append(ah.getPlayer().getPlayingTrack().getInfo().title).append("**\n");
         }
-        return FormatUtil.filter(sb.append(success).append(" Current Queue | ").append(songslength)
-                .append(" entries | `").append(FormatUtil.formatTime(total)).append("` ")
+        return FormatUtil.filter(sb.append(success).append(" \uD604\uC7AC \uB300\uAE30\uC5F4 | ").append(songslength)
+                .append(" \uD56D\uBAA9 | `").append(FormatUtil.formatTime(total)).append("` ")
                 .append(repeatmode.getEmoji() != null ? "| "+repeatmode.getEmoji() : "").toString());
     }
 }

@@ -33,7 +33,7 @@ public class SetvcCmd extends AdminCommand
     public SetvcCmd(Bot bot)
     {
         this.name = "setvc";
-        this.help = "sets the voice channel for playing music";
+        this.help = "\uC74C\uC545\uC744 \uC7AC\uC0DD\uD558\uAE30 \uC704\uD55C \uC74C\uC131 \uCC44\uB110\uC744 \uC124\uC815\uD569\uB2C8\uB2E4";
         this.arguments = "<channel|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
@@ -43,26 +43,26 @@ public class SetvcCmd extends AdminCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" Please include a voice channel or NONE");
+            event.reply(event.getClient().getError()+" \uC74C\uC131 \uCC44\uB110 \uB610\uB294 NONE\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess()+" Music can now be played in any channel");
+            event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uBAA8\uB4E0 \uCC44\uB110\uC5D0\uC11C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4");
         }
         else
         {
             List<VoiceChannel> list = FinderUtil.findVoiceChannels(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" No Voice Channels found matching \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" \uC77C\uCE58\uD558\uB294 \uC74C\uC131 \uCC44\uB110\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC74C \""+event.getArgs()+"\"");
             else if (list.size()>1)
                 event.reply(event.getClient().getWarning()+FormatUtil.listOfVChannels(list, event.getArgs()));
             else
             {
                 s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" Music can now only be played in "+list.get(0).getAsMention());
+                event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uC74C\uC545\uC740 \uC624\uC9C1 "+list.get(0).getAsMention()+" \uC5D0\uC11C\uB9CC \uC7AC\uC0DD\uB429\uB2C8\uB2E4");
             }
         }
     }

@@ -33,7 +33,7 @@ public class SettcCmd extends AdminCommand
     public SettcCmd(Bot bot)
     {
         this.name = "settc";
-        this.help = "sets the text channel for music commands";
+        this.help = "\uC74C\uC545 \uBA85\uB839\uC758 \uD14D\uC2A4\uD2B8 \uCC44\uB110\uC744 \uC124\uC815\uD569\uB2C8\uB2E4";
         this.arguments = "<channel|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
@@ -43,26 +43,26 @@ public class SettcCmd extends AdminCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" Please include a text channel or NONE");
+            event.reply(event.getClient().getError()+" \uD14D\uC2A4\uD2B8 \uCC44\uB110 \uB610\uB294 NONE\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setTextChannel(null);
-            event.reply(event.getClient().getSuccess()+" Music commands can now be used in any channel");
+            event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uBAA8\uB4E0 \uCC44\uB110\uC5D0\uC11C \uC74C\uC545 \uBA85\uB839\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4");
         }
         else
         {
             List<TextChannel> list = FinderUtil.findTextChannels(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" No Text Channels found matching \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" \uC77C\uCE58\uD558\uB294 \uD14D\uC2A4\uD2B8 \uCC44\uB110\uC774 \uC5C6\uC2B5\uB2C8\uB2E4 \""+event.getArgs()+"\"");
             else if (list.size()>1)
                 event.reply(event.getClient().getWarning()+FormatUtil.listOfTChannels(list, event.getArgs()));
             else
             {
                 s.setTextChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" Music commands can now only be used in <#"+list.get(0).getId()+">");
+                event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uC74C\uC545 \uBA85\uB839\uC5B4\uB294 \uC624\uC9C1 <#"+list.get(0).getId()+"> \uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5\uD569\uB2C8\uB2E4");
             }
         }
     }

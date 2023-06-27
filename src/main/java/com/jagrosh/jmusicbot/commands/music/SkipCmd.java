@@ -31,7 +31,7 @@ public class SkipCmd extends MusicCommand
     {
         super(bot);
         this.name = "skip";
-        this.help = "votes to skip the current song";
+        this.help = "\uD604\uC7AC \uB178\uB798 \uAC74\uB108\uB6F0\uAE30\uC5D0 \uD22C\uD45C\uD569\uB2C8\uB2E4.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
@@ -44,7 +44,7 @@ public class SkipCmd extends MusicCommand
         RequestMetadata rm = handler.getRequestMetadata();
         if(event.getAuthor().getIdLong() == rm.getOwner())
         {
-            event.reply(event.getClient().getSuccess()+" Skipped **"+handler.getPlayer().getPlayingTrack().getInfo().title+"**");
+            event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uAC74\uB108\uB6F0\uC5B4\uC9D0");
             handler.getPlayer().stopTrack();
         }
         else
@@ -53,10 +53,10 @@ public class SkipCmd extends MusicCommand
                     .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getAuthor().getId()))
-                msg = event.getClient().getWarning()+" You already voted to skip this song `[";
+                msg = event.getClient().getWarning()+" \uC774\uBBF8 \uC774 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uB3C4\uB85D \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
             else
             {
-                msg = event.getClient().getSuccess()+" You voted to skip the song `[";
+                msg = event.getClient().getSuccess()+" \uB2F9\uC2E0\uC740 \uADF8 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uAE30\uB85C \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
                 handler.getVotes().add(event.getAuthor().getId());
             }
             int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
@@ -66,7 +66,7 @@ public class SkipCmd extends MusicCommand
             if(skippers>=required)
             {
                 msg += "\n" + event.getClient().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
-                    + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
+                        + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
                 handler.getPlayer().stopTrack();
             }
             event.reply(msg);

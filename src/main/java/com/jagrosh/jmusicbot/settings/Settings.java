@@ -37,6 +37,7 @@ public class Settings implements GuildSettingsProvider
     private String defaultPlaylist;
     private RepeatMode repeatMode;
     private String prefix;
+    
     private double skipRatio;
 
     public Settings(SettingsManager manager, String textId, String voiceId, String roleId, int volume, String defaultPlaylist, RepeatMode repeatMode, String prefix, double skipRatio)
@@ -164,7 +165,7 @@ public class Settings implements GuildSettingsProvider
         this.manager.writeSettings();
     }
     
-    public void setRepeatMode(RepeatMode mode)
+    public void setRepeatMode(RepeatMode  mode)
     {
         this.repeatMode = mode;
         this.manager.writeSettings();

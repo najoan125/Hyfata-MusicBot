@@ -34,7 +34,6 @@ import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JMusicBot 
 {
-    public final static Logger LOG = LoggerFactory.getLogger(JMusicBot.class);
+	public final static Logger LOG = LoggerFactory.getLogger(JMusicBot.class);
     public final static Permission[] RECOMMENDED_PERMS = {Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_HISTORY, Permission.MESSAGE_ADD_REACTION,
                                 Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ATTACH_FILES, Permission.MESSAGE_MANAGE, Permission.MESSAGE_EXT_EMOJI,
                                 Permission.MANAGE_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK, Permission.NICKNAME_CHANGE};
@@ -54,7 +53,7 @@ public class JMusicBot
      * @param args the command line arguments
      */
     public static void main(String[] args)
-    {
+    {	
         if(args.length > 0)
             switch(args[0].toLowerCase())
             {
@@ -65,11 +64,10 @@ public class JMusicBot
             }
         startBot();
     }
-    
+
     private static void startBot()
     {
-        // create prompt to handle startup
-        Prompt prompt = new Prompt("JMusicBot");
+    	Prompt prompt = new Prompt("JMusicBot");
         
         // startup checks
         OtherUtil.checkVersion(prompt);
@@ -88,11 +86,11 @@ public class JMusicBot
         Bot bot = new Bot(waiter, config, settings);
         
         AboutCommand aboutCommand = new AboutCommand(Color.BLUE.brighter(),
-                                "a music bot that is [easy to host yourself!](https://github.com/jagrosh/MusicBot) (v" + OtherUtil.getCurrentVersion() + ")",
-                                new String[]{"High-quality music playback", "FairQueue™ Technology", "Easy to host yourself"},
+                                "\uC774 \uBBA4\uC9C1\uBD07\uC740 \uC624\uD508\uC18C\uC2A4\uB97C \uCC38\uACE0\uD558\uC5EC \uB9CC\uB4E4\uC5B4\uC84C\uC5B4\uC694 [\uC624\uD508\uC18C\uC2A4](https://github.com/jagrosh/MusicBot) (v" + OtherUtil.getCurrentVersion() + ")",
+                                new String[]{"\uACE0\uC74C\uC9C8 \uC74C\uC545 \uC7AC\uC0DD", "FairQueue™ \uAE30\uC220"},
                                 RECOMMENDED_PERMS);
         aboutCommand.setIsAuthor(false);
-        aboutCommand.setReplacementCharacter("\uD83C\uDFB6"); // 🎶
+        aboutCommand.setReplacementCharacter("\uD83C\uDFB6"); // �윃�
         
         // set up the command client
         CommandClientBuilder cb = new CommandClientBuilder()
@@ -117,16 +115,19 @@ public class JMusicBot
                         new SCSearchCmd(bot),
                         new ShuffleCmd(bot),
                         new SkipCmd(bot),
+                        new MoveTrackCmd(bot),
+                        new PauseCmd(bot),
+                        new RepeatCmd(bot),
+                        new StopCmd(bot),
+                        new VolumeCmd(bot),
+                        new TTSCmd(bot),
+                        new TTSCmdEn(bot),
+                        new TTSCmdJp(bot),
 
                         new ForceRemoveCmd(bot),
                         new ForceskipCmd(bot),
-                        new MoveTrackCmd(bot),
-                        new PauseCmd(bot),
                         new PlaynextCmd(bot),
-                        new RepeatCmd(bot),
                         new SkiptoCmd(bot),
-                        new StopCmd(bot),
-                        new VolumeCmd(bot),
                         
                         new PrefixCmd(bot),
                         new SetdjCmd(bot),
@@ -174,13 +175,15 @@ public class JMusicBot
             }
         }
         
+        LOG.info("Loaded config from " + config.getConfigLocation());
+        
         // attempt to log in and start
         try
         {
             JDA jda = JDABuilder.create(config.getToken(), Arrays.asList(INTENTS))
                     .enableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS, CacheFlag.EMOTE, CacheFlag.ONLINE_STATUS)
-                    .setActivity(nogame ? null : Activity.playing("loading..."))
+                    .setActivity(nogame ? null : Activity.playing("\uB85C\uB529..."))
                     .setStatus(config.getStatus()==OnlineStatus.INVISIBLE || config.getStatus()==OnlineStatus.OFFLINE 
                             ? OnlineStatus.INVISIBLE : OnlineStatus.DO_NOT_DISTURB)
                     .addEventListeners(cb.build(), waiter, new Listener(bot))
@@ -199,12 +202,6 @@ public class JMusicBot
         {
             prompt.alert(Prompt.Level.ERROR, "JMusicBot", "Some aspect of the configuration is "
                     + "invalid: " + ex + "\nConfig Location: " + config.getConfigLocation());
-            System.exit(1);
-        }
-        catch(ErrorResponseException ex)
-        {
-            prompt.alert(Prompt.Level.ERROR, "JMusicBot", ex + "\nInvalid reponse returned when "
-                    + "attempting to connect, please make sure you're connected to the internet");
             System.exit(1);
         }
     }

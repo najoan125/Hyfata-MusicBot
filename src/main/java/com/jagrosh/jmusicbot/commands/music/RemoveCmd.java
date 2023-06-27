@@ -34,7 +34,7 @@ public class RemoveCmd extends MusicCommand
     {
         super(bot);
         this.name = "remove";
-        this.help = "removes a song from the queue";
+        this.help = "\uB178\uB798\uB97C \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uD569\uB2C8\uB2E4";
         this.arguments = "<position|ALL>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
@@ -47,16 +47,16 @@ public class RemoveCmd extends MusicCommand
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         if(handler.getQueue().isEmpty())
         {
-            event.replyError("There is nothing in the queue!");
+            event.replyError("\uADF8\uAC83\uC740 \uB300\uAE30\uC5F4\uC5D0 \uC5C6\uC2B5\uB2C8\uB2E4!");
             return;
         }
         if(event.getArgs().equalsIgnoreCase("all"))
         {
             int count = handler.getQueue().removeAll(event.getAuthor().getIdLong());
             if(count==0)
-                event.replyWarning("You don't have any songs in the queue!");
+                event.replyWarning("\uB300\uAE30\uC5F4\uC5D0 \uC5B4\uB5A4 \uB178\uB798\uB3C4 \uC5C6\uC2B5\uB2C8\uB2E4!");
             else
-                event.replySuccess("Successfully removed your "+count+" entries.");
+                event.replySuccess("\uC131\uACF5\uC801\uC73C\uB85C "+count+" \uD56D\uBAA9\uC744 \uC81C\uAC70\uD558\uC600\uC2B5\uB2C8\uB2E4.");
             return;
         }
         int pos;
@@ -67,7 +67,7 @@ public class RemoveCmd extends MusicCommand
         }
         if(pos<1 || pos>handler.getQueue().size())
         {
-            event.replyError("Position must be a valid integer between 1 and "+handler.getQueue().size()+"!");
+            event.replyError("\uC704\uCE58\uB294 1\uACFC "+handler.getQueue().size()+" \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
             return;
         }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
@@ -78,7 +78,7 @@ public class RemoveCmd extends MusicCommand
         if(qt.getIdentifier()==event.getAuthor().getIdLong())
         {
             handler.getQueue().remove(pos-1);
-            event.replySuccess("Removed **"+qt.getTrack().getInfo().title+"** from the queue");
+            event.replySuccess("**"+qt.getTrack().getInfo().title+"** (\uC774)\uAC00 \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uB428");
         }
         else if(isDJ)
         {
@@ -89,12 +89,12 @@ public class RemoveCmd extends MusicCommand
             } catch(Exception e) {
                 u = null;
             }
-            event.replySuccess("Removed **"+qt.getTrack().getInfo().title
-                    +"** from the queue (requested by "+(u==null ? "someone" : "**"+u.getName()+"**")+")");
+            event.replySuccess("**"+qt.getTrack().getInfo().title
+                    +"** (\uC774)\uAC00 \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uB428 ("+(u==null ? "someone" : "**"+u.getName()+"** \uC5D0 \uC758\uD574 \uC694\uCCAD\uB428")+")");
         }
         else
         {
-            event.replyError("You cannot remove **"+qt.getTrack().getInfo().title+"** because you didn't add it!");
+            event.replyError("**"+qt.getTrack().getInfo().title+"** (\uC744)\uB97C \uCD94\uAC00\uD558\uC9C0 \uC54A\uC558\uC73C\uBBC0\uB85C \uC81C\uAC70\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!");
         }
     }
 }

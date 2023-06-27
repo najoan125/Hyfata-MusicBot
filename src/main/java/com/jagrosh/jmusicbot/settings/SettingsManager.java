@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SettingsManager implements GuildSettingsManager<Settings>
 {
-    private final static double SKIP_RATIO = .55;
+	private final static double SKIP_RATIO = .55;
     private final HashMap<Long,Settings> settings;
 
     public SettingsManager()
@@ -81,7 +81,7 @@ public class SettingsManager implements GuildSettingsManager<Settings>
     
     private Settings createDefaultSettings()
     {
-        return new Settings(this, 0, 0, 0, 100, null, RepeatMode.OFF, null, SKIP_RATIO);
+    	return new Settings(this, 0, 0, 0, 100, null, RepeatMode.OFF, null, SKIP_RATIO);
     }
     
     protected void writeSettings()

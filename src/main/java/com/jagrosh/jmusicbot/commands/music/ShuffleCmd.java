@@ -29,8 +29,8 @@ public class ShuffleCmd extends MusicCommand
     public ShuffleCmd(Bot bot)
     {
         super(bot);
-        this.name = "shuffle";
-        this.help = "shuffles songs you have added";
+        this.name = "\uC154\uD50C";
+        this.help = "\uCD94\uAC00\uD55C \uB178\uB798\uB97C \uC11E\uC2B5\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
@@ -44,13 +44,13 @@ public class ShuffleCmd extends MusicCommand
         switch (s) 
         {
             case 0:
-                event.replyError("You don't have any music in the queue to shuffle!");
+                event.replyError("\uB300\uAE30\uC5F4\uC5D0 \uC11E\uC744 \uC74C\uC545\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
                 break;
             case 1:
-                event.replyWarning("You only have one song in the queue!");
+                event.replyWarning("\uB300\uAE30\uC5F4\uC5D0 \uB178\uB798\uAC00 \uD558\uB098\uB9CC \uC788\uC2B5\uB2C8\uB2E4!");
                 break;
             default:
-                event.replySuccess("You successfully shuffled your "+s+" entries.");
+                event.replySuccess(s+" \uD56D\uBAA9\uC744 \uC131\uACF5\uC801\uC73C\uB85C \uC11E\uC5C8\uC2B5\uB2C8\uB2E4");
                 break;
         }
     }

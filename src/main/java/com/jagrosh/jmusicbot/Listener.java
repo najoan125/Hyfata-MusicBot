@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 public class Listener extends ListenerAdapter
 {
     private final Bot bot;
-    
     public Listener(Bot bot)
     {
         this.bot = bot;
@@ -73,7 +73,7 @@ public class Listener extends ListenerAdapter
             {
                 try
                 {
-                    User owner = bot.getJDA().retrieveUserById(bot.getConfig().getOwnerId()).complete();
+                	User owner = bot.getJDA().retrieveUserById(bot.getConfig().getOwnerId()).complete();
                     String currentVersion = OtherUtil.getCurrentVersion();
                     String latestVersion = OtherUtil.getLatestVersion();
                     if(latestVersion!=null && !currentVersion.equalsIgnoreCase(latestVersion))
@@ -82,7 +82,7 @@ public class Listener extends ListenerAdapter
                         owner.openPrivateChannel().queue(pc -> pc.sendMessage(msg).queue());
                     }
                 }
-                catch(Exception ex) {} // ignored
+                catch(Exception ex) {} //ignored
             }, 0, 24, TimeUnit.HOURS);
         }
     }
@@ -97,6 +97,12 @@ public class Listener extends ListenerAdapter
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event)
     {
         bot.getAloneInVoiceHandler().onVoiceUpdate(event);
+    }
+    
+    @Override
+    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) 
+    {
+    	bot.getAloneInVoiceHandler().Deafen(event);
     }
 
     @Override

@@ -17,7 +17,7 @@ package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 
@@ -25,14 +25,14 @@ import com.jagrosh.jmusicbot.settings.Settings;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RepeatCmd extends DJCommand
+public class RepeatCmd extends MusicCommand
 {
     public RepeatCmd(Bot bot)
     {
         super(bot);
-        this.name = "repeat";
-        this.help = "re-adds music to the queue when finished";
-        this.arguments = "[off|all|single]";
+        this.name = "\uBC18\uBCF5";
+        this.help = "대기열 전체를 반복하거나 노래 한곡만 단일 반복 합니다.";
+        this.arguments = "[끄기|켜기(전체)|단일]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
     }
@@ -51,25 +51,25 @@ public class RepeatCmd extends DJCommand
             else
                 value = RepeatMode.OFF;
         }
-        else if(args.equalsIgnoreCase("false") || args.equalsIgnoreCase("off"))
+        else if(args.equalsIgnoreCase("false") || args.equalsIgnoreCase("off") || args.equalsIgnoreCase("끄기"))
         {
-            value = RepeatMode.OFF;
+        	value = RepeatMode.OFF;
         }
-        else if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("on") || args.equalsIgnoreCase("all"))
+        else if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("on") || args.equalsIgnoreCase("all") || args.equalsIgnoreCase("켜기") || args.equalsIgnoreCase("전체"))
         {
             value = RepeatMode.ALL;
         }
-        else if(args.equalsIgnoreCase("one") || args.equalsIgnoreCase("single"))
+        else if(args.equalsIgnoreCase("one") || args.equalsIgnoreCase("single") || args.equalsIgnoreCase("단일"))
         {
             value = RepeatMode.SINGLE;
         }
         else
         {
-            event.replyError("Valid options are `off`, `all` or `single` (or leave empty to toggle between `off` and `all`)");
+            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `전체` \uB610\uB294 `끄기` 또는 `단일` \uC785\uB2C8\uB2E4 (또는 비워두면 `꺼짐` 과 `전체` 로 전환됩니다)");
             return;
         }
         settings.setRepeatMode(value);
-        event.replySuccess("Repeat mode is now `"+value.getUserFriendlyName()+"`");
+        event.replySuccess("반복 모드: `"+value.getUserFriendlyName()+"`");
     }
 
     @Override

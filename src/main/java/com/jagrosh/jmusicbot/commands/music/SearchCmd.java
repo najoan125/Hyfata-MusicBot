@@ -45,10 +45,10 @@ public class SearchCmd extends MusicCommand
     {
         super(bot);
         this.searchingEmoji = bot.getConfig().getSearching();
-        this.name = "search";
+        this.name = "p";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.arguments = "<query>";
-        this.help = "searches Youtube for a provided query";
+        this.arguments = "<\uAC80\uC0C9\uC5B4>";
+        this.help = "\uC81C\uACF5\uB41C \uC694\uCCAD\uC744 Youtube\uC5D0\uC11C \uAC80\uC0C9\uD569\uB2C8\uB2E4.";
         this.beListening = true;
         this.bePlaying = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
@@ -64,10 +64,10 @@ public class SearchCmd extends MusicCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.replyError("Please include a query.");
+            event.replyError("\uAC80\uC0C9\uC5B4\uB97C \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
             return;
         }
-        event.reply(searchingEmoji+" Searching... `["+event.getArgs()+"]`", 
+        event.reply(searchingEmoji+" \uAC80\uC0C9 \uC911... `["+event.getArgs()+"]`", 
                 m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), searchPrefix + event.getArgs(), new ResultHandler(m,event)));
     }
     
@@ -87,37 +87,37 @@ public class SearchCmd extends MusicCommand
         {
             if(bot.getConfig().isTooLong(track))
             {
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" \uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
                         +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
-            m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" Added **"+track.getInfo().title
-                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "to begin playing" 
-                        : " to the queue at position "+pos))).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
+                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "(\uC774)\uAC00 \uCD94\uAC00\uB418\uC5B4 \uC7AC\uC0DD\uC744 \uC2DC\uC791\uD569\uB2C8\uB2E4" 
+                        : " (\uC774)\uAC00 \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uB428"))).queue();
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist)
         {
             builder.setColor(event.getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" Search results for `"+event.getArgs()+"`:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" \uAC80\uC0C9 \uACB0\uACFC `"+event.getArgs()+"`:"))
                     .setChoices(new String[0])
                     .setSelection((msg,i) -> 
                     {
                         AudioTrack track = playlist.getTracks().get(i-1);
                         if(bot.getConfig().isTooLong(track))
                         {
-                            event.replyWarning("This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
+                            event.replyWarning("\uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
                                     +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
                             return;
                         }
                         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
                         int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
-                        event.replySuccess("Added **" + FormatUtil.filter(track.getInfo().title)
-                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "to begin playing" 
-                                    : " to the queue at position "+pos));
+                        event.replySuccess("\uC7AC\uC0DD\uC744 \uC2DC\uC791\uD558\uAE30 \uC704\uD574  **" + FormatUtil.filter(track.getInfo().title)
+                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "(\uC744)\uB97C \uCD94\uAC00\uD588\uC2B5\uB2C8\uB2E4" 
+                                    : " (\uC744)\uB97C \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uD568"));
                     })
                     .setCancel((msg) -> {})
                     .setUsers(event.getAuthor())
@@ -133,16 +133,16 @@ public class SearchCmd extends MusicCommand
         @Override
         public void noMatches() 
         {
-            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" No results found for `"+event.getArgs()+"`.")).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" \uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC5C6\uC74C `"+event.getArgs()+"`.")).queue();
         }
 
         @Override
         public void loadFailed(FriendlyException throwable) 
         {
             if(throwable.severity==Severity.COMMON)
-                m.editMessage(event.getClient().getError()+" Error loading: "+throwable.getMessage()).queue();
+                m.editMessage(event.getClient().getError()+" \uB85C\uB4DC \uC624\uB958: "+throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError()+" Error loading track.").queue();
+                m.editMessage(event.getClient().getError()+" \uD2B8\uB799\uC744 \uB85C\uB4DC\uD558\uB294\uB370 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.").queue();
         }
     }
 }

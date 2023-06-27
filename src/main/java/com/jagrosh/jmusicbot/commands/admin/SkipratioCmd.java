@@ -29,11 +29,11 @@ public class SkipratioCmd extends AdminCommand
     public SkipratioCmd(Bot bot)
     {
         this.name = "setskip";
-        this.help = "sets a server-specific skip percentage";
+        this.help = "서버별 건너뛰기 확률(%)을 설정합니다.";
         this.arguments = "<0 - 100>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
-    
+
     @Override
     protected void execute(CommandEvent event) 
     {
@@ -42,16 +42,16 @@ public class SkipratioCmd extends AdminCommand
             int val = Integer.parseInt(event.getArgs().endsWith("%") ? event.getArgs().substring(0,event.getArgs().length()-1) : event.getArgs());
             if( val < 0 || val > 100)
             {
-                event.replyError("The provided value must be between 0 and 100!");
+                event.replyError("값은 0에서 100 사이여야 합니다!");
                 return;
             }
             Settings s = event.getClient().getSettingsFor(event.getGuild());
             s.setSkipRatio(val / 100.0);
-            event.replySuccess("Skip percentage has been set to `" + val + "%` of listeners on *" + event.getGuild().getName() + "*");
+            event.replySuccess("건너뛰기 비율이 *" + event.getGuild().getName() + "* 청취자의 `" + val + "%` 로 설정되었습니다.");
         }
         catch(NumberFormatException ex)
         {
-            event.replyError("Please include an integer between 0 and 100 (default is 55). This number is the percentage of listening users that must vote to skip a song.");
+            event.replyError("0에서 100 사이의 정수를 포함하십시오(기본값은 55). 이 숫자는 노래를 건너뛰기 위해 투표해야 하는 청취 사용자의 비율입니다.");
         }
     }
 }

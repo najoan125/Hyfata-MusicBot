@@ -21,9 +21,9 @@ package com.jagrosh.jmusicbot.settings;
  */
 public enum RepeatMode
 {
-    OFF(null, "Off"),
-    ALL("\uD83D\uDD01", "All"), // 🔁
-    SINGLE("\uD83D\uDD02", "Single"); // 🔂
+    OFF(null, "꺼짐"),
+    ALL("\uD83D\uDD01", "켜짐(전체 반복)"), // 🔁
+    SINGLE("\uD83D\uDD02", "켜짐(단일 반복)"); // 🔂
 
     private final String emoji;
     private final String userFriendlyName;

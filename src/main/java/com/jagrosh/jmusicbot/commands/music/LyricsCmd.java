@@ -34,9 +34,9 @@ public class LyricsCmd extends MusicCommand
     public LyricsCmd(Bot bot)
     {
         super(bot);
-        this.name = "lyrics";
-        this.arguments = "[song name]";
-        this.help = "shows the lyrics of a song";
+        this.name = "\uAC00\uC0AC";
+        this.arguments = "[\uB178\uB798 \uC81C\uBAA9]";
+        this.help = "\uD604\uC7AC \uC7AC\uC0DD \uC911\uC778 \uB178\uB798\uC758 \uAC00\uC0AC\uB97C \uBCF4\uC5EC\uC90D\uB2C8\uB2E4.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
@@ -63,7 +63,7 @@ public class LyricsCmd extends MusicCommand
         {
             if(lyrics == null)
             {
-                event.replyError("Lyrics for `" + title + "` could not be found!" + (event.getArgs().isEmpty() ? " Try entering the song name manually (`lyrics [song name]`)" : ""));
+                event.replyError("`" + title + "` \uC758 \uAC00\uC0AC\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!" + (event.getArgs().isEmpty() ? " \uC218\uB3D9\uC73C\uB85C \uB178\uB798 \uC774\uB984\uC744 \uC785\uB825\uD574 \uBCF4\uC2ED\uC2DC\uC624 (`\uAC00\uC0AC [\uB178\uB798 \uC81C\uBAA9]`)" : ""));
                 return;
             }
 
@@ -73,7 +73,7 @@ public class LyricsCmd extends MusicCommand
                     .setTitle(lyrics.getTitle(), lyrics.getURL());
             if(lyrics.getContent().length()>15000)
             {
-                event.replyWarning("Lyrics for `" + title + "` found but likely not correct: " + lyrics.getURL());
+                event.replyWarning("`" + title + "` \uC758 \uAC00\uC0AC\uAC00 \uBC1C\uACAC\uB418\uC5C8\uC9C0\uB9CC \uC815\uD655\uD558\uC9C0 \uC54A\uC744 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4: " + lyrics.getURL());
             }
             else if(lyrics.getContent().length()>2000)
             {

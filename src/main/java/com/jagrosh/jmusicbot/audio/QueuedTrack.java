@@ -31,7 +31,7 @@ public class QueuedTrack implements Queueable
     
     public QueuedTrack(AudioTrack track, User owner)
     {
-        this(track, new RequestMetadata(owner));
+    	this(track, new RequestMetadata(owner));
     }
     
     public QueuedTrack(AudioTrack track, RequestMetadata rm)
@@ -43,7 +43,7 @@ public class QueuedTrack implements Queueable
     @Override
     public long getIdentifier() 
     {
-        return track.getUserData(RequestMetadata.class).getOwner();
+    	return track.getUserData(RequestMetadata.class).getOwner();
     }
     
     public AudioTrack getTrack()
@@ -54,7 +54,7 @@ public class QueuedTrack implements Queueable
     @Override
     public String toString() 
     {
-        String entry = "`[" + FormatUtil.formatTime(track.getDuration()) + "]` ";
+    	String entry = "`[" + FormatUtil.formatTime(track.getDuration()) + "]` ";
         AudioTrackInfo trackInfo = track.getInfo();
         entry = entry + (trackInfo.uri.startsWith("http") ? "[**" + trackInfo.title + "**]("+trackInfo.uri+")" : "**" + trackInfo.title + "**");
         return entry + " - <@" + track.getUserData(RequestMetadata.class).getOwner() + ">";

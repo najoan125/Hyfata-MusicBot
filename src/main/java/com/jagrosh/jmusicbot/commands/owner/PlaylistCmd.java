@@ -75,7 +75,7 @@ public class PlaylistCmd extends OwnerCommand
             pname = pname.replaceAll("[*?|\\/\":<>]", "");
             if(pname == null || pname.isEmpty()) 
             {
-                event.replyError("Please provide a name for the playlist!");
+                event.replyError("플레이리스트의 이름을 입력하십시오!");
             } 
             else if(bot.getPlaylistLoader().getPlaylist(pname) == null)
             {

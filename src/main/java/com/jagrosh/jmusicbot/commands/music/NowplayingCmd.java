@@ -31,8 +31,8 @@ public class NowplayingCmd extends MusicCommand
     public NowplayingCmd(Bot bot)
     {
         super(bot);
-        this.name = "nowplaying";
-        this.help = "shows the song that is currently playing";
+        this.name = "np";
+        this.help = "\uD604\uC7AC \uC7AC\uC0DD \uC911\uC778 \uB178\uB798\uB97C \uBCF4\uC5EC\uC90D\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }

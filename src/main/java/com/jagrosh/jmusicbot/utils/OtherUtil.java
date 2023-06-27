@@ -52,7 +52,7 @@ public class OtherUtil
      */
     public static Path getPath(String path)
     {
-        Path result = Paths.get(path);
+    	Path result = Paths.get(path);
         // special logic to prevent trying to access system32
         if(result.toAbsolutePath().toString().toLowerCase().startsWith(WINDOWS_INVALID_PATH))
         {
@@ -156,7 +156,7 @@ public class OtherUtil
             prompt.alert(Prompt.Level.WARNING, "Java Version", 
                     "It appears that you may not be using a supported Java version. Please use 64-bit java.");
     }
-    
+
     public static void checkVersion(Prompt prompt)
     {
         // Get current version number
@@ -176,7 +176,7 @@ public class OtherUtil
         if(JMusicBot.class.getPackage()!=null && JMusicBot.class.getPackage().getImplementationVersion()!=null)
             return JMusicBot.class.getPackage().getImplementationVersion();
         else
-            return "UNKNOWN";
+            return "0.3.9";
     }
     
     public static String getLatestVersion()
