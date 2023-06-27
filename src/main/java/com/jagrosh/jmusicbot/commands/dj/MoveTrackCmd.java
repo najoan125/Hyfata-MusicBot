@@ -30,7 +30,7 @@ public class MoveTrackCmd extends MusicCommand
         int from;
         int to;
 
-        String[] parts = event.getArgs().split("\s+", 2);
+        String[] parts = event.getArgs().split("\\s+", 2);
         if(parts.length < 2)
         {
             event.replyError("\uC720\uD6A8\uD55C \uC778\uB371\uC2A4\uB97C \uB450 \uAC1C \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
