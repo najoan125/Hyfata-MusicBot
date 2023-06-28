@@ -63,20 +63,16 @@ public class SearchCmd extends MusicCommand
     {
         super(bot);
         this.searchingEmoji = bot.getConfig().getSearching();
-        this.name = "p";
+        this.name = "검색";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.arguments = "<검색어>";
         this.help = "제공된 요청을 Youtube에서 검색합니다.";
         this.beListening = true;
         this.bePlaying = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        new OrderedMenu.Builder()
-                .allowTextInput(true)
-                .useNumbers()
-                .useCancelButton(true)
-                .setEventWaiter(bot.getWaiter())
-                .setTimeout(1, TimeUnit.MINUTES);
     }
+    
+    
     @Override
     public void doCommand(CommandEvent event) 
     {
@@ -130,7 +126,7 @@ public class SearchCmd extends MusicCommand
         	LinkedList<Component> actionRow = new LinkedList<>();
         	for(int i=0;i<10 && i<playlist.getTracks().size(); i++) {
         		AudioTrack track = playlist.getTracks().get(i);
-        		actionRow.add(Button.secondary(i+1+"", i+1+""));
+        		actionRow.add(Button.primary(i+1+"", i+1+""));
         		result += OrderedMenu.NUMBERS[i]
         			+" `["+FormatUtil.formatTime(track.getDuration())+"]` "
         				+ "[**"+track.getInfo().title+"**]("+track.getInfo().uri+")\n";
@@ -158,8 +154,10 @@ public class SearchCmd extends MusicCommand
 				@Override
 				public void run() {
 					try {
-						TimeUnit.SECONDS.sleep(10);
-					} catch(InterruptedException e) {}
+						TimeUnit.SECONDS.sleep(30);
+					} catch(InterruptedException e) {
+						return;
+					}
 					m.editMessage("검색이 취소되었습니다.")
 						.setEmbeds()
 						.setActionRows()
