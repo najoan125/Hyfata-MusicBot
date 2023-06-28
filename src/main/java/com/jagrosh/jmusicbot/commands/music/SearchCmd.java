@@ -20,7 +20,13 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
@@ -28,8 +34,15 @@ import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
  *
@@ -38,8 +51,13 @@ import net.dv8tion.jda.api.entities.Message;
 public class SearchCmd extends MusicCommand 
 {
     protected String searchPrefix = "ytsearch:";
-    private final OrderedMenu.Builder builder;
     private final String searchingEmoji;
+    
+    //Listener.java에 사용할 HashMap
+    public static HashMap<String, User> searchCmdMap = new HashMap<>();
+    public static HashMap<String, AudioPlaylist> searchCmdPlaylist = new HashMap<>();
+    public static HashMap<String, CommandEvent> searchCmdEvent = new HashMap<>();
+    public static HashMap<String, ExecutorService> searchCmdExecutors = new HashMap<>();
     
     public SearchCmd(Bot bot)
     {
@@ -47,12 +65,12 @@ public class SearchCmd extends MusicCommand
         this.searchingEmoji = bot.getConfig().getSearching();
         this.name = "p";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.arguments = "<\uAC80\uC0C9\uC5B4>";
-        this.help = "\uC81C\uACF5\uB41C \uC694\uCCAD\uC744 Youtube\uC5D0\uC11C \uAC80\uC0C9\uD569\uB2C8\uB2E4.";
+        this.arguments = "<검색어>";
+        this.help = "제공된 요청을 Youtube에서 검색합니다.";
         this.beListening = true;
         this.bePlaying = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        builder = new OrderedMenu.Builder()
+        new OrderedMenu.Builder()
                 .allowTextInput(true)
                 .useNumbers()
                 .useCancelButton(true)
@@ -64,14 +82,14 @@ public class SearchCmd extends MusicCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.replyError("\uAC80\uC0C9\uC5B4\uB97C \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
+            event.replyError("검색어를 포함하십시오.");
             return;
         }
-        event.reply(searchingEmoji+" \uAC80\uC0C9 \uC911... `["+event.getArgs()+"]`", 
+        event.reply(searchingEmoji+" 검색 중... `["+event.getArgs()+"]`", 
                 m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), searchPrefix + event.getArgs(), new ResultHandler(m,event)));
     }
     
-    private class ResultHandler implements AudioLoadResultHandler 
+    private class ResultHandler implements AudioLoadResultHandler
     {
         private final Message m;
         private final CommandEvent event;
@@ -87,62 +105,90 @@ public class SearchCmd extends MusicCommand
         {
             if(bot.getConfig().isTooLong(track))
             {
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" \uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" 이 트랙 (**"+track.getInfo().title+"**) (은)는 허용된 최대치보다 깁니다: `"
                         +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
             m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
-                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "(\uC774)\uAC00 \uCD94\uAC00\uB418\uC5B4 \uC7AC\uC0DD\uC744 \uC2DC\uC791\uD569\uB2C8\uB2E4" 
-                        : " (\uC774)\uAC00 \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uB428"))).queue();
+                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "(이)가 추가되어 재생을 시작합니다" 
+                        : " (이)가 대기열 위치 "+pos+"에 추가됨"))).queue();
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist)
         {
-            builder.setColor(event.getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" \uAC80\uC0C9 \uACB0\uACFC `"+event.getArgs()+"`:"))
-                    .setChoices(new String[0])
-                    .setSelection((msg,i) -> 
-                    {
-                        AudioTrack track = playlist.getTracks().get(i-1);
-                        if(bot.getConfig().isTooLong(track))
-                        {
-                            event.replyWarning("\uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
-                                    +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
-                            return;
-                        }
-                        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                        int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
-                        event.replySuccess("\uC7AC\uC0DD\uC744 \uC2DC\uC791\uD558\uAE30 \uC704\uD574  **" + FormatUtil.filter(track.getInfo().title)
-                                + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "(\uC744)\uB97C \uCD94\uAC00\uD588\uC2B5\uB2C8\uB2E4" 
-                                    : " (\uC744)\uB97C \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uD568"));
-                    })
-                    .setCancel((msg) -> {})
-                    .setUsers(event.getAuthor())
-                    ;
-            for(int i=0; i<4 && i<playlist.getTracks().size(); i++)
-            {
-                AudioTrack track = playlist.getTracks().get(i);
-                builder.addChoices("`["+FormatUtil.formatTime(track.getDuration())+"]` [**"+track.getInfo().title+"**]("+track.getInfo().uri+")");
-            }
-            builder.build().display(m);
+        	//메시지 수정
+        	MessageAction ma = m.editMessage(FormatUtil.filter(
+        			event.getClient().getSuccess()+"`"+event.getArgs()+"` 검색 결과:"));
+        	EmbedBuilder eb = new EmbedBuilder();
+        	eb.setColor(event.getSelfMember().getColor());
+        	
+        	//버튼 생성
+        	String result = "";
+        	LinkedList<Component> actionRow = new LinkedList<>();
+        	for(int i=0;i<10 && i<playlist.getTracks().size(); i++) {
+        		AudioTrack track = playlist.getTracks().get(i);
+        		actionRow.add(Button.secondary(i+1+"", i+1+""));
+        		result += OrderedMenu.NUMBERS[i]
+        			+" `["+FormatUtil.formatTime(track.getDuration())+"]` "
+        				+ "[**"+track.getInfo().title+"**]("+track.getInfo().uri+")\n";
+        	}
+        	ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
+        	ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, 10));
+        	ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
+        	ma.setActionRows(actionRow1, actionRow2, actionRow3);
+        	
+        	//곡 제목들 표시
+        	eb.setDescription(result);
+        	
+        	//새 ExecutorService 생성
+        	ExecutorService executorService = Executors.newSingleThreadExecutor();
+        	
+        	//HashMap에 등록
+        	searchCmdMap.put(m.getId(), event.getAuthor());
+        	searchCmdPlaylist.put(m.getId(), playlist);
+        	searchCmdEvent.put(m.getId(), event);
+        	searchCmdExecutors.put(m.getId(), executorService);
+        	
+        	//ExecutorService를 이용한 시간 초과 처리
+        	executorService.submit(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						TimeUnit.SECONDS.sleep(10);
+					} catch(InterruptedException e) {}
+					m.editMessage("검색이 취소되었습니다.")
+						.setEmbeds()
+						.setActionRows()
+						.queue();
+					
+					//HashMap 등록 해제
+					searchCmdMap.remove(m.getId());
+			    	searchCmdPlaylist.remove(m.getId());
+			    	searchCmdEvent.remove(m.getId());
+			    	searchCmdExecutors.remove(m.getId());
+				}
+			});
+        	
+        	ma.setEmbeds(eb.build()).queue();
         }
 
         @Override
         public void noMatches() 
         {
-            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" \uAC80\uC0C9 \uACB0\uACFC\uAC00 \uC5C6\uC74C `"+event.getArgs()+"`.")).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" 검색 결과가 없음 `"+event.getArgs()+"`.")).queue();
         }
 
         @Override
         public void loadFailed(FriendlyException throwable) 
         {
             if(throwable.severity==Severity.COMMON)
-                m.editMessage(event.getClient().getError()+" \uB85C\uB4DC \uC624\uB958: "+throwable.getMessage()).queue();
+                m.editMessage(event.getClient().getError()+" 로드 오류: "+throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError()+" \uD2B8\uB799\uC744 \uB85C\uB4DC\uD558\uB294\uB370 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.").queue();
+                m.editMessage(event.getClient().getError()+" 트랙을 로드하는데 오류가 발생했습니다.").queue();
         }
     }
 }

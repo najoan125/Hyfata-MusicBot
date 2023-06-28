@@ -15,7 +15,15 @@
  */
 package com.jagrosh.jmusicbot;
 
+import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.QueuedTrack;
+import com.jagrosh.jmusicbot.commands.music.SearchCmd;
+import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
 import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,6 +34,7 @@ import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -76,7 +85,7 @@ public class Listener extends ListenerAdapter
                 	User owner = bot.getJDA().retrieveUserById(bot.getConfig().getOwnerId()).complete();
                     String currentVersion = OtherUtil.getCurrentVersion();
                     String latestVersion = OtherUtil.getLatestVersion();
-                    if(latestVersion!=null && !currentVersion.equalsIgnoreCase(latestVersion))
+                    if(latestVersion!=null && !currentVersion.equalsIgnoreCase(latestVersion) && !currentVersion.equalsIgnoreCase("UNKNOWN"))
                     {
                         String msg = String.format(OtherUtil.NEW_VERSION_AVAILABLE, currentVersion, latestVersion);
                         owner.openPrivateChannel().queue(pc -> pc.sendMessage(msg).queue());
@@ -115,6 +124,47 @@ public class Listener extends ListenerAdapter
     public void onGuildJoin(GuildJoinEvent event) 
     {
         credit(event.getJDA());
+    }
+    
+    @Override
+    public void onButtonClick(ButtonClickEvent event) {
+    	String messageId = event.getMessageId();
+    	User user = SearchCmd.searchCmdMap.get(messageId);
+    	
+    	
+    	if (user != null && event.getMember().getUser().equals(user)) {
+    		searchCmdClicked(event);
+    	}
+    }
+    
+    private void searchCmdClicked(ButtonClickEvent event) {
+    	String messageId = event.getMessageId();
+    	SearchCmd.searchCmdExecutors.get(messageId).shutdownNow();
+    	SearchCmd.searchCmdExecutors.remove(messageId);
+    	
+    	AudioPlaylist pl = SearchCmd.searchCmdPlaylist.get(messageId);
+    	CommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
+    	if (event.getComponentId().equals("cancel")) {
+    		event.editMessage("검색이 취소되었습니다.").setEmbeds().setActionRows().queue();
+    	}
+    	else {
+    		event.getMessage().delete().queue();
+    		AudioTrack track = pl.getTracks().get(Integer.parseInt(event.getButton().getId())-1);
+    		if(bot.getConfig().isTooLong(track))
+            {
+                ev.replyWarning("\uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
+                        +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
+                return;
+            }
+            AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
+            int pos = handler.addTrack(new QueuedTrack(track, ev.getAuthor()))+1;
+            ev.replySuccess("\uC7AC\uC0DD\uC744 \uC2DC\uC791\uD558\uAE30 \uC704\uD574  **" + FormatUtil.filter(track.getInfo().title)
+                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "(\uC744)\uB97C \uCD94\uAC00\uD588\uC2B5\uB2C8\uB2E4" 
+                        : " (\uC744)\uB97C \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uD568"));
+    	}
+    	SearchCmd.searchCmdMap.remove(messageId);
+    	SearchCmd.searchCmdPlaylist.remove(messageId);
+    	SearchCmd.searchCmdEvent.remove(messageId);
     }
     
     // make sure people aren't adding clones to dbots

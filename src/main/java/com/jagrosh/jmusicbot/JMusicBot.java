@@ -87,7 +87,7 @@ public class JMusicBot
         Bot bot = new Bot(waiter, config, settings);
         
         AboutCommand aboutCommand = new AboutCommand(Color.BLUE.brighter(),
-                                "\uC774 \uBBA4\uC9C1\uBD07\uC740 \uC624\uD508\uC18C\uC2A4\uB97C \uCC38\uACE0\uD558\uC5EC \uB9CC\uB4E4\uC5B4\uC84C\uC5B4\uC694 [\uC624\uD508\uC18C\uC2A4](https://github.com/jagrosh/MusicBot) (v" + OtherUtil.getCurrentVersion() + ")",
+                                "\uC774 \uBBA4\uC9C1\uBD07\uC740 \uC624\uD508\uC18C\uC2A4\uB97C \uCC38\uACE0\uD558\uC5EC \uB9CC\uB4E4\uC5B4\uC84C\uC5B4\uC694 [\uC624\uD508\uC18C\uC2A4](https://github.com/najoan125/Hyfata-MusicBot) (v" + OtherUtil.getCurrentVersion() + ")",
                                 new String[]{"\uACE0\uC74C\uC9C8 \uC74C\uC545 \uC7AC\uC0DD", "FairQueue™ \uAE30\uC220"},
                                 RECOMMENDED_PERMS);
         aboutCommand.setIsAuthor(false);
