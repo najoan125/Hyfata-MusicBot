@@ -29,8 +29,8 @@ public class PlaylistsCmd extends MusicCommand
     public PlaylistsCmd(Bot bot)
     {
         super(bot);
-        this.name = "playlists";
-        this.help = "\uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uC7AC\uC0DD \uBAA9\uB85D\uC744 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
+        this.name = "플레이리스트";
+        this.help = "사용 가능한 플레이리스트를 표시합니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = true;
         this.beListening = false;

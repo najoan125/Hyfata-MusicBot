@@ -39,9 +39,9 @@ public class PlaynextCmd extends DJCommand
     {
         super(bot);
         this.loadingEmoji = bot.getConfig().getLoading();
-        this.name = "playnext";
+        this.name = "새치기";
         this.arguments = "<\uC81C\uBAA9|URL>";
-        this.help = "\uD604\uC7AC \uACE1\uC774 \uB05D\uB098\uACE0 \uC0C8\uCE58\uAE30 \uD558\uC5EC \uC81C\uACF5\uB41C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4.";
+        this.help = "\uD604\uC7AC \uACE1\uC774 \uB05D\uB098\uACE0 \uC0C8\uCE58\uAE30 \uD558\uC5EC \uC81C\uACF5\uB41C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;

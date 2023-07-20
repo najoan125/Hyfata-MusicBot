@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.music;
+package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
-import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
@@ -28,12 +28,12 @@ import net.dv8tion.jda.api.entities.User;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class RemoveCmd extends MusicCommand 
+public class RemoveCmd extends DJCommand
 {
     public RemoveCmd(Bot bot)
     {
         super(bot);
-        this.name = "remove";
+        this.name = "제거";
         this.help = "\uB178\uB798\uB97C \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uD569\uB2C8\uB2E4";
         this.arguments = "<position|ALL>";
         this.aliases = bot.getConfig().getAliases(this.name);

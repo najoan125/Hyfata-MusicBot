@@ -54,7 +54,7 @@ public class AboutCommand extends Command {
         this.description = description;
         this.features = features;
         this.name = "about";
-        this.help = "\uBD07\uC5D0 \uB300\uD55C \uC815\uBCF4\uB97C \uD45C\uC2DC\uD569\uB2C8\uB2E4";
+        this.help = "봇에 대한 정보를 표시합니다";
         this.guildOnly = false;
         this.perms = perms;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
@@ -84,11 +84,11 @@ public class AboutCommand extends Command {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(event.isFromType(ChannelType.TEXT) ? event.getGuild().getSelfMember().getColor() : color);
-        builder.setAuthor("" + event.getSelfUser().getName() + "\uC758 \uBAA8\uB4E0 \uAC83!", null, event.getSelfUser().getAvatarUrl());
+        builder.setAuthor("" + event.getSelfUser().getName() + "의 모든 것!", null, event.getSelfUser().getAvatarUrl());
         boolean join = !(event.getClient().getServerInvite() == null || event.getClient().getServerInvite().isEmpty());
         boolean inv = !oauthLink.isEmpty();
-        String invline = "\n" + (join ? "Join my server [`here`](" + event.getClient().getServerInvite() + ")" : (inv ? "\uB2F9\uC2E0\uC758 \uC11C\uBC84\uC5D0 \uC800\uB97C " : "")) 
-                + (inv ? (join ? ", or " : "") + "[`\uCD08\uB300`](" + oauthLink + ") \uD574\uC8FC\uC138\uC694" : "") + "!";
+        String invline = "\n" + (join ? "Join my server [`here`](" + event.getClient().getServerInvite() + ")" : (inv ? "당신의 서버에 저를 " : ""))
+                + (inv ? (join ? ", or " : "") + "[`초대`](" + oauthLink + ") 해주세요" : "") + "!";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId())==null ? "<@" + event.getClient().getOwnerId()+">" 
                 : event.getJDA().getUserById(event.getClient().getOwnerId()).getName();
         StringBuilder descr = new StringBuilder().append("\uC548\uB155\uD558\uC138\uC694! \uC800\uB294 **").append(event.getSelfUser().getName()).append("** \uC785\uB2C8\uB2E4, ")

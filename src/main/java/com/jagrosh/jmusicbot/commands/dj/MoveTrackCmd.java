@@ -5,19 +5,19 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
-import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.queue.FairQueue;
 
 /**
  * Command that provides users the ability to move a track in the playlist.
  */
-public class MoveTrackCmd extends MusicCommand
+public class MoveTrackCmd extends DJCommand
 {
 
     public MoveTrackCmd(Bot bot)
     {
         super(bot);
-        this.name = "movetrack";
+        this.name = "트랙이동";
         this.help = "\uD604\uC7AC \uB300\uAE30\uC5F4\uC758 \uD2B8\uB799\uC744 \uB2E4\uB978 \uC704\uCE58\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4";
         this.arguments = "<from> <to>";
         this.aliases = bot.getConfig().getAliases(this.name);

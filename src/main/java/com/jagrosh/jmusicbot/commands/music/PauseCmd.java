@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.dj;
+package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
@@ -24,23 +24,27 @@ import com.jagrosh.jmusicbot.commands.MusicCommand;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class StopCmd extends MusicCommand
+public class PauseCmd extends MusicCommand
 {
-    public StopCmd(Bot bot)
+    public PauseCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uC815\uC9C0";
-        this.help = "\uD604\uC7AC \uB178\uB798\uB97C \uC911\uC9C0\uD558\uACE0 \uB300\uAE30\uC5F4\uC744 \uC9C0\uC6C1\uB2C8\uB2E4";
+        this.name = "\uC77C\uC2DC\uC815\uC9C0";
+        this.help = "\uD604\uC7AC \uACE1\uC744 \uC77C\uC2DC\uC815\uC9C0\uD569\uB2C8\uB2E4";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.bePlaying = false;
+        this.bePlaying = true;
     }
 
     @Override
     public void doCommand(CommandEvent event) 
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        handler.stopAndClear();
-        event.getGuild().getAudioManager().closeAudioConnection();
-        event.reply(event.getClient().getSuccess()+" \uD50C\uB808\uC774\uC5B4\uAC00 \uC911\uC9C0\uB418\uACE0 \uB300\uAE30\uC5F4\uC774 \uC9C0\uC6CC\uC84C\uC2B5\uB2C8\uB2E4.");
+        if(handler.getPlayer().isPaused())
+        {
+            event.replyWarning("\uC774\uBBF8 \uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uC2DC\uC815\uC9C0 \uB418\uC5C8\uC2B5\uB2C8\uB2E4! `"+event.getClient().getPrefix()+"재생` \uB97C \uC0AC\uC6A9\uD558\uC5EC \uC77C\uC2DC\uC815\uC9C0\uB97C \uD574\uC81C\uD558\uC138\uC694!");
+            return;
+        }
+        handler.getPlayer().setPaused(true);
+        event.replySuccess("**"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC744)\uB97C \uC77C\uC2DC\uC815\uC9C0\uD558\uC600\uC2B5\uB2C8\uB2E4. `"+event.getClient().getPrefix()+"재생` \uB97C \uC785\uB825\uD558\uC5EC \uB2E4\uC2DC \uC7AC\uC0DD\uD558\uC138\uC694!");
     }
 }

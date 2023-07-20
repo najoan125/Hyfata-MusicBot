@@ -18,17 +18,22 @@ package com.jagrosh.jmusicbot;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.music.SearchCmd;
+import com.jagrosh.jmusicbot.settings.RepeatMode;
+import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -37,6 +42,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +58,9 @@ public class Listener extends ListenerAdapter
     {
         this.bot = bot;
     }
-    
+
     @Override
-    public void onReady(ReadyEvent event) 
+    public void onReady(ReadyEvent event)
     {
         if(event.getJDA().getGuildCache().isEmpty())
         {
@@ -63,7 +69,7 @@ public class Listener extends ListenerAdapter
             log.warn(event.getJDA().getInviteUrl(JMusicBot.RECOMMENDED_PERMS));
         }
         credit(event.getJDA());
-        event.getJDA().getGuilds().forEach((guild) -> 
+        event.getJDA().getGuilds().forEach((guild) ->
         {
             try
             {
@@ -78,7 +84,7 @@ public class Listener extends ListenerAdapter
         });
         if(bot.getConfig().useUpdateAlerts())
         {
-            bot.getThreadpool().scheduleWithFixedDelay(() -> 
+            bot.getThreadpool().scheduleWithFixedDelay(() ->
             {
                 try
                 {
@@ -95,9 +101,9 @@ public class Listener extends ListenerAdapter
             }, 0, 24, TimeUnit.HOURS);
         }
     }
-    
+
     @Override
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event) 
+    public void onGuildMessageDelete(GuildMessageDeleteEvent event)
     {
         bot.getNowplayingHandler().onMessageDelete(event.getGuild(), event.getMessageIdLong());
     }
@@ -107,66 +113,141 @@ public class Listener extends ListenerAdapter
     {
         bot.getAloneInVoiceHandler().onVoiceUpdate(event);
     }
-    
+
     @Override
-    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) 
+    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event)
     {
     	bot.getAloneInVoiceHandler().Deafen(event);
     }
 
     @Override
-    public void onShutdown(ShutdownEvent event) 
+    public void onShutdown(ShutdownEvent event)
     {
         bot.shutdown();
     }
 
     @Override
-    public void onGuildJoin(GuildJoinEvent event) 
+    public void onGuildJoin(GuildJoinEvent event)
     {
         credit(event.getJDA());
     }
-    
+
     @Override
     public void onButtonClick(ButtonClickEvent event) {
     	String messageId = event.getMessageId();
     	User user = SearchCmd.searchCmdMap.get(messageId);
-    	
-    	
-    	if (user != null && event.getMember().getUser().equals(user)) {
+
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        int volume = handler.getPlayer().getVolume();
+        if(event.getComponentId().equals("pause") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
+            handler.getPlayer().setPaused(!handler.getPlayer().isPaused());
+            event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
+        }
+    	else if (event.getComponentId().equals("next") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
+            nextCmdClicked(event);
+        }
+        else if (event.getComponentId().equals("volumeDown")){
+            if (volume - 10 >= 0){
+                handler.getPlayer().setVolume(volume - 10);
+                event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
+            }
+            else {
+                event.deferEdit().queue();
+            }
+        }
+        else if (event.getComponentId().equals("volumeUp")){
+            if (volume + 10 <= 150){
+                handler.getPlayer().setVolume(volume + 10);
+                event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
+            }
+            else{
+                event.deferEdit().queue();
+            }
+        }
+        else if (event.getComponentId().equals("repeat")){
+            Settings settings = bot.getSettingsManager().getSettings(event.getGuild());
+            RepeatMode value;
+            if(settings.getRepeatMode() == RepeatMode.OFF)
+                value = RepeatMode.ALL;
+            else
+                value = RepeatMode.OFF;
+            settings.setRepeatMode(value);
+            event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
+        }
+    	else if (user != null && Objects.requireNonNull(event.getMember()).getUser().equals(user)) {
     		searchCmdClicked(event);
     	}
     }
-    
+
+    private void nextCmdClicked(ButtonClickEvent event){
+        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        RequestMetadata rm = handler.getRequestMetadata();
+        if(event.getUser().getIdLong() == rm.getOwner())
+        {
+            event.reply(bot.getConfig().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uAC74\uB108\uB6F0\uC5B4\uC9D0").queue();
+            handler.getPlayer().stopTrack();
+        }
+        else
+        {
+            int listeners = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
+                    .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
+            String msg;
+            if(handler.getVotes().contains(event.getUser().getId()))
+                msg = bot.getConfig().getWarning()+" \uC774\uBBF8 \uC774 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uB3C4\uB85D \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+            else
+            {
+                msg = bot.getConfig().getSuccess()+" \uB2F9\uC2E0\uC740 \uADF8 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uAE30\uB85C \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+                handler.getVotes().add(event.getUser().getId());
+            }
+            int skippers = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
+                    .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
+            int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
+            msg += skippers + " votes, " + required + "/" + listeners + " needed]`";
+            if(skippers>=required)
+            {
+                msg += "\n" + bot.getConfig().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
+                        + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
+                handler.getPlayer().stopTrack();
+            }
+            event.reply(msg).queue();
+        }
+    }
+
     private void searchCmdClicked(ButtonClickEvent event) {
     	String messageId = event.getMessageId();
     	SearchCmd.searchCmdExecutors.get(messageId).shutdownNow();
     	SearchCmd.searchCmdExecutors.remove(messageId);
-    	
+
     	AudioPlaylist pl = SearchCmd.searchCmdPlaylist.get(messageId);
     	CommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
     	if (event.getComponentId().equals("cancel")) {
     		event.editMessage("검색이 취소되었습니다.").setEmbeds().setActionRows().queue();
     	}
     	else {
-    		event.getMessage().delete().queue();
     		AudioTrack track = pl.getTracks().get(Integer.parseInt(event.getButton().getId())-1);
     		if(bot.getConfig().isTooLong(track))
             {
+    		    event.getMessage().delete().queue();
                 ev.replyWarning("\uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
                         +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
                 return;
             }
             AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, ev.getAuthor()))+1;
-            ev.replySuccess("\uC7AC\uC0DD\uC744 \uC2DC\uC791\uD558\uAE30 \uC704\uD574  **" + FormatUtil.filter(track.getInfo().title)
-                    + "** (`" + FormatUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "(\uC744)\uB97C \uCD94\uAC00\uD588\uC2B5\uB2C8\uB2E4" 
-                        : " (\uC744)\uB97C \uB300\uAE30\uC5F4 \uC704\uCE58 "+pos+"\uC5D0 \uCD94\uAC00\uD568"));
+            Message addMsg = new MessageBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
+                    (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).build();
+            MessageAction ma = event.getMessage().editMessage(addMsg);
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setTitle(track.getInfo().title, track.getInfo().uri);
+            eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+FormatUtil.formatTime(track.getDuration())+"`)");
+            ma.setEmbeds(eb.build()).queue();
+            event.deferEdit().queue();
     	}
     	SearchCmd.searchCmdMap.remove(messageId);
     	SearchCmd.searchCmdPlaylist.remove(messageId);
     	SearchCmd.searchCmdEvent.remove(messageId);
     }
-    
+
     // make sure people aren't adding clones to dbots
     private void credit(JDA jda)
     {

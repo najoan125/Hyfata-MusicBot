@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.dj;
+package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
@@ -24,6 +24,9 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  *
@@ -46,15 +49,20 @@ public class TTSCmd extends MusicCommand
     AudioTrack audiotrack = null;
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(CommandEvent event)
     {
     	if (event.getArgs().isEmpty()) {
     		event.replyError("재생할 텍스트를 알려주세요. 사용법: `" + event.getClient().getPrefix() + "tts <text>`");
     		return;
     	}
     	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        String args = "http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=" + event.getArgs().replace("%", "퍼센트").replace(" ", "%20").replace("\\", "역슬레시").replace("{", "여는중괄호").replace("}", "닫는중괄호").replace("#", "샾").replace("`", "%20").replace("\"", "큰따옴표").replace("+", "플러스").replace("|", "수직선").replace("^", "캐럿").replace("&", "앤드").replace("<", "%20").replace(">", "%20").replace("나죠안", "").replace("나죠아", "").replace("나조아", "").replace("나조안", "") + "&tl=ko-kr";
-        bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new AudioLoadResultHandler() {
+		String args = null;
+		try {
+			args = "http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=" + URLEncoder.encode(event.getArgs(), "UTF-8") + "&tl=ko-kr";
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new AudioLoadResultHandler() {
 
 			@Override
 			public void loadFailed(FriendlyException arg0) {

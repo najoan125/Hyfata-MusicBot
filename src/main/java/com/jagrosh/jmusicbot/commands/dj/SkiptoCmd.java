@@ -30,8 +30,8 @@ public class SkiptoCmd extends DJCommand
     {
         super(bot);
         this.name = "skipto";
-        this.help = "\uC9C0\uC815\uB41C \uB178\uB798\uB85C \uAC74\uB108\uB701\uB2C8\uB2E4";
-        this.arguments = "<\uC704\uCE58>";
+        this.help = "지정된 대기열 위치로 건너뜁니다";
+        this.arguments = "<대기열 위치>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
     }

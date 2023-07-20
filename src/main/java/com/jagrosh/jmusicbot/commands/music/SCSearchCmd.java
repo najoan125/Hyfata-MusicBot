@@ -27,7 +27,7 @@ public class SCSearchCmd extends SearchCmd
     {
         super(bot);
         this.searchPrefix = "scsearch:";
-        this.name = "scsearch";
+        this.name = "sc검색";
         this.help = "\uC81C\uACF5\uB41C \uC694\uCCAD\uC744 SoundCloud\uC5D0\uC11C \uAC80\uC0C9\uD569\uB2C8\uB2E4.";
         this.aliases = bot.getConfig().getAliases(this.name);
     }

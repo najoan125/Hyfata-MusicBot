@@ -62,14 +62,14 @@
 	<dependency>
 	    <groupId>com.github.jagrosh</groupId>
 	    <artifactId>JLyrics</artifactId>
-	    <version>master-SNAPSHOT</version>
+	    <version>master-01cf4ee007-1</version>
 	</dependency>
         
         <!-- Misc Internal Dependencies -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.11</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>

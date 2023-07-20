@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.commands.dj;
+package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
@@ -24,6 +24,9 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  *
@@ -53,8 +56,13 @@ public class TTSCmdJp extends MusicCommand
     		return;
     	}
     	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-    	String args = "http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=" + event.getArgs()+ "&tl=ja-jp";
-        bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new AudioLoadResultHandler() {
+		String args = null;
+		try {
+			args = "http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=" + URLEncoder.encode(event.getArgs(), "UTF-8")+ "&tl=ja-jp";
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new AudioLoadResultHandler() {
 
 			@Override
 			public void loadFailed(FriendlyException arg0) {

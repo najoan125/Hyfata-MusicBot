@@ -30,8 +30,8 @@ public class ForceskipCmd extends DJCommand
     public ForceskipCmd(Bot bot)
     {
         super(bot);
-        this.name = "forceskip";
-        this.help = "\uD604\uC7AC \uB178\uB798\uB97C \uAC74\uB108\uB701\uB2C8\uB2E4";
+        this.name = "강제스킵";
+        this.help = "현재 음악을 강제로 건너뜁니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
     }

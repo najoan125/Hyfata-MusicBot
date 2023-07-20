@@ -37,7 +37,7 @@ public class ForceRemoveCmd extends DJCommand
     public ForceRemoveCmd(Bot bot)
     {
         super(bot);
-        this.name = "forceremove";
+        this.name = "강제제거";
         this.help = "\uB300\uAE30\uC5F4\uC5D0\uC11C \uC0AC\uC6A9\uC790\uAC00 \uC785\uB825\uD55C \uBAA8\uB4E0 \uD56D\uBAA9\uC744 \uC81C\uAC70\uD569\uB2C8\uB2E4.";
         this.arguments = "<user>";
         this.aliases = bot.getConfig().getAliases(this.name);

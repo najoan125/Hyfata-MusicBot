@@ -108,7 +108,7 @@ public class SearchCmd extends MusicCommand
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
             m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
-                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "(이)가 추가되어 재생을 시작합니다" 
+                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "(이)가 추가되어 재생을 시작합니다"
                         : " (이)가 대기열 위치 "+pos+"에 추가됨"))).queue();
         }
 
@@ -126,7 +126,7 @@ public class SearchCmd extends MusicCommand
         	LinkedList<Component> actionRow = new LinkedList<>();
         	for(int i=0;i<10 && i<playlist.getTracks().size(); i++) {
         		AudioTrack track = playlist.getTracks().get(i);
-        		actionRow.add(Button.primary(i+1+"", i+1+""));
+        		actionRow.add(Button.primary(String.valueOf(i+1), String.valueOf(i+1)));
         		result += OrderedMenu.NUMBERS[i]
         			+" `["+FormatUtil.formatTime(track.getDuration())+"]` "
         				+ "[**"+track.getInfo().title+"**]("+track.getInfo().uri+")\n";
