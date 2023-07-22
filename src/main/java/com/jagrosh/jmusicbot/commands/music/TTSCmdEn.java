@@ -20,10 +20,13 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.utils.CustomAudioTrack;
+import com.jagrosh.jmusicbot.utils.UserUtil;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -84,17 +87,29 @@ public class TTSCmdEn extends MusicCommand
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
+				String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";
+				String newAuthor = "TTS EN";
+
+				CustomAudioTrack at = new CustomAudioTrack(track, getChangedTrackInfo(track,newTitle,newAuthor));
 				if (handler.getNowPlaying(event.getJDA()) != null) {
-					handler.addTrackToFront(new QueuedTrack(track, event.getAuthor()));
+					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
 					event.replySuccess("TTS를 대기열에 추가했습니다 (현재 재생중인 곡이 끝나면 TTS가 바로 재생됩니다)");
 				}
 				else {
-					handler.addTrackToFront(new QueuedTrack(track, event.getAuthor()));
+					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
 					event.replySuccess("TTS를 재생합니다");
 				}
-				
+
 			}
         	
         });
     }
+
+	public AudioTrackInfo getChangedTrackInfo(AudioTrack track, String title, String author){
+		AudioTrackInfo oldTrackInfo = track.getInfo();
+
+		return new AudioTrackInfo(
+				title, author, oldTrackInfo.length, oldTrackInfo.identifier, oldTrackInfo.isStream, oldTrackInfo.uri
+		);
+	}
 }

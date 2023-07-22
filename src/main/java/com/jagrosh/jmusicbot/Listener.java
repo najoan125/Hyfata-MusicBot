@@ -184,7 +184,13 @@ public class Listener extends ListenerAdapter
         RequestMetadata rm = handler.getRequestMetadata();
         if(event.getUser().getIdLong() == rm.getOwner())
         {
-            event.reply(bot.getConfig().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uAC74\uB108\uB6F0\uC5B4\uC9D0").queue();
+            event.reply(new MessageBuilder()
+                    .setContent(bot.getConfig().getSuccess()+"**<@"+event.getUser().getId()+">**님에 의해 건너뛰어졌습니다!")
+                    .setEmbeds(new EmbedBuilder()
+                        .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
+                        .setDescription("이 항목을 건너뛰었습니다!")
+                        .build()).build()
+            ).queue();
             handler.getPlayer().stopTrack();
         }
         else
@@ -193,23 +199,35 @@ public class Listener extends ListenerAdapter
                     .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getUser().getId()))
-                msg = bot.getConfig().getWarning()+" \uC774\uBBF8 \uC774 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uB3C4\uB85D \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+                msg = bot.getConfig().getWarning()+" <@"+event.getUser().getId()+"> 이미 현재 재생 중인 항목을 건너뛰도록 투표했습니다 `[";
             else
             {
-                msg = bot.getConfig().getSuccess()+" \uB2F9\uC2E0\uC740 \uADF8 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uAE30\uB85C \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+                msg = bot.getConfig().getSuccess()+" <@"+event.getUser().getId()+"> 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
                 handler.getVotes().add(event.getUser().getId());
             }
             int skippers = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
             int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
-            msg += skippers + " votes, " + required + "/" + listeners + " needed]`";
+            msg += skippers + "표, " + required + "/" + listeners + " 필요]`";
+            String embed;
             if(skippers>=required)
             {
-                msg += "\n" + bot.getConfig().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
-                        + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
+                msg += "\n" + bot.getConfig().getSuccess() + " 이 항목을 건너뛰었습니다!";
+                embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + rm.user.username + "**에 의해 요청됨)");
+
+                event.reply(new MessageBuilder()
+                        .setContent(msg)
+                        .setEmbeds(new EmbedBuilder()
+                                .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
+                                .setDescription(embed)
+                                .build()
+                        ).build()
+                ).queue();
+
                 handler.getPlayer().stopTrack();
             }
-            event.reply(msg).queue();
+            else
+                event.reply(msg).queue();
         }
     }
 
