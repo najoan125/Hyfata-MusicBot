@@ -47,6 +47,7 @@ public class SkipCmd extends MusicCommand
         if(event.getAuthor().getIdLong() == rm.getOwner())
         {
             event.reply(new MessageBuilder()
+                    .setContent("현재 재생 중인 항목을 건너뛰었습니다!")
                     .setEmbeds(new EmbedBuilder()
                             .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
                             .setDescription("이 항목을 건너뛰었습니다!")
