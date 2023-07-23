@@ -199,7 +199,7 @@ public class Listener extends ListenerAdapter
                     .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getUser().getId()))
-                msg = bot.getConfig().getWarning()+" <@"+event.getUser().getId()+"> 이미 현재 재생 중인 항목을 건너뛰도록 투표했습니다 `[";
+                msg = bot.getConfig().getWarning()+" <@"+event.getUser().getId()+"> 이미 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
             else
             {
                 msg = bot.getConfig().getSuccess()+" <@"+event.getUser().getId()+"> 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";

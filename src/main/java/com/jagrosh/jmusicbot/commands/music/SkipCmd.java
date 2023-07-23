@@ -20,6 +20,8 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 
 /**
  *
@@ -44,7 +46,13 @@ public class SkipCmd extends MusicCommand
         RequestMetadata rm = handler.getRequestMetadata();
         if(event.getAuthor().getIdLong() == rm.getOwner())
         {
-            event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uAC74\uB108\uB6F0\uC5B4\uC9D0");
+            event.reply(new MessageBuilder()
+                    .setEmbeds(new EmbedBuilder()
+                            .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
+                            .setDescription("이 항목을 건너뛰었습니다!")
+                            .build())
+                    .build()
+            );
             handler.getPlayer().stopTrack();
         }
         else
@@ -53,23 +61,34 @@ public class SkipCmd extends MusicCommand
                     .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getAuthor().getId()))
-                msg = event.getClient().getWarning()+" \uC774\uBBF8 \uC774 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uB3C4\uB85D \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+                msg = event.getClient().getWarning()+" 이미 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
             else
             {
-                msg = event.getClient().getSuccess()+" \uB2F9\uC2E0\uC740 \uADF8 \uB178\uB798\uB97C \uAC74\uB108\uB6F0\uAE30\uB85C \uD22C\uD45C\uD588\uC2B5\uB2C8\uB2E4 `[";
+                msg = event.getClient().getSuccess()+" 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
                 handler.getVotes().add(event.getAuthor().getId());
             }
             int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
             int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
-            msg += skippers + " votes, " + required + "/" + listeners + " needed]`";
+            msg += skippers + "표, " + required + "/" + listeners + " 필요]`";
+            String embed;
             if(skippers>=required)
             {
-                msg += "\n" + event.getClient().getSuccess() + " Skipped **" + handler.getPlayer().getPlayingTrack().getInfo().title
-                        + "** " + (rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + rm.user.username + "**)");
+                msg += "\n" + bot.getConfig().getSuccess() + " 이 항목을 건너뛰었습니다!";
+                embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + rm.user.username + "**에 의해 요청됨)");
+
+                event.reply(new MessageBuilder()
+                        .setContent(msg)
+                        .setEmbeds(new EmbedBuilder()
+                                .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
+                                .setDescription(embed)
+                                .build()
+                        ).build()
+                );
                 handler.getPlayer().stopTrack();
             }
-            event.reply(msg);
+            else
+                event.reply(msg);
         }
     }
     
