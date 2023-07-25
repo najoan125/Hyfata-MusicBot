@@ -238,8 +238,13 @@ public class Listener extends ListenerAdapter
 
     	AudioPlaylist pl = SearchCmd.searchCmdPlaylist.get(messageId);
     	CommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
+        AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
     	if (event.getComponentId().equals("cancel")) {
     		event.editMessage("검색이 취소되었습니다.").setEmbeds().setActionRows().queue();
+            if (!handler.isMusicPlaying(ev.getJDA()) && handler.getQueue().isEmpty()){
+                if (!bot.getConfig().getStay())
+                    ev.getGuild().getAudioManager().closeAudioConnection();
+            }
     	}
     	else {
     		AudioTrack track = pl.getTracks().get(Integer.parseInt(event.getButton().getId())-1);
@@ -250,7 +255,6 @@ public class Listener extends ListenerAdapter
                         +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
                 return;
             }
-            AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, ev.getAuthor()))+1;
             Message addMsg = new MessageBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).build();

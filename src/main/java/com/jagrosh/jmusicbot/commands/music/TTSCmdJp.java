@@ -30,6 +30,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Objects;
 
 /**
  *
@@ -47,63 +48,73 @@ public class TTSCmdJp extends MusicCommand
         this.bePlaying = false;
         this.beListening = true;
     }
-    
-    public boolean isplaying = false;
-    AudioTrack audiotrack = null;
 
     @Override
-    public void doCommand(CommandEvent event) 
-    {
-    	if (event.getArgs().isEmpty()) {
-    		event.replyError("재생할 텍스트를 알려주세요. 사용법: `" + event.getClient().getPrefix() + "ttsJp <text>`");
-    		return;
-    	}
-    	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+	public void doCommand(CommandEvent event)
+	{
+		if (event.getArgs().isEmpty()) {
+			event.replyError("재생할 텍스트를 알려주세요. 사용법: `" + event.getClient().getPrefix() + "ttsJp <text>`");
+			return;
+		}
+		AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
 		String args = null;
 		try {
-			args = "http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=" + URLEncoder.encode(event.getArgs(), "UTF-8")+ "&tl=ja-jp";
+			args = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=" + URLEncoder.encode(event.getArgs(), "UTF-8") + "&tl=ja-jp";
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			event.replyError("지원하지 않는 텍스트 형식입니다!");
 		}
 		bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new AudioLoadResultHandler() {
 
 			@Override
 			public void loadFailed(FriendlyException arg0) {
-				// TODO Auto-generated method stub
-				
+				event.replyError("TTS를 로드하는 데 실패했습니다! 문제가 지속될 경우, 봇 관리자에게 문의하세요!");
 			}
 
 			@Override
 			public void noMatches() {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void playlistLoaded(AudioPlaylist arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
-				String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";
-				String newAuthor = "TTS JP";
+				AudioTrack nowPlaying = Objects.requireNonNull(handler).getPlayer().getPlayingTrack();
+				boolean isTTS;
+				if (Objects.requireNonNull(handler).getNowPlaying(event.getJDA()) != null)
+					isTTS = nowPlaying.getInfo().uri.startsWith("https://translate.google.com");
+				else
+					isTTS = false;
 
-				CustomAudioTrack at = new CustomAudioTrack(track, getChangedTrackInfo(track,newTitle,newAuthor));
-				if (handler.getNowPlaying(event.getJDA()) != null) {
-					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
-					event.replySuccess("TTS를 대기열에 추가했습니다 (현재 재생중인 곡이 끝나면 TTS가 바로 재생됩니다)");
-				}
-				else {
-					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+				if (isTTS) {
+					event.replySuccess("TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)");
+				} else {
 					event.replySuccess("TTS를 재생합니다");
 				}
 
+				String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";
+				String newAuthor = "TTS";
+
+				CustomAudioTrack at = new CustomAudioTrack(track, getChangedTrackInfo(track,newTitle,newAuthor));
+				if (Objects.requireNonNull(handler).getNowPlaying(event.getJDA()) != null && !isTTS) {
+					AudioTrack cloned = nowPlaying.makeClone();
+					cloned.setPosition(nowPlaying.getPosition());
+					handler.addTrackToFront(new QueuedTrack(cloned, handler.getRequestMetadata()));
+					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+					handler.getPlayer().stopTrack();
+				}
+				else {
+					handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+				}
 			}
-        	
-        });
-    }
+		});
+	}
 	public AudioTrackInfo getChangedTrackInfo(AudioTrack track, String title, String author){
 		AudioTrackInfo oldTrackInfo = track.getInfo();
 
