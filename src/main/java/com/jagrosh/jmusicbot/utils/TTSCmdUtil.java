@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class TTSCmdUtil {
     public static void playTTS(CommandEvent event, Bot bot, String lang){
-        event.reply(bot.getConfig().getSearching()+" 불러오는 중...", m -> {
+        event.reply(bot.getConfig().getLoading()+" 불러오는 중...", m -> {
             String ttsBase64;
             try {
                 ttsBase64 = AudioUtil.getTTSBase64(lang,event.getArgs());
