@@ -36,9 +36,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -132,22 +130,16 @@ public class SearchCmd extends MusicCommand
         	}
 
             int actionRowSize = actionRow.size();
-            if (actionRowSize == 10) {
-                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
-                ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, 10));
-                ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
-                ma.setActionRows(actionRow1, actionRow2, actionRow3);
-            } else if (actionRowSize <= 5){
-                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, actionRowSize));
-                ActionRow actionRow2 = ActionRow.of(Button.danger("cancel", "취소"));
-                ma.setActionRows(actionRow1, actionRow2);
-            } else if (actionRowSize < 10){
-                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
-                ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, actionRowSize));
-                ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
-                ma.setActionRows(actionRow1, actionRow2, actionRow3);
+            List<ActionRow> actionRows = new ArrayList<>();
+            if (actionRowSize <= 5){
+                actionRows.add(ActionRow.of(actionRow.subList(0, actionRowSize)));
+            } else if (actionRowSize <= 10) {
+                actionRows.add(ActionRow.of(actionRow.subList(0, 5)));
+                actionRows.add(ActionRow.of(actionRow.subList(5, actionRowSize)));
             }
-        	
+            actionRows.add(ActionRow.of(Button.danger("cancel", "취소")));
+            ma.setActionRows(actionRows);
+
         	//곡 제목들 표시
         	eb.setDescription(result);
         	

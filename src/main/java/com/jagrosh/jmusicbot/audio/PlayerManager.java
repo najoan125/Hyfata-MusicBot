@@ -37,6 +37,12 @@ public class PlayerManager extends DefaultAudioPlayerManager
     
     public void init()
     {
+        String email = bot.getConfig().getEmail();
+        String password = bot.getConfig().getPassword();
+
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(true, email, password);
+        registerSourceManager(youtubeAudioSourceManager);
+
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(t -> registerSourceManager(t));
         AudioSourceManagers.registerRemoteSources(this);
         AudioSourceManagers.registerLocalSource(this);
