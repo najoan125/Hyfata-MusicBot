@@ -130,10 +130,23 @@ public class SearchCmd extends MusicCommand
         			+" `["+FormatUtil.formatTime(track.getDuration())+"]` "
         				+ "[**"+track.getInfo().title+"**]("+track.getInfo().uri+")\n";
         	}
-        	ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
-        	ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, 10));
-        	ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
-        	ma.setActionRows(actionRow1, actionRow2, actionRow3);
+
+            int actionRowSize = actionRow.size();
+            if (actionRowSize == 10) {
+                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
+                ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, 10));
+                ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
+                ma.setActionRows(actionRow1, actionRow2, actionRow3);
+            } else if (actionRowSize <= 5){
+                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, actionRowSize));
+                ActionRow actionRow2 = ActionRow.of(Button.danger("cancel", "취소"));
+                ma.setActionRows(actionRow1, actionRow2);
+            } else if (actionRowSize < 10){
+                ActionRow actionRow1 = ActionRow.of(actionRow.subList(0, 5));
+                ActionRow actionRow2 = ActionRow.of(actionRow.subList(5, actionRowSize));
+                ActionRow actionRow3 = ActionRow.of(Button.danger("cancel", "취소"));
+                ma.setActionRows(actionRow1, actionRow2, actionRow3);
+            }
         	
         	//곡 제목들 표시
         	eb.setDescription(result);
