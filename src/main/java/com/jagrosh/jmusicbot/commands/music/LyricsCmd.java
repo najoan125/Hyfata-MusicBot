@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.Permission;
  */
 public class LyricsCmd extends MusicCommand
 {
-    private final LyricsClient client = new LyricsClient();
+    private final LyricsClient client = new LyricsClient("Bugs");
     
     public LyricsCmd(Bot bot)
     {
