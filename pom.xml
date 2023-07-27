@@ -69,7 +69,7 @@
             <artifactId>json</artifactId>
             <version>20230618</version>
         </dependency>
-        
+
         <!-- Misc Internal Dependencies -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
