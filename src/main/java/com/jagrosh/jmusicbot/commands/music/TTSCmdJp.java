@@ -37,7 +37,7 @@ public class TTSCmdJp extends MusicCommand
 			event.replyError("API에서 TTS를 불러오는 도중 오류가 발생하였습니다!");
 			return;
 		} catch (TTSTooLongException e) {
-			event.replyError("글자 수가 최대 Byte인 3000Byte를 초과하였습니다!");
+			event.replyError("텍스트가 글자 수 제한인 200자를 초과했습니다!");
 			return;
 		}
 
