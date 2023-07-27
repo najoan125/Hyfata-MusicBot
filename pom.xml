@@ -48,22 +48,27 @@
             <artifactId>lavaplayer</artifactId>
             <version>1.3.78</version>
         </dependency -->
-  <dependency>
-    <groupId>com.github.walkyst</groupId>
-    <artifactId>lavaplayer-fork</artifactId>
-    <version>1.4.2</version>
-  </dependency>
+        <dependency>
+            <groupId>com.github.walkyst</groupId>
+            <artifactId>lavaplayer-fork</artifactId>
+            <version>1.4.2</version>
+        </dependency>
         <!-- this is needed, but isn't actually hosted anywhere anymore... uh -->
         <!--dependency>
             <groupId>com.sedmelluq</groupId>
             <artifactId>lavaplayer-natives-extra</artifactId>
             <version>1.3.13</version>
         </dependency-->
-	<dependency>
-	    <groupId>com.github.jagrosh</groupId>
-	    <artifactId>JLyrics</artifactId>
-	    <version>master-01cf4ee007-1</version>
-	</dependency>
+        <dependency>
+            <groupId>com.github.jagrosh</groupId>
+            <artifactId>JLyrics</artifactId>
+            <version>01cf4ee007</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20230618</version>
+        </dependency>
         
         <!-- Misc Internal Dependencies -->
         <dependency>

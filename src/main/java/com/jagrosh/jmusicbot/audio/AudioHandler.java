@@ -23,6 +23,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -150,12 +154,23 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         RepeatMode repeatMode = manager.getBot().getSettingsManager().getSettings(guildId).getRepeatMode();
         // if the track ended normally, and we're in repeat mode, re-add it to the queue
-        if (endReason == AudioTrackEndReason.FINISHED && repeatMode != RepeatMode.OFF && !track.getInfo().uri.startsWith("https://translate.google.com")) {
+        String trackUri = track.getInfo().uri;
+        if (endReason == AudioTrackEndReason.FINISHED && repeatMode != RepeatMode.OFF && !trackUri.startsWith("TTS")) {
             QueuedTrack clone = new QueuedTrack(track.makeClone(), track.getUserData(RequestMetadata.class));
             if (repeatMode == RepeatMode.ALL)
                 queue.add(clone);
             else
                 queue.addAt(0, clone);
+        }
+
+        if (trackUri.startsWith("TTS")){
+            String filepath = trackUri.split(" ")[1];
+            Path fileToDelete = Paths.get(filepath);
+            try {
+                Files.delete(fileToDelete);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         if (queue.isEmpty()) {
