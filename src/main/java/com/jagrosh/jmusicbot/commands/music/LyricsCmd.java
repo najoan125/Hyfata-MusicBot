@@ -34,9 +34,9 @@ public class LyricsCmd extends MusicCommand
     public LyricsCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uAC00\uC0AC";
-        this.arguments = "[\uB178\uB798 \uC81C\uBAA9]";
-        this.help = "\uD604\uC7AC \uC7AC\uC0DD \uC911\uC778 \uB178\uB798\uC758 \uAC00\uC0AC\uB97C \uBCF4\uC5EC\uC90D\uB2C8\uB2E4.";
+        this.name = "가사";
+        this.arguments = "[노래 제목]";
+        this.help = "현재 재생 중인 노래의 가사를 벅스(Bugs!)에서 찾아 보여줍니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
