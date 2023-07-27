@@ -5,7 +5,6 @@ import org.json.JSONObject;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.Objects;
@@ -16,7 +15,7 @@ public class AudioUtil {
      * @param lang ko, en, ja, etc...
      * @throws TTSTooLongException when text's length(Byte) is longer than 3000
      */
-    public static String getTTSBase64(String lang, String text) throws UnsupportedEncodingException, TTSTooLongException {
+    public static String getTTSBase64(String lang, String text) throws IOException, TTSTooLongException {
         String encodedTxt = URLEncoder.encode(text, "UTF-8");
         if (encodedTxt.length() <= 3000) {
             String tts = "https://www.google.com/async/translate_tts?yv=3&ttsp=tl:" + lang + ",txt:" + URLEncoder.encode(text, "UTF-8") + ",spd:2&cs=1&async=_fmt:jspb";

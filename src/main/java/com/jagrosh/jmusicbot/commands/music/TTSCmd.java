@@ -8,7 +8,6 @@ import com.jagrosh.jmusicbot.utils.TTSResultHandler;
 import com.jagrosh.jmusicbot.utils.TTSTooLongException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public class TTSCmd extends MusicCommand
 {
@@ -33,9 +32,9 @@ public class TTSCmd extends MusicCommand
         String ttsBase64;
         try {
             ttsBase64 = AudioUtil.getTTSBase64("ko",event.getArgs());
-        } catch (UnsupportedEncodingException e) {
+        } catch (IOException e) {
            e.printStackTrace();
-           event.replyError("지원되지 않는 텍스트 형식입니다!");
+           event.replyError("API에서 TTS를 불러오는 도중 오류가 발생하였습니다!");
            return;
         } catch (TTSTooLongException e) {
             event.replyError("글자 수가 최대 Byte인 3000Byte를 초과하였습니다!");
