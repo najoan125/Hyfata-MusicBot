@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.api.entities.Message;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,10 +18,12 @@ import java.util.Objects;
 public class TTSResultHandler implements AudioLoadResultHandler {
     CommandEvent event;
     String filepath;
+    Message m;
 
-    public TTSResultHandler(CommandEvent event, String filepath){
+    public TTSResultHandler(CommandEvent event, String filepath, Message message){
         this.event = event;
         this.filepath = filepath;
+        this.m = message;
     }
     @Override
     public void trackLoaded(AudioTrack track) {
@@ -34,9 +37,9 @@ public class TTSResultHandler implements AudioLoadResultHandler {
             isTTS = false;
 
         if (isTTS) {
-            event.replySuccess("TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)");
+            m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)").queue();
         } else {
-            event.replySuccess("TTS를 재생합니다");
+            m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다").queue();
         }
 
         String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";
@@ -62,7 +65,7 @@ public class TTSResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void noMatches() {
-        event.replyError("트랙을 찾을 수 없습니다.");
+        m.editMessage(event.getClient().getError()+" 트랙을 찾을 수 없습니다.").queue();
         Path fileToDelete = Paths.get(filepath);
         try {
             Files.delete(fileToDelete);
@@ -73,7 +76,7 @@ public class TTSResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void loadFailed(FriendlyException exception) {
-        event.replyError("TTS 로드를 실패했습니다! 관리자에게 문의하세요!");
+        m.editMessage(event.getClient().getError()+" TTS 로드를 실패했습니다! 관리자에게 문의하세요!").queue();
         exception.printStackTrace();
         Path fileToDelete = Paths.get(filepath);
         try {
