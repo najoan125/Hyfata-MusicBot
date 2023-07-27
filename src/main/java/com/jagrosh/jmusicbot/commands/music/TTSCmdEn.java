@@ -22,7 +22,7 @@ public class TTSCmdEn extends MusicCommand
 	public void doCommand(CommandEvent event)
 	{
 		if (event.getArgs().isEmpty()) {
-			event.replyError("재생할 텍스트를 알려주세요. 사용법: `" + event.getClient().getPrefix() + "tts <text>`");
+			event.replyError("재생할 텍스트를 알려주세요. 사용법: `" + event.getClient().getPrefix() + "ttsEn <text>`");
 			return;
 		}
 		TTSCmdUtil.playTTS(event,bot,"en");
