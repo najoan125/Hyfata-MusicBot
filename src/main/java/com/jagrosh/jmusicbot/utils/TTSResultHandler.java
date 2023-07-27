@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class TTSResultHandler implements AudioLoadResultHandler {
 
         String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";
         String newAuthor = "TTS";
-        CustomAudioTrack at = new CustomAudioTrack(track, TrackUtil.getChangedTrackInfo(track,newTitle,newAuthor, "TTS "+filepath));
+        CustomAudioTrack at = new CustomAudioTrack(track, getChangedTrackInfo(track,newTitle,newAuthor, "TTS "+filepath));
 
         if (Objects.requireNonNull(handler).getNowPlaying(event.getJDA()) != null && !isTTS) {
             AudioTrack cloned = nowPlaying.makeClone();
@@ -84,5 +85,13 @@ public class TTSResultHandler implements AudioLoadResultHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static AudioTrackInfo getChangedTrackInfo(AudioTrack track, String title, String author, String uri){
+        AudioTrackInfo oldTrackInfo = track.getInfo();
+
+        return new AudioTrackInfo(
+                title, author, oldTrackInfo.length/2, oldTrackInfo.identifier, oldTrackInfo.isStream, uri
+        );
     }
 }

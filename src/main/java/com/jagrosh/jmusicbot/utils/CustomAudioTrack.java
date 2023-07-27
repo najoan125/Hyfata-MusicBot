@@ -62,7 +62,7 @@ public class CustomAudioTrack implements AudioTrack, InternalAudioTrack {
 
     @Override
     public long getDuration() {
-        return track.getDuration();
+        return trackInfo.length;
     }
 
     @Override
