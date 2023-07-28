@@ -20,11 +20,20 @@ public class TTSResultHandler implements AudioLoadResultHandler {
     CommandEvent event;
     String filepath;
     Message m;
+    boolean sPgmld = false;
+    String sPgmldStr = "";
 
     public TTSResultHandler(CommandEvent event, String filepath, Message message){
         this.event = event;
         this.filepath = filepath;
         this.m = message;
+    }
+    public TTSResultHandler(CommandEvent event, String filepath, Message message, boolean sPgmld, String text){
+        this.event = event;
+        this.filepath = filepath;
+        this.m = message;
+        this.sPgmld = sPgmld;
+        sPgmldStr = text;
     }
     @Override
     public void trackLoaded(AudioTrack track) {
@@ -38,9 +47,15 @@ public class TTSResultHandler implements AudioLoadResultHandler {
             isTTS = false;
 
         if (isTTS) {
-            m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)").queue();
+            if (!sPgmld)
+                m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)").queue();
+            else
+                m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다(현재 재생 중인 TTS가 끝나면 재생됩니다)\n녜힁: "+sPgmldStr).queue();
         } else {
-            m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다").queue();
+            if (!sPgmld)
+                m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다").queue();
+            else
+                m.editMessage(event.getClient().getSuccess()+" TTS를 재생합니다\n녜힁: "+sPgmldStr).queue();
         }
 
         String newTitle = UserUtil.getUserCustomNickname(event.getMember()) +"님의 TTS";

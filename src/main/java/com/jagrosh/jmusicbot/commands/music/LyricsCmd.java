@@ -52,7 +52,7 @@ public class LyricsCmd extends MusicCommand
                 title = sendingHandler.getPlayer().getPlayingTrack().getInfo().title;
             else
             {
-                event.replyError("There must be music playing to use that!");
+                event.replyError("사용법: `;가사 <노래 제목>`");
                 return;
             }
         }
