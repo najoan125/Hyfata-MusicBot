@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.io.IOException;
@@ -71,6 +72,11 @@ public class TTSResultHandler implements AudioLoadResultHandler {
         }
         else {
             handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+        }
+
+        if (!event.getGuild().getAudioManager().isConnected()){
+            GuildVoiceState userState = event.getMember().getVoiceState();
+            event.getGuild().getAudioManager().openAudioConnection(Objects.requireNonNull(userState).getChannel());
         }
     }
 
