@@ -17,7 +17,9 @@ package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
@@ -41,6 +43,13 @@ public class VolumeCmd extends MusicCommand
     public void doCommand(CommandEvent event)
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        if (JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조정 못하쥬? ㅋㅋ 어쩔거임? ㅄ ㅋㅋ");
+            return;
+        }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         int volume = handler.getPlayer().getVolume();
         if(event.getArgs().isEmpty())

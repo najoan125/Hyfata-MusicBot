@@ -19,7 +19,6 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 
@@ -75,11 +74,15 @@ public class AloneInVoiceHandler
     {
     	Guild guild = event.getEntity().getGuild();
     	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        VoiceChannel voiceChannel = guild.getAudioManager().getConnectedChannel();
+        Member member = event.getGuild().getMemberById(bot.getConfig().getOwnerId());
 
-        if (event.getChannelLeft() != null && JMusicBot.rnjsska) {
-            if (voiceChannel != null) {
-                guild.getAudioManager().openAudioConnection(event.getChannelLeft());
+        if (event.getChannelLeft() != null && JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack() != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            if (member != null && member.getVoiceState() != null && member.getVoiceState().getChannel() != null) {
+                guild.getAudioManager().openAudioConnection(member.getVoiceState().getChannel());
             }
         }
     	if(guild != null && isAlone(guild)) {
