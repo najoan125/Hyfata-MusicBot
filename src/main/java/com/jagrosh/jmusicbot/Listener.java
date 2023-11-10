@@ -140,10 +140,16 @@ public class Listener extends ListenerAdapter
         AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         int volume = handler.getPlayer().getVolume();
         if(event.getComponentId().equals("pause") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
+            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+                return;
+            }
             handler.getPlayer().setPaused(!handler.getPlayer().isPaused());
             event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
         }
     	else if (event.getComponentId().equals("next") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
+            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+                return;
+            }
             nextCmdClicked(event);
         }
         else if (event.getComponentId().equals("volumeDown")){

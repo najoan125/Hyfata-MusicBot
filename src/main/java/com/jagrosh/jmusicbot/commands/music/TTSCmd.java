@@ -31,6 +31,7 @@ public class TTSCmd extends MusicCommand
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (JMusicBot.rnjsska &&
                 handler != null &&
+                handler.getPlayer().getPlayingTrack() != null &&
                 handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
                 event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
             event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 TTS 못함 ㅋㅋ ㅅㄱ");

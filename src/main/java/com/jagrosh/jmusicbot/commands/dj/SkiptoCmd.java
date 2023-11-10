@@ -17,7 +17,9 @@ package com.jagrosh.jmusicbot.commands.dj;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.DJCommand;
 
 /**
@@ -50,6 +52,14 @@ public class SkiptoCmd extends DJCommand
             return;
         }
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        if (JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack() != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못함 ㅋㅋ ㅅㄱ");
+            return;
+        }
         if(index<1 || index>handler.getQueue().size())
         {
             event.reply(event.getClient().getError()+" \uC704\uCE58\uB294 1\uACFC "+handler.getQueue().size()+" \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");

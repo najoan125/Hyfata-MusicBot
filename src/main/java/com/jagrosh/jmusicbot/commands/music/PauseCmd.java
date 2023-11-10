@@ -17,7 +17,9 @@ package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 
 /**
@@ -39,6 +41,14 @@ public class PauseCmd extends MusicCommand
     public void doCommand(CommandEvent event) 
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        if (JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack() != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 일시정지 못함 ㅋㅋ ㅅㄱ");
+            return;
+        }
         if(handler.getPlayer().isPaused())
         {
             event.replyWarning("\uC774\uBBF8 \uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uC2DC\uC815\uC9C0 \uB418\uC5C8\uC2B5\uB2C8\uB2E4! `"+event.getClient().getPrefix()+"재생` \uB97C \uC0AC\uC6A9\uD558\uC5EC \uC77C\uC2DC\uC815\uC9C0\uB97C \uD574\uC81C\uD558\uC138\uC694!");
