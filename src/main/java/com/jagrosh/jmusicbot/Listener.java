@@ -147,6 +147,10 @@ public class Listener extends ListenerAdapter
             nextCmdClicked(event);
         }
         else if (event.getComponentId().equals("volumeDown")){
+            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+                event.reply(bot.getConfig().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조절 못함 ㅅㄱ");
+                return;
+            }
             if (volume - 10 >= 0){
                 handler.getPlayer().setVolume(volume - 10);
                 event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
@@ -156,6 +160,10 @@ public class Listener extends ListenerAdapter
             }
         }
         else if (event.getComponentId().equals("volumeUp")){
+            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+                event.reply(bot.getConfig().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조정 못함 ㅋㅋ ㅅㄱ");
+                return;
+            }
             if (volume + 10 <= 150){
                 handler.getPlayer().setVolume(volume + 10);
                 event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
