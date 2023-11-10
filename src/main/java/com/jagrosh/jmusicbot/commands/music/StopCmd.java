@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 
@@ -38,6 +39,10 @@ public class StopCmd extends MusicCommand
     @Override
     public void doCommand(CommandEvent event) 
     {
+        if (JMusicBot.rnjsska) {
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 못 멈춤 ㅋㅋ ㅅㄱ");
+            return;
+        }
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         handler.stopAndClear();
         event.getGuild().getAudioManager().closeAudioConnection();
