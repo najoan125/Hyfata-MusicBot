@@ -19,16 +19,14 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 
 /**
- *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class StopCmd extends MusicCommand
-{
-    public StopCmd(Bot bot)
-    {
+public class StopCmd extends MusicCommand {
+    public StopCmd(Bot bot) {
         super(bot);
         this.name = "\uC815\uC9C0";
         this.help = "\uD604\uC7AC \uB178\uB798\uB97C \uC911\uC9C0\uD558\uACE0 \uB300\uAE30\uC5F4\uC744 \uC9C0\uC6C1\uB2C8\uB2E4";
@@ -37,15 +35,17 @@ public class StopCmd extends MusicCommand
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
-    {
-        if (JMusicBot.rnjsska) {
+    public void doCommand(CommandEvent event) {
+        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+        if (JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
             event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 못 멈춤 ㅋㅋ ㅅㄱ");
             return;
         }
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         handler.stopAndClear();
         event.getGuild().getAudioManager().closeAudioConnection();
-        event.reply(event.getClient().getSuccess()+" \uD50C\uB808\uC774\uC5B4\uAC00 \uC911\uC9C0\uB418\uACE0 \uB300\uAE30\uC5F4\uC774 \uC9C0\uC6CC\uC84C\uC2B5\uB2C8\uB2E4.");
+        event.reply(event.getClient().getSuccess() + " \uD50C\uB808\uC774\uC5B4\uAC00 \uC911\uC9C0\uB418\uACE0 \uB300\uAE30\uC5F4\uC774 \uC9C0\uC6CC\uC84C\uC2B5\uB2C8\uB2E4.");
     }
 }

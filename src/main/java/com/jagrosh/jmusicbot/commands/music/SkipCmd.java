@@ -43,11 +43,14 @@ public class SkipCmd extends MusicCommand
     @Override
     public void doCommand(CommandEvent event) 
     {
-        if (JMusicBot.rnjsska) {
+        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        if (JMusicBot.rnjsska &&
+                handler != null &&
+                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
+                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
             event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못하쥬? 킹받쥬? ㅋㅋ ㅅㄱ");
             return;
         }
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         RequestMetadata rm = handler.getRequestMetadata();
         if(event.getAuthor().getIdLong() == rm.getOwner())
         {
