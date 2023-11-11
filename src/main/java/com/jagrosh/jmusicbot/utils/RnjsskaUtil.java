@@ -14,8 +14,8 @@ public class RnjsskaUtil {
     private static final File file = new File(System.getProperty("user.dir"), "rnjsska.txt");
 
     public static void init(long owner) {
+        ownerId = owner;
         if (!file.exists()) {
-            ownerId = owner;
             allowedUsers.add(owner);
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(owner + "\n");
