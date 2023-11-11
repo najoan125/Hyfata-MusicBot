@@ -24,6 +24,7 @@ import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
+import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
@@ -140,21 +141,20 @@ public class Listener extends ListenerAdapter
         AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         int volume = handler.getPlayer().getVolume();
         if(event.getComponentId().equals("pause") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
-            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
                 return;
             }
             handler.getPlayer().setPaused(!handler.getPlayer().isPaused());
             event.editMessage(handler.getNowPlaying(event.getJDA())).queue();
         }
     	else if (event.getComponentId().equals("next") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
-            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+            if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
                 return;
             }
             nextCmdClicked(event);
         }
         else if (event.getComponentId().equals("volumeDown")){
-            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
-                event.reply(bot.getConfig().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조절 못함 ㅅㄱ");
+            if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
                 return;
             }
             if (volume - 10 >= 0){
@@ -166,8 +166,7 @@ public class Listener extends ListenerAdapter
             }
         }
         else if (event.getComponentId().equals("volumeUp")){
-            if (JMusicBot.rnjsska && handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() && event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
-                event.reply(bot.getConfig().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조정 못함 ㅋㅋ ㅅㄱ");
+            if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
                 return;
             }
             if (volume + 10 <= 150){

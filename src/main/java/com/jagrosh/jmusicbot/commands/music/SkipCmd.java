@@ -17,10 +17,10 @@ package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 
@@ -44,10 +44,7 @@ public class SkipCmd extends MusicCommand
     public void doCommand(CommandEvent event) 
     {
         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        if (JMusicBot.rnjsska &&
-                handler != null &&
-                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
-                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+        if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
             event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못하쥬? 킹받쥬? ㅋㅋ ㅅㄱ");
             return;
         }

@@ -16,7 +16,7 @@
 package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.JMusicBot;
+import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
@@ -76,11 +76,7 @@ public class AloneInVoiceHandler
     	AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
         Member member = event.getGuild().getMemberById(bot.getConfig().getOwnerId());
 
-        if (event.getChannelLeft() != null && JMusicBot.rnjsska &&
-                handler != null &&
-                handler.getPlayer().getPlayingTrack() != null &&
-                handler.getPlayer().getPlayingTrack().getUserData(RequestMetadata.class).user.id == bot.getConfig().getOwnerId() &&
-                event.getMember().getIdLong() != bot.getConfig().getOwnerId()) {
+        if (event.getChannelLeft() != null && RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
             if (member != null && member.getVoiceState() != null && member.getVoiceState().getChannel() != null) {
                 guild.getAudioManager().openAudioConnection(member.getVoiceState().getChannel());
             }
