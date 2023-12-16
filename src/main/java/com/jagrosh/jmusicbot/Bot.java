@@ -18,10 +18,7 @@ package com.jagrosh.jmusicbot;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.jagrosh.jmusicbot.audio.AloneInVoiceHandler;
-import com.jagrosh.jmusicbot.audio.AudioHandler;
-import com.jagrosh.jmusicbot.audio.NowplayingHandler;
-import com.jagrosh.jmusicbot.audio.PlayerManager;
+import com.jagrosh.jmusicbot.audio.*;
 import com.jagrosh.jmusicbot.gui.GUI;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
@@ -43,6 +40,7 @@ public class Bot
     private final PlayerManager players;
     private final PlaylistLoader playlists;
     private final NowplayingHandler nowplaying;
+    private final SyncLyricHandler syncLyricHandler;
     private final AloneInVoiceHandler aloneInVoiceHandler;
     
     private boolean shuttingDown = false;
@@ -60,6 +58,8 @@ public class Bot
         this.players.init();
         this.nowplaying = new NowplayingHandler(this);
         this.nowplaying.init();
+        this.syncLyricHandler = new SyncLyricHandler(this);
+        this.syncLyricHandler.init();
         this.aloneInVoiceHandler = new AloneInVoiceHandler(this);
         this.aloneInVoiceHandler.init();
     }
@@ -97,6 +97,10 @@ public class Bot
     public NowplayingHandler getNowplayingHandler()
     {
         return nowplaying;
+    }
+
+    public SyncLyricHandler getSyncLyricHandler() {
+        return syncLyricHandler;
     }
 
     public AloneInVoiceHandler getAloneInVoiceHandler()

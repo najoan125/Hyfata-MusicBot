@@ -17,6 +17,8 @@ package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
+import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
+import com.jagrosh.jmusicbot.utils.synclyric.SyncLyricUtil;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -27,10 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.jagrosh.jmusicbot.queue.FairQueue;
 import com.jagrosh.jmusicbot.settings.Settings;
@@ -49,6 +48,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -163,7 +163,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 queue.addAt(0, clone);
         }
 
-        if (trackUri.startsWith("TTS")){
+        if (trackUri.startsWith("TTS")) {
             String filepath = trackUri.split(" ")[1];
             Path fileToDelete = Paths.get(filepath);
             try {
@@ -249,6 +249,107 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             mb.setActionRows(actionRow1, actionRow2);
             return mb.setEmbeds(eb.build()).build();
         } else return null;
+    }
+
+    AudioTrack track;
+    LinkedHashMap<Double, String> lyrics;
+    ArrayList<Double> lyricTimes;
+    int currentLyricIndex = 0;
+
+    public Message getSyncLyric(JDA jda) throws LyricNotFoundException, IOException {
+        if (isMusicPlaying(jda) && !(track != null && track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
+            AudioTrack track = audioPlayer.getPlayingTrack();
+            double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
+            Guild guild = guild(jda);
+
+            if (this.track == null || !this.track.equals(track)) {
+                MessageBuilder mb = new MessageBuilder();
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setColor(guild.getSelfMember().getColor());
+
+                // initialize
+                lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+                this.track = track;
+                lyricTimes = new ArrayList<>(lyrics.keySet());
+
+                if (trackPosition < lyricTimes.get(0)) {
+                    currentLyricIndex = -1;
+                } else {
+                    loadCurrentLyricIndex(trackPosition);
+                }
+                return getLyricMessage(mb, eb);
+            }
+            if (lyricTimes.size() == currentLyricIndex + 1) {
+                System.out.println("test");
+                if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex)) {
+                    MessageBuilder mb = new MessageBuilder();
+                    EmbedBuilder eb = new EmbedBuilder();
+                    if (trackPosition < lyricTimes.get(0)) {
+                        currentLyricIndex = -1;
+                        return getLyricMessage(mb, eb);
+                    }
+                    loadCurrentLyricIndex(trackPosition);
+                    eb.setColor(guild.getSelfMember().getColor());
+                    return getLyricMessage(mb, eb);
+                }
+                return null;
+            } else if (trackPosition >= lyricTimes.get(currentLyricIndex + 1)) {
+                loadCurrentLyricIndex(trackPosition);
+                System.out.println(lyrics.size());
+                System.out.println(currentLyricIndex);
+                MessageBuilder mb = new MessageBuilder();
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setColor(guild.getSelfMember().getColor());
+                return getLyricMessage(mb, eb);
+            }
+        }
+        return null;
+    }
+
+    private void loadCurrentLyricIndex(double trackPosition) {
+        int i = 0;
+        for (double time : lyricTimes) {
+            if (trackPosition >= time) {
+                currentLyricIndex = i;
+            } else {
+                break;
+            }
+            i++;
+        }
+    }
+
+    @NotNull
+    private Message getLyricMessage(MessageBuilder mb, EmbedBuilder eb) {
+        if (currentLyricIndex == -1) {
+            eb.setDescription(
+                    " \n \n" + lyrics.get(lyricTimes.get(0))
+            );
+        } else if (currentLyricIndex == 0) {
+            eb.setDescription(
+                    " \n"
+                            + "## " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
+                            + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
+            );
+        } else if (lyrics.size() != currentLyricIndex + 1) {
+            eb.setDescription(
+                    lyrics.get(lyricTimes.get(currentLyricIndex - 1))
+                            + "\n"
+                            + "## " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
+                            + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
+            );
+        } else {
+            String lyric = lyrics.get(lyricTimes.get(currentLyricIndex));
+            if (!lyric.isEmpty()) {
+                lyric = "## " + lyric;
+            }
+            eb.setDescription(
+                    lyrics.get(lyricTimes.get(currentLyricIndex - 1))
+                            + "\n"
+                            + lyric + "\n"
+                            + " "
+            );
+        }
+        return mb.setEmbeds(eb.build()).build();
     }
 
     private String getRepeatModeName(RepeatMode repeatMode) {

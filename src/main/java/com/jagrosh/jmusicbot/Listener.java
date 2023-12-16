@@ -107,6 +107,7 @@ public class Listener extends ListenerAdapter
     public void onGuildMessageDelete(GuildMessageDeleteEvent event)
     {
         bot.getNowplayingHandler().onMessageDelete(event.getGuild(), event.getMessageIdLong());
+        bot.getSyncLyricHandler().onMessageDelete(event.getGuild(), event.getMessageIdLong());
     }
 
     @Override

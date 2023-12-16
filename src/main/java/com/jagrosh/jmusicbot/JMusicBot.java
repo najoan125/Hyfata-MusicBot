@@ -121,6 +121,7 @@ public class JMusicBot
                         new VolumeCmd(bot),
                         new NowplayingCmd(bot),
                         new LyricsCmd(bot),
+                        new SyncLyricsCmd(bot),
                         new QueueCmd(bot),
                         new PlaylistsCmd(bot),
                         new TTSCmd(bot),

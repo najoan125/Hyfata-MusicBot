@@ -37,6 +37,10 @@ public class FormatUtil {
         seconds %= 60;
         return (hours>0 ? hours+":" : "") + (minutes<10 ? "0"+minutes : minutes) + ":" + (seconds<10 ? "0"+seconds : seconds);
     }
+
+    public static double formatTimeDouble(long duration) {
+        return (double) Math.round(duration / 1000.0 * 100) / 100;
+    }
         
     public static String progressBar(double percent)
     {

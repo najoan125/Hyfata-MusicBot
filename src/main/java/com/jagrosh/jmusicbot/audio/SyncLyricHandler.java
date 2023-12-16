@@ -1,0 +1,119 @@
+/*
+ * Copyright 2018 John Grosh <john.a.grosh@gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.jagrosh.jmusicbot.audio;
+
+import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.entities.Pair;
+import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+/**
+ *
+ * @author John Grosh (john.a.grosh@gmail.com)
+ */
+public class SyncLyricHandler
+{
+    private final Bot bot;
+    private final HashMap<Long,Pair<Long,Long>> lastLyric; // guild -> channel,message
+
+    public SyncLyricHandler(Bot bot)
+    {
+        this.bot = bot;
+        this.lastLyric = new HashMap<>();
+    }
+    
+    public void init()
+    {
+        if(!bot.getConfig().useNPImages())
+            bot.getThreadpool().scheduleWithFixedDelay(() -> updateAll(), 0, 10, TimeUnit.MILLISECONDS);
+    }
+    
+    public void setLastLyricMessage(Message m)
+    {
+        lastLyric.put(m.getGuild().getIdLong(), new Pair<>(m.getTextChannel().getIdLong(), m.getIdLong()));
+    }
+    
+    public void clearLastLyricMessage(Guild guild)
+    {
+        lastLyric.remove(guild.getIdLong());
+    }
+    
+    private void updateAll()
+    {
+        Set<Long> toRemove = new HashSet<>();
+        for(long guildId: lastLyric.keySet())
+        {
+            Guild guild = bot.getJDA().getGuildById(guildId);
+            if(guild==null)
+            {
+                toRemove.add(guildId);
+                continue;
+            }
+            Pair<Long,Long> pair = lastLyric.get(guildId);
+            TextChannel tc = guild.getTextChannelById(pair.getKey());
+            if(tc==null)
+            {
+                toRemove.add(guildId);
+                continue;
+            }
+            AudioHandler handler = (AudioHandler)guild.getAudioManager().getSendingHandler();
+            Message msg;
+            try {
+                msg = handler.getSyncLyric(bot.getJDA());
+            } catch (LyricNotFoundException e) {
+                msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + " 싱크 가사를 찾을 수 없습니다! 유튜브 뮤직으로 재생했는지 확인해주세요!").build();
+            } catch (IOException e) {
+                msg = new MessageBuilder().setContent(bot.getConfig().getError() + " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : " + e.getMessage()).build();
+                e.printStackTrace(System.out);
+            }
+            if(!handler.isMusicPlaying(bot.getJDA()))
+            {
+                msg = handler.getNoMusicPlaying(bot.getJDA());
+                toRemove.add(guildId);
+            }
+            try 
+            {
+                if (msg != null) {
+                    tc.editMessageById(pair.getValue(), msg).queue(m -> {
+                    }, t -> lastLyric.remove(guildId));
+                }
+            } 
+            catch(Exception e) 
+            {
+                toRemove.add(guildId);
+            }
+        }
+        toRemove.forEach(id -> lastLyric.remove(id));
+    }
+    
+    public void onMessageDelete(Guild guild, long messageId)
+    {
+        Pair<Long,Long> pair = lastLyric.get(guild.getIdLong());
+        if(pair==null)
+            return;
+        if(pair.getValue() == messageId)
+            lastLyric.remove(guild.getIdLong());
+    }
+}
