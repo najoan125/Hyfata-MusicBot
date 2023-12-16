@@ -280,7 +280,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 return getLyricMessage(mb, eb);
             }
             if (lyricTimes.size() == currentLyricIndex + 1) {
-                System.out.println("test");
                 if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex)) {
                     MessageBuilder mb = new MessageBuilder();
                     EmbedBuilder eb = new EmbedBuilder();
@@ -295,8 +294,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 return null;
             } else if (trackPosition >= lyricTimes.get(currentLyricIndex + 1)) {
                 loadCurrentLyricIndex(trackPosition);
-                System.out.println(lyrics.size());
-                System.out.println(currentLyricIndex);
                 MessageBuilder mb = new MessageBuilder();
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.setColor(guild.getSelfMember().getColor());
