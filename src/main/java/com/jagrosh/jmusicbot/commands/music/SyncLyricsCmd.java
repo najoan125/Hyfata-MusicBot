@@ -43,7 +43,7 @@ public class SyncLyricsCmd extends MusicCommand {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         Message m;
         try {
-            m = Objects.requireNonNull(handler).getSyncLyric(event.getJDA());
+            m = Objects.requireNonNull(handler).getLyric(event.getJDA());
         } catch (LyricNotFoundException e) {
             event.reply(bot.getConfig().getWarning() + " 싱크 가사를 찾을 수 없습니다! 유튜브 뮤직으로 재생했는지 확인해주세요!");
             return;

@@ -80,13 +80,18 @@ public class SyncLyricHandler
             }
             AudioHandler handler = (AudioHandler)guild.getAudioManager().getSendingHandler();
             Message msg;
+            boolean error = false;
             try {
                 msg = handler.getSyncLyric(bot.getJDA());
             } catch (LyricNotFoundException e) {
                 msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + " 싱크 가사를 찾을 수 없습니다! 유튜브 뮤직으로 재생했는지 확인해주세요!").build();
+                toRemove.add(guildId);
+                error = true;
             } catch (IOException e) {
                 msg = new MessageBuilder().setContent(bot.getConfig().getError() + " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : " + e.getMessage()).build();
                 e.printStackTrace(System.out);
+                toRemove.add(guildId);
+                error = true;
             }
             if(!handler.isMusicPlaying(bot.getJDA()))
             {
@@ -95,8 +100,11 @@ public class SyncLyricHandler
             }
             try 
             {
-                if (msg != null) {
+                if (msg != null && !error) {
                     tc.editMessageById(pair.getValue(), msg).queue(m -> {
+                    }, t -> lastLyric.remove(guildId));
+                } else if (msg != null) {
+                    tc.editMessageById(pair.getValue(), msg).setEmbeds().queue(m -> {
                     }, t -> lastLyric.remove(guildId));
                 }
             } 

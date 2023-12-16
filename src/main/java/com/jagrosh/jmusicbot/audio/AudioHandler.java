@@ -256,6 +256,31 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     ArrayList<Double> lyricTimes;
     int currentLyricIndex = 0;
 
+    public Message getLyric(JDA jda) throws LyricNotFoundException, IOException {
+        if (isMusicPlaying(jda) && !(track != null && track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
+            AudioTrack track = audioPlayer.getPlayingTrack();
+            double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
+            Guild guild = guild(jda);
+            MessageBuilder mb = new MessageBuilder();
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setColor(guild.getSelfMember().getColor());
+
+            // initialize
+            lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+            this.track = track;
+            lyricTimes = new ArrayList<>(lyrics.keySet());
+
+            if (trackPosition < lyricTimes.get(0)) {
+                currentLyricIndex = -1;
+            } else {
+                loadCurrentLyricIndex(trackPosition);
+            }
+            return getLyricMessage(mb, eb);
+        } else {
+            return null;
+        }
+    }
+
     public Message getSyncLyric(JDA jda) throws LyricNotFoundException, IOException {
         if (isMusicPlaying(jda) && !(track != null && track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
             AudioTrack track = audioPlayer.getPlayingTrack();
