@@ -22,6 +22,8 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import net.dv8tion.jda.api.entities.Guild;
 
+import java.util.Objects;
+
 /**
  *
  * @author John Grosh (john.a.grosh@gmail.com)
@@ -37,13 +39,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
     
     public void init()
     {
-        String email = bot.getConfig().getEmail();
-        String password = bot.getConfig().getPassword();
-
-        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(true, email, password);
-        registerSourceManager(youtubeAudioSourceManager);
-
-        TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(t -> registerSourceManager(t));
+        TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
         AudioSourceManagers.registerRemoteSources(this);
         AudioSourceManagers.registerLocalSource(this);
         source(YoutubeAudioSourceManager.class).setPlaylistPageCount(10);
@@ -65,7 +61,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
         if(guild.getAudioManager().getSendingHandler()==null)
         {
             AudioPlayer player = createPlayer();
-            player.setVolume(bot.getSettingsManager().getSettings(guild).getVolume());
+            player.setVolume(Objects.requireNonNull(bot.getSettingsManager().getSettings(guild)).getVolume());
             handler = new AudioHandler(this, guild, player);
             player.addListener(handler);
             guild.getAudioManager().setSendingHandler(handler);
