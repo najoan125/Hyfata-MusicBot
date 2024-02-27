@@ -47,7 +47,7 @@ public class SyncLyricHandler
     public void init()
     {
         if(!bot.getConfig().useNPImages())
-            bot.getThreadpool().scheduleWithFixedDelay(() -> updateAll(), 0, 10, TimeUnit.MILLISECONDS);
+            bot.getThreadpool().scheduleWithFixedDelay(this::updateAll, 0, 10, TimeUnit.MILLISECONDS);
     }
     
     public void setLastLyricMessage(Message m)
@@ -79,6 +79,12 @@ public class SyncLyricHandler
                 continue;
             }
             AudioHandler handler = (AudioHandler)guild.getAudioManager().getSendingHandler();
+            if (handler == null) {
+                continue;
+            }
+            if (handler.getPlayer().getPlayingTrack().getInfo().uri.startsWith("TTS")) {
+                continue;
+            }
             Message msg;
             boolean error = false;
             try {
@@ -113,7 +119,7 @@ public class SyncLyricHandler
                 toRemove.add(guildId);
             }
         }
-        toRemove.forEach(id -> lastLyric.remove(id));
+        toRemove.forEach(lastLyric::remove);
     }
     
     public void onMessageDelete(Guild guild, long messageId)
