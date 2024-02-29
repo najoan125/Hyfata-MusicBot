@@ -8,6 +8,11 @@
     
     <repositories>
         <repository>
+            <id>in-project</id>
+            <name>custom jars</name>
+            <url>file://${project.basedir}/lib</url>
+        </repository>
+        <repository>
             <id>dv8tion</id>
             <name>m2-dv8tion</name>
             <url>https://m2.dv8tion.net/releases</url>
@@ -51,9 +56,7 @@
         <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>2.1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/lavaplayer-snapshot.jar</systemPath>
+            <version>6d14c5b2d96fd953c671cfae8f9b9ea11aa20d5a-SNAPSHOT</version>
         </dependency>
         <!-- this is needed, but isn't actually hosted anywhere anymore... uh -->
         <!--dependency>
