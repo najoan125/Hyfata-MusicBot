@@ -61,16 +61,6 @@ public class CustomAudioTrack implements AudioTrack, InternalAudioTrack {
     }
 
     @Override
-    public void addMarker(TrackMarker trackMarker) {
-
-    }
-
-    @Override
-    public void removeMarker(TrackMarker trackMarker) {
-
-    }
-
-    @Override
     public long getDuration() {
         return trackInfo.length;
     }
