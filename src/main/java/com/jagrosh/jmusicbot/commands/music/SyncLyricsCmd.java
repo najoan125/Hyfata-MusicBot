@@ -45,7 +45,7 @@ public class SyncLyricsCmd extends MusicCommand {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         Message m;
         try {
-            m = Objects.requireNonNull(handler).getLyric(event.getJDA());
+            m = Objects.requireNonNull(handler).getSyncLyric(event.getJDA());
         } catch (LyricNotFoundException e) {
             event.reply(bot.getConfig().getWarning() + LYRIC_NOT_FOUND);
             return;
@@ -54,6 +54,7 @@ public class SyncLyricsCmd extends MusicCommand {
             e.printStackTrace(System.out);
             return;
         }
+
         if (m == null) {
             event.reply(handler.getNoMusicPlaying(event.getJDA()));
             bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());

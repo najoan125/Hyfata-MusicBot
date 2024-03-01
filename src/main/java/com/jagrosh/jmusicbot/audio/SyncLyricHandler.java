@@ -31,65 +31,56 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author John Grosh (john.a.grosh@gmail.com)
  */
-public class SyncLyricHandler
-{
+public class SyncLyricHandler {
     private final Bot bot;
-    private final HashMap<Long,Pair<Long,Long>> lastLyric; // guild -> channel,message
+    private final HashMap<Long, Pair<Long, Long>> lastLyric; // guild -> channel,message
 
-    public SyncLyricHandler(Bot bot)
-    {
+    public SyncLyricHandler(Bot bot) {
         this.bot = bot;
         this.lastLyric = new HashMap<>();
     }
-    
-    public void init()
-    {
-        if(!bot.getConfig().useNPImages())
+
+    public void init() {
+        if (!bot.getConfig().useNPImages())
             bot.getThreadpool().scheduleWithFixedDelay(this::updateAll, 0, 10, TimeUnit.MILLISECONDS);
     }
-    
-    public void setLastLyricMessage(Message m)
-    {
+
+    public void setLastLyricMessage(Message m) {
         lastLyric.put(m.getGuild().getIdLong(), new Pair<>(m.getTextChannel().getIdLong(), m.getIdLong()));
     }
-    
-    public void clearLastLyricMessage(Guild guild)
-    {
+
+    public void clearLastLyricMessage(Guild guild) {
         lastLyric.remove(guild.getIdLong());
     }
-    
-    private void updateAll()
-    {
+
+    private void updateAll() {
         Set<Long> toRemove = new HashSet<>();
-        for(long guildId: lastLyric.keySet())
-        {
+        for (long guildId : lastLyric.keySet()) {
             Guild guild = bot.getJDA().getGuildById(guildId);
-            if(guild==null)
-            {
+            if (guild == null) {
                 toRemove.add(guildId);
                 continue;
             }
-            Pair<Long,Long> pair = lastLyric.get(guildId);
+            Pair<Long, Long> pair = lastLyric.get(guildId);
             TextChannel tc = guild.getTextChannelById(pair.getKey());
-            if(tc==null)
-            {
+            if (tc == null) {
                 toRemove.add(guildId);
                 continue;
             }
-            AudioHandler handler = (AudioHandler)guild.getAudioManager().getSendingHandler();
-            if (handler == null) {
-                continue;
-            }
-            if (handler.getPlayer().getPlayingTrack().getInfo().uri.startsWith("TTS")) {
-                continue;
-            }
+            AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+
+            // set msg
             Message msg;
             boolean error = false;
             try {
-                msg = handler.getSyncLyric(bot.getJDA());
+                if (!handler.isMusicPlaying(bot.getJDA())) {
+                    msg = handler.getNoMusicPlaying(bot.getJDA());
+                    toRemove.add(guildId);
+                } else {
+                    msg = handler.getSyncLyric(bot.getJDA());
+                }
             } catch (LyricNotFoundException e) {
                 msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + SyncLyricsCmd.LYRIC_NOT_FOUND).build();
                 toRemove.add(guildId);
@@ -100,13 +91,9 @@ public class SyncLyricHandler
                 toRemove.add(guildId);
                 error = true;
             }
-            if(!handler.isMusicPlaying(bot.getJDA()))
-            {
-                msg = handler.getNoMusicPlaying(bot.getJDA());
-                toRemove.add(guildId);
-            }
-            try 
-            {
+
+            // edit message
+            try {
                 if (msg != null && !error) {
                     tc.editMessageById(pair.getValue(), msg).queue(m -> {
                     }, t -> lastLyric.remove(guildId));
@@ -114,21 +101,18 @@ public class SyncLyricHandler
                     tc.editMessageById(pair.getValue(), msg).setEmbeds().queue(m -> {
                     }, t -> lastLyric.remove(guildId));
                 }
-            } 
-            catch(Exception e) 
-            {
+            } catch (Exception e) {
                 toRemove.add(guildId);
             }
         }
         toRemove.forEach(lastLyric::remove);
     }
-    
-    public void onMessageDelete(Guild guild, long messageId)
-    {
-        Pair<Long,Long> pair = lastLyric.get(guild.getIdLong());
-        if(pair==null)
+
+    public void onMessageDelete(Guild guild, long messageId) {
+        Pair<Long, Long> pair = lastLyric.get(guild.getIdLong());
+        if (pair == null)
             return;
-        if(pair.getValue() == messageId)
+        if (pair.getValue() == messageId)
             lastLyric.remove(guild.getIdLong());
     }
 }

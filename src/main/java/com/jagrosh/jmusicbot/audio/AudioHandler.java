@@ -256,73 +256,30 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     ArrayList<Double> lyricTimes;
     int currentLyricIndex = 0;
 
-    public Message getLyric(JDA jda) throws LyricNotFoundException, IOException {
-        if (isMusicPlaying(jda) && !(track != null && track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
-            AudioTrack track = audioPlayer.getPlayingTrack();
-            double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
-            Guild guild = guild(jda);
-            MessageBuilder mb = new MessageBuilder();
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.setColor(guild.getSelfMember().getColor());
-
-            // initialize
-            lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
-            this.track = track;
-            lyricTimes = new ArrayList<>(lyrics.keySet());
-
-            if (trackPosition < lyricTimes.get(0)) {
-                currentLyricIndex = -1;
-            } else {
-                loadCurrentLyricIndex(trackPosition);
-            }
-            return getLyricMessage(mb, eb);
-        } else {
-            return null;
-        }
-    }
-
     public Message getSyncLyric(JDA jda) throws LyricNotFoundException, IOException {
-        if (isMusicPlaying(jda) && !(track != null && track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
-            AudioTrack track = audioPlayer.getPlayingTrack();
+        AudioTrack track = audioPlayer.getPlayingTrack();
+        if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
             double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
             Guild guild = guild(jda);
 
-            if (this.track == null || !this.track.equals(track)) {
-                MessageBuilder mb = new MessageBuilder();
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.setColor(guild.getSelfMember().getColor());
-
-                // initialize
+            // init
+            if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
                 lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
                 this.track = track;
                 lyricTimes = new ArrayList<>(lyrics.keySet());
-
-                if (trackPosition < lyricTimes.get(0)) {
-                    currentLyricIndex = -1;
-                } else {
-                    loadCurrentLyricIndex(trackPosition);
-                }
-                return getLyricMessage(mb, eb);
+                return getNewLyricMessage(guild, track);
             }
+
+            // currentLyric == lastLyric
             if (lyricTimes.size() == currentLyricIndex + 1) {
-                if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex)) {
-                    MessageBuilder mb = new MessageBuilder();
-                    EmbedBuilder eb = new EmbedBuilder();
-                    if (trackPosition < lyricTimes.get(0)) {
-                        currentLyricIndex = -1;
-                        return getLyricMessage(mb, eb);
-                    }
-                    loadCurrentLyricIndex(trackPosition);
-                    eb.setColor(guild.getSelfMember().getColor());
-                    return getLyricMessage(mb, eb);
+                if (trackPosition < lyricTimes.get(currentLyricIndex)) {
+                    return getNewLyricMessage(guild, track);
                 }
-                return null;
-            } else if (trackPosition >= lyricTimes.get(currentLyricIndex + 1)) {
-                loadCurrentLyricIndex(trackPosition);
-                MessageBuilder mb = new MessageBuilder();
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.setColor(guild.getSelfMember().getColor());
-                return getLyricMessage(mb, eb);
+            }
+            // ex: When played again from the beginning || current track position >= nextLyric time
+            else if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex) ||
+                    trackPosition >= lyricTimes.get(currentLyricIndex + 1)) {
+                return getNewLyricMessage(guild, track);
             }
         }
         return null;
@@ -338,6 +295,20 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             }
             i++;
         }
+    }
+
+    private Message getNewLyricMessage(Guild guild, AudioTrack track) {
+        double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
+        MessageBuilder mb = new MessageBuilder();
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setColor(guild.getSelfMember().getColor());
+
+        if (trackPosition < lyricTimes.get(0)) {
+            currentLyricIndex = -1;
+        } else {
+            loadCurrentLyricIndex(trackPosition);
+        }
+        return getLyricMessage(mb, eb);
     }
 
     @NotNull
