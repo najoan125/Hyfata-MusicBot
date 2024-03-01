@@ -153,35 +153,31 @@ public class SearchCmd extends MusicCommand
         	searchCmdExecutors.put(m.getId(), executorService);
         	
         	//ExecutorService를 이용한 시간 초과 처리
-        	executorService.submit(new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						TimeUnit.SECONDS.sleep(30);
-					} catch(InterruptedException e) {
-						return;
-					}
-					m.editMessage("검색이 취소되었습니다.")
-						.setEmbeds()
-						.setActionRows()
-						.queue();
+        	executorService.submit(() -> {
+                try {
+                    TimeUnit.SECONDS.sleep(30);
+                } catch(InterruptedException e) {
+                    return;
+                }
+                m.editMessage("검색이 취소되었습니다.")
+                    .setEmbeds()
+                    .setActionRows()
+                    .queue();
 
-					
-					//HashMap 등록 해제
-					searchCmdMap.remove(m.getId());
-			    	searchCmdPlaylist.remove(m.getId());
-			    	searchCmdEvent.remove(m.getId());
-			    	searchCmdExecutors.remove(m.getId());
 
-                    //현재 곡이 재생 중이지 않고 대기열이 비어있을 경우
-                    AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                    if (!Objects.requireNonNull(handler).isMusicPlaying(event.getJDA()) && handler.getQueue().isEmpty()){
-                        if (!bot.getConfig().getStay())
-                            event.getGuild().getAudioManager().closeAudioConnection();
-                    }
-				}
-			});
+                //HashMap 등록 해제
+                searchCmdMap.remove(m.getId());
+                searchCmdPlaylist.remove(m.getId());
+                searchCmdEvent.remove(m.getId());
+                searchCmdExecutors.remove(m.getId());
+
+//현재 곡이 재생 중이지 않고 대기열이 비어있을 경우
+AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+if (!Objects.requireNonNull(handler).isMusicPlaying(event.getJDA()) && handler.getQueue().isEmpty()){
+if (!bot.getConfig().getStay())
+event.getGuild().getAudioManager().closeAudioConnection();
+}
+            });
         	
         	ma.setEmbeds(eb.build()).queue();
         }
@@ -198,7 +194,7 @@ public class SearchCmd extends MusicCommand
             if(throwable.severity==Severity.COMMON)
                 m.editMessage(event.getClient().getError()+" 로드 오류: "+throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError()+" 트랙을 로드하는데 오류가 발생했습니다.").queue();
+                m.editMessage(event.getClient().getError()+" 로드하는데 오류가 발생했습니다.").queue();
         }
     }
 }

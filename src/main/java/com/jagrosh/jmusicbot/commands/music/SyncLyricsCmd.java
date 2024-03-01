@@ -30,10 +30,12 @@ import java.util.Objects;
  * @author John Grosh <john.a.grosh@gmail.com>
  */
 public class SyncLyricsCmd extends MusicCommand {
+    public static final String LYRIC_NOT_FOUND = " 싱크 가사를 찾을 수 없습니다! (Spotify로 재생하면 싱크 가사가 지원될 가능성이 높습니다)";
+    public static final String LYRIC_ERROR = " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : ";
     public SyncLyricsCmd(Bot bot) {
         super(bot);
         this.name = "싱크가사";
-        this.help = "현재 재생 중인 곡의 가사를 실시간으로 표시합니다(유튜브 뮤직으로 재생한 곡만 지원)";
+        this.help = "현재 재생 중인 곡의 가사를 실시간으로 표시합니다 (Youtube Music, Spotify, Apple Music으로 재생한 곡만 지원)";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
@@ -45,10 +47,10 @@ public class SyncLyricsCmd extends MusicCommand {
         try {
             m = Objects.requireNonNull(handler).getLyric(event.getJDA());
         } catch (LyricNotFoundException e) {
-            event.reply(bot.getConfig().getWarning() + " 싱크 가사를 찾을 수 없습니다! 유튜브 뮤직으로 재생했는지 확인해주세요!");
+            event.reply(bot.getConfig().getWarning() + LYRIC_NOT_FOUND);
             return;
         } catch (IOException e) {
-            event.reply(bot.getConfig().getError() + " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : " + e.getMessage());
+            event.reply(bot.getConfig().getError() + LYRIC_ERROR + e.getMessage());
             e.printStackTrace(System.out);
             return;
         }

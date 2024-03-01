@@ -113,6 +113,8 @@ public class JMusicBot
                         new PlayCmd(bot),
                         new SearchCmd(bot),
                         new SCSearchCmd(bot),
+                        new SPSearchCmd(bot),
+                        new AMSearchCmd(bot),
                         new SkipCmd(bot),
                         new PauseCmd(bot),
                         new StopCmd(bot),

@@ -91,12 +91,12 @@ public class AboutCommand extends Command {
                 + (inv ? (join ? ", or " : "") + "[`초대`](" + oauthLink + ") 해주세요" : "") + "!";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId())==null ? "<@" + event.getClient().getOwnerId()+">" 
                 : event.getJDA().getUserById(event.getClient().getOwnerId()).getName();
-        StringBuilder descr = new StringBuilder().append("\uC548\uB155\uD558\uC138\uC694! \uC800\uB294 **").append(event.getSelfUser().getName()).append("** \uC785\uB2C8\uB2E4, ")
-                .append(description).append("\n\uC800\uB294 ").append(IS_AUTHOR ? "was written in Java" : "").append("**")
-                .append(author).append("** \uC5D0 \uC758\uD574 \uB9CC\uB4E4\uC5B4\uC84C\uACE0 " + JDAUtilitiesInfo.AUTHOR + "\uC758 [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
-                .append(JDAUtilitiesInfo.VERSION).append(") \uACFC [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
-                .append(JDAInfo.VERSION).append(") \uB97C \uC0AC\uC6A9\uD558\uC600\uC5B4\uC694\n`").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
-                .append("` \uB97C \uC785\uB825\uD558\uC5EC \uBA85\uB839\uC5B4\uB97C \uBCFC \uC218 \uC788\uC5B4\uC694!").append(join || inv ? invline : "").append("\n\n\uC774 \uBD07\uC758 \uD2B9\uC9D5: ```css");
+        StringBuilder descr = new StringBuilder().append("안녕하세요! 저는 **").append(event.getSelfUser().getName()).append("** 입니다, ")
+                .append(description).append("\n저는 ").append(IS_AUTHOR ? "was written in Java" : "").append("**")
+                .append(author).append("** 에 의해 만들어졌고 " + JDAUtilitiesInfo.AUTHOR + "의 [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
+                .append(JDAUtilitiesInfo.VERSION).append(") 과 [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
+                .append(JDAInfo.VERSION).append(") 를 사용하였어요\n`").append(event.getClient().getTextualPrefix()).append(event.getClient().getHelpWord())
+                .append("` 를 입력하여 명령어를 볼 수 있어요!").append(join || inv ? invline : "").append("\n\n이 봇의 특징: ```css");
         for (String feature : features)
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");

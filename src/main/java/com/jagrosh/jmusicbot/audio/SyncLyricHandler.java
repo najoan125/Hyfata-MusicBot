@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.commands.music.SyncLyricsCmd;
 import com.jagrosh.jmusicbot.entities.Pair;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -90,11 +91,11 @@ public class SyncLyricHandler
             try {
                 msg = handler.getSyncLyric(bot.getJDA());
             } catch (LyricNotFoundException e) {
-                msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + " 싱크 가사를 찾을 수 없습니다! 유튜브 뮤직으로 재생했는지 확인해주세요!").build();
+                msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + SyncLyricsCmd.LYRIC_NOT_FOUND).build();
                 toRemove.add(guildId);
                 error = true;
             } catch (IOException e) {
-                msg = new MessageBuilder().setContent(bot.getConfig().getError() + " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : " + e.getMessage()).build();
+                msg = new MessageBuilder().setContent(bot.getConfig().getError() + SyncLyricsCmd.LYRIC_ERROR + e.getMessage()).build();
                 e.printStackTrace(System.out);
                 toRemove.add(guildId);
                 error = true;

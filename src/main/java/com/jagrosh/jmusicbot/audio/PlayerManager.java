@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.audio;
 
+import com.github.topi314.lavasrc.applemusic.AppleMusicSourceManager;
+import com.github.topi314.lavasrc.spotify.SpotifySourceManager;
 import com.jagrosh.jmusicbot.Bot;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -39,6 +41,15 @@ public class PlayerManager extends DefaultAudioPlayerManager
     
     public void init()
     {
+        String spotifyId = bot.getConfig().getSpotifyId();
+        String spotifySecret = bot.getConfig().getSpotifySecret();
+        String spotifyCountry = bot.getConfig().getSpotifyCountry();
+        String appleToken = bot.getConfig().getAppleToken();
+        String appleCountry = bot.getConfig().getAppleCountry();
+
+        registerSourceManager(new SpotifySourceManager(null, spotifyId, spotifySecret, spotifyCountry, this));
+        registerSourceManager(new AppleMusicSourceManager(null, appleToken, appleCountry, this));
+
         TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
         AudioSourceManagers.registerRemoteSources(this);
         AudioSourceManagers.registerLocalSource(this);

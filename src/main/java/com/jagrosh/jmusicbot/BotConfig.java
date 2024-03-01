@@ -40,7 +40,9 @@ public class BotConfig
     
     private Path path = null;
     private String token, prefix, altprefix, helpWord, playlistsFolder,
-            successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji, email, password;
+            successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
+            spotifyId, spotifySecret, spotifyCountry,
+            appleToken, appleCountry;
     private boolean stayInChannel, songInGame, npImages, updatealerts, useEval, dbots;
     private long owner, maxSeconds, aloneTimeUntilStop;
     private OnlineStatus status;
@@ -91,8 +93,11 @@ public class BotConfig
             playlistsFolder = config.getString("playlistsfolder");
             aliases = config.getConfig("aliases");
             transforms = config.getConfig("transforms");
-            email = config.getString("email");
-            password = config.getString("password");
+            spotifyId = config.getString("spotifyId");
+            spotifySecret = config.getString("spotifySecret");
+            spotifyCountry = config.getString("spotifyCountry");
+            appleToken = config.getString("appleToken");
+            appleCountry = config.getString("appleCountry");
             dbots = owner == 113156185389092864L;
             
             // we may need to write a new config file
@@ -346,17 +351,29 @@ public class BotConfig
             return new String[0];
         }
     }
-    
+
+    public String getSpotifyId() {
+        return spotifyId;
+    }
+
+    public String getSpotifySecret() {
+        return spotifySecret;
+    }
+
+    public String getSpotifyCountry() {
+        return spotifyCountry;
+    }
+
+    public String getAppleToken() {
+        return appleToken;
+    }
+
+    public String getAppleCountry() {
+        return appleCountry;
+    }
+
     public Config getTransforms()
     {
         return transforms;
-    }
-
-    public String getEmail(){
-        return email;
-    }
-
-    public String getPassword(){
-        return password;
     }
 }
