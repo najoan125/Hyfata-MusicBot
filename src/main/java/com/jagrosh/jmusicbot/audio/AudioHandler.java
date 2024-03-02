@@ -264,7 +264,11 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
             // init
             if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
-                lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+                if (track.getInfo().isrc != null) {
+                    lyrics = SyncLyricUtil.getLyricByIsrc(track.getInfo().isrc);
+                } else {
+                    lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+                }
                 this.track = track;
                 lyricTimes = new ArrayList<>(lyrics.keySet());
                 return getNewLyricMessage(guild, track);
@@ -315,33 +319,34 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private Message getLyricMessage(MessageBuilder mb, EmbedBuilder eb) {
         if (currentLyricIndex == -1) {
             eb.setDescription(
-                    " \n \n" + lyrics.get(lyricTimes.get(0))
+                    " \n \n### " + lyrics.get(lyricTimes.get(0))
             );
         } else if (currentLyricIndex == 0) {
             eb.setDescription(
                     " \n"
-                            + "## " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
+                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n### "
                             + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
             );
         } else if (lyrics.size() != currentLyricIndex + 1) {
             eb.setDescription(
-                    lyrics.get(lyricTimes.get(currentLyricIndex - 1))
+                    "### " + lyrics.get(lyricTimes.get(currentLyricIndex - 1))
                             + "\n"
-                            + "## " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
+                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n### "
                             + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
             );
         } else {
             String lyric = lyrics.get(lyricTimes.get(currentLyricIndex));
             if (!lyric.isEmpty()) {
-                lyric = "## " + lyric;
+                lyric = "# " + lyric;
             }
             eb.setDescription(
-                    lyrics.get(lyricTimes.get(currentLyricIndex - 1))
+                    "### " + lyrics.get(lyricTimes.get(currentLyricIndex - 1))
                             + "\n"
                             + lyric + "\n"
                             + " "
             );
         }
+        eb.setFooter("가사 제공: Musixmatch");
         return mb.setEmbeds(eb.build()).build();
     }
 
