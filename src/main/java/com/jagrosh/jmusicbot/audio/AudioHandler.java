@@ -256,6 +256,29 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     ArrayList<Double> lyricTimes;
     int currentLyricIndex = 0;
 
+    public Message getInitLyric(Guild guild, AudioTrack track) throws LyricNotFoundException, IOException {
+        if (track.getInfo().isrc != null) {
+            lyrics = SyncLyricUtil.getLyricByIsrc(track.getInfo().isrc);
+        } else {
+            lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+        }
+        this.track = track;
+        lyricTimes = new ArrayList<>(lyrics.keySet());
+        return getNewLyricMessage(guild, track);
+    }
+
+    public Message getLyric(JDA jda) throws LyricNotFoundException, IOException {
+        AudioTrack track = audioPlayer.getPlayingTrack();
+        if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
+            Guild guild = guild(jda);
+            if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
+                return getInitLyric(guild, track);
+            }
+            return getNewLyricMessage(guild, track);
+        }
+        return null;
+    }
+
     public Message getSyncLyric(JDA jda) throws LyricNotFoundException, IOException {
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
@@ -264,14 +287,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
             // init
             if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
-                if (track.getInfo().isrc != null) {
-                    lyrics = SyncLyricUtil.getLyricByIsrc(track.getInfo().isrc);
-                } else {
-                    lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
-                }
-                this.track = track;
-                lyricTimes = new ArrayList<>(lyrics.keySet());
-                return getNewLyricMessage(guild, track);
+                return getInitLyric(guild, track);
             }
 
             // currentLyric == lastLyric
@@ -328,11 +344,15 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                             + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
             );
         } else if (lyrics.size() != currentLyricIndex + 1) {
+            String nextLyric = lyrics.get(lyricTimes.get(currentLyricIndex + 1));
+            if (!nextLyric.isEmpty()) {
+                nextLyric = "### " + nextLyric;
+            }
             eb.setDescription(
                     "### " + lyrics.get(lyricTimes.get(currentLyricIndex - 1))
                             + "\n"
-                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n### "
-                            + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
+                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
+                            + nextLyric
             );
         } else {
             String lyric = lyrics.get(lyricTimes.get(currentLyricIndex));

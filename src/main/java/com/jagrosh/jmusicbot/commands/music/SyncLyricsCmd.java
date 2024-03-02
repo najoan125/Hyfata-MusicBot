@@ -46,7 +46,7 @@ public class SyncLyricsCmd extends MusicCommand {
         event.getChannel().sendTyping().queue();
         Message m;
         try {
-            m = Objects.requireNonNull(handler).getSyncLyric(event.getJDA());
+            m = Objects.requireNonNull(handler).getLyric(event.getJDA());
         } catch (LyricNotFoundException e) {
             event.reply(bot.getConfig().getWarning() + LYRIC_NOT_FOUND);
             return;
