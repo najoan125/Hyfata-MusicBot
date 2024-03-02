@@ -43,25 +43,27 @@ public class SyncLyricsCmd extends MusicCommand {
     @Override
     public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-        event.getChannel().sendTyping().queue();
-        Message m;
-        try {
-            m = Objects.requireNonNull(handler).getLyric(event.getJDA());
-        } catch (LyricNotFoundException e) {
-            event.reply(bot.getConfig().getWarning() + LYRIC_NOT_FOUND);
-            return;
-        } catch (IOException e) {
-            event.reply(bot.getConfig().getError() + LYRIC_ERROR + e.getMessage());
-            e.printStackTrace(System.out);
-            return;
-        }
+        event.reply(bot.getConfig().getLoading() + " 불러오는 중...", msg -> {
+            Message lyricMsg;
+            try {
+                lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA());
+            } catch (LyricNotFoundException e) {
+                msg.editMessage(bot.getConfig().getWarning() + LYRIC_NOT_FOUND).queue();
+                return;
+            } catch (IOException e) {
+                msg.editMessage(bot.getConfig().getError() + LYRIC_ERROR + e.getMessage()).queue();
+                e.printStackTrace(System.out);
+                return;
+            }
 
-        if (m == null) {
-            event.reply(handler.getNoMusicPlaying(event.getJDA()));
-            bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
-        } else {
-            event.reply(m, msg -> bot.getSyncLyricHandler().setLastLyricMessage(msg));
-            bot.getNowplayingHandler().clearLastNPMessage(event.getGuild());
-        }
+            if (lyricMsg == null) {
+                msg.editMessage(handler.getNoMusicPlaying(event.getJDA())).queue();
+                bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
+            } else {
+                msg.editMessage(lyricMsg).queue();
+                bot.getSyncLyricHandler().setLastLyricMessage(msg);
+                bot.getNowplayingHandler().clearLastNPMessage(event.getGuild());
+            }
+        });
     }
 }
