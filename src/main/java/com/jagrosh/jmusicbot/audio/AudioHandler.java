@@ -347,6 +347,10 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             );
         }
         eb.setFooter("가사 제공: Musixmatch");
+        mb.append("**").append(manager.getBot().getConfig().getSuccess())
+                .append(" ")
+                .append(track.getInfo().author)
+                .append(" - ").append(track.getInfo().title).append(" 재생 중...**");
         return mb.setEmbeds(eb.build()).build();
     }
 

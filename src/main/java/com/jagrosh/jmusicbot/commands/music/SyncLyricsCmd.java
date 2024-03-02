@@ -30,7 +30,7 @@ import java.util.Objects;
  * @author John Grosh <john.a.grosh@gmail.com>
  */
 public class SyncLyricsCmd extends MusicCommand {
-    public static final String LYRIC_NOT_FOUND = " 싱크 가사를 찾을 수 없습니다! (Spotify로 재생하면 싱크 가사가 지원될 가능성이 높습니다)";
+    public static final String LYRIC_NOT_FOUND = " 싱크 가사를 찾을 수 없습니다! (Spotify 또는 Apple Music 으로 재생하면 싱크 가사가 지원될 가능성이 높습니다)";
     public static final String LYRIC_ERROR = " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : ";
     public SyncLyricsCmd(Bot bot) {
         super(bot);
@@ -43,6 +43,7 @@ public class SyncLyricsCmd extends MusicCommand {
     @Override
     public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+        event.getChannel().sendTyping().queue();
         Message m;
         try {
             m = Objects.requireNonNull(handler).getSyncLyric(event.getJDA());

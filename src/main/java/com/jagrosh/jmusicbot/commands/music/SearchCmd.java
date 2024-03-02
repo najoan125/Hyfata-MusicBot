@@ -124,9 +124,15 @@ public class SearchCmd extends MusicCommand
         	for(int i=0;i<10 && i<playlist.getTracks().size(); i++) {
         		AudioTrack track = playlist.getTracks().get(i);
         		actionRow.add(Button.primary(String.valueOf(i+1), String.valueOf(i+1)));
-        		result += OrderedMenu.NUMBERS[i]
-        			+" `["+FormatUtil.formatTime(track.getDuration())+"]` "
-        				+ "[**"+track.getInfo().title+"**]("+track.getInfo().uri+")\n";
+                if (searchPrefix.equals("ytsearch:") || searchPrefix.equals("scsearch:")) {
+                    result += OrderedMenu.NUMBERS[i]
+                            + " `[" + FormatUtil.formatTime(track.getDuration()) + "]` "
+                            + "[**" + track.getInfo().title + "**](" + track.getInfo().uri + ")\n";
+                } else {
+                    result += OrderedMenu.NUMBERS[i]
+                            + " `[" + FormatUtil.formatTime(track.getDuration()) + "]` "
+                            + "[**" + track.getInfo().author + " - " + track.getInfo().title + "**](" + track.getInfo().uri + ")\n";
+                }
         	}
 
             int actionRowSize = actionRow.size();
