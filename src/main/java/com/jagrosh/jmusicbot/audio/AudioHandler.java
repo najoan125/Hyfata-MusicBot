@@ -371,6 +371,14 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 .append(" ")
                 .append(track.getInfo().author)
                 .append(" - ").append(track.getInfo().title).append(" 재생 중...**");
+
+        double progress = (double) audioPlayer.getPlayingTrack().getPosition() / track.getDuration();
+        mb.append("\n")
+                .append(getStatusEmoji()).append(" ")
+                .append(FormatUtil.progressBar(progress))
+                .append(" `")
+                .append(FormatUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).append(" / ").append(FormatUtil.formatTime(track.getDuration()))
+                .append("`");
         return mb.setEmbeds(eb.build()).build();
     }
 
