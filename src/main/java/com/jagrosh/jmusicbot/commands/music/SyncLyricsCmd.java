@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -44,9 +45,10 @@ public class SyncLyricsCmd extends MusicCommand {
     public void doCommand(CommandEvent event) {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         event.reply(bot.getConfig().getLoading() + " 불러오는 중...", msg -> {
+            long ping = event.getMessage().getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
             Message lyricMsg;
             try {
-                lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA());
+                lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA(), ping);
             } catch (LyricNotFoundException e) {
                 msg.editMessage(bot.getConfig().getWarning() + LYRIC_NOT_FOUND).queue();
                 return;

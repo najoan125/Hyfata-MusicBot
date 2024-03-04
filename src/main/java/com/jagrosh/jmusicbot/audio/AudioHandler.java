@@ -26,6 +26,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -255,6 +256,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     LinkedHashMap<Double, String> lyrics;
     ArrayList<Double> lyricTimes;
     int currentLyricIndex = 0;
+    double ping;
 
     public Message getInitLyric(Guild guild, AudioTrack track) throws LyricNotFoundException, IOException {
         if (track.getInfo().isrc != null) {
@@ -267,7 +269,8 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return getNewLyricMessage(guild, track);
     }
 
-    public Message getLyric(JDA jda) throws LyricNotFoundException, IOException {
+    public Message getLyric(JDA jda, long ping) throws LyricNotFoundException, IOException {
+        this.ping = FormatUtil.formatTimeDouble(ping);
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
             Guild guild = guild(jda);
@@ -292,13 +295,13 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
             // currentLyric == lastLyric
             if (lyricTimes.size() == currentLyricIndex + 1) {
-                if (trackPosition < lyricTimes.get(currentLyricIndex)) {
+                if (trackPosition < lyricTimes.get(currentLyricIndex) - ping) {
                     return getNewLyricMessage(guild, track);
                 }
             }
             // ex: When played again from the beginning || current track position >= nextLyric time
-            else if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex) ||
-                    trackPosition >= lyricTimes.get(currentLyricIndex + 1)) {
+            else if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex) - ping ||
+                    trackPosition >= lyricTimes.get(currentLyricIndex + 1) - ping) {
                 return getNewLyricMessage(guild, track);
             }
         }
@@ -308,7 +311,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private void loadCurrentLyricIndex(double trackPosition) {
         int i = 0;
         for (double time : lyricTimes) {
-            if (trackPosition >= time) {
+            if (trackPosition >= time - ping) {
                 currentLyricIndex = i;
             } else {
                 break;
@@ -323,7 +326,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(guild.getSelfMember().getColor());
 
-        if (trackPosition < lyricTimes.get(0)) {
+        if (trackPosition < lyricTimes.get(0) - ping) {
             currentLyricIndex = -1;
         } else {
             loadCurrentLyricIndex(trackPosition);
