@@ -20,6 +20,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -49,7 +50,11 @@ public class SkipCmd extends MusicCommand
             return;
         }
         RequestMetadata rm = handler.getRequestMetadata();
-        if(event.getAuthor().getIdLong() == rm.getOwner())
+        double skipRatio = bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio();
+        if(skipRatio == -1) {
+            skipRatio = bot.getConfig().getSkipRatio();
+        }
+        if(event.getAuthor().getIdLong() == rm.getOwner() || skipRatio == 0)
         {
             event.reply(new MessageBuilder()
                     .setContent(bot.getConfig().getSuccess()+" 현재 재생 중인 항목을 건너뛰었습니다!")
@@ -75,13 +80,13 @@ public class SkipCmd extends MusicCommand
             }
             int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
-            int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
+            int required = (int)Math.ceil(listeners * skipRatio);
             msg += skippers + "표, " + required + "/" + listeners + " 필요]`";
             String embed;
             if(skippers>=required)
             {
                 msg += "\n" + bot.getConfig().getSuccess() + " 이 항목을 건너뛰었습니다!";
-                embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + rm.user.username + "**에 의해 요청됨)");
+                embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + FormatUtil.formatUsername(rm.user) + "**에 의해 요청됨)");
 
                 event.reply(new MessageBuilder()
                         .setContent(msg)

@@ -6,7 +6,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.commands.DJCommand;
-import com.jagrosh.jmusicbot.queue.FairQueue;
+import com.jagrosh.jmusicbot.queue.AbstractQueue;
 
 /**
  * Command that provides users the ability to move a track in the playlist.
@@ -57,7 +57,7 @@ public class MoveTrackCmd extends DJCommand
 
         // Validate that from and to are available
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-        FairQueue<QueuedTrack> queue = handler.getQueue();
+        AbstractQueue<QueuedTrack> queue = handler.getQueue();
         if (isUnavailablePosition(queue, from))
         {
             String reply = String.format("`%d` (\uC740)\uB294 \uB300\uAE30\uC5F4\uC5D0 \uC62C\uBC14\uB978 \uC704\uCE58\uAC00 \uC544\uB2D9\uB2C8\uB2E4!", from);
@@ -78,7 +78,7 @@ public class MoveTrackCmd extends DJCommand
         event.replySuccess(reply);
     }
 
-    private static boolean isUnavailablePosition(FairQueue<QueuedTrack> queue, int position)
+    private static boolean isUnavailablePosition(AbstractQueue<QueuedTrack> queue, int position)
     {
         return (position < 1 || position > queue.size());
     }

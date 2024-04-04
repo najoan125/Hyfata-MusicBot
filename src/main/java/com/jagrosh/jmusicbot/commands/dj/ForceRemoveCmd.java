@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.DJCommand;
+import com.jagrosh.jmusicbot.utils.FormatUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -113,7 +114,7 @@ public class ForceRemoveCmd extends DJCommand
         }
         else
         {
-            event.replySuccess("`"+count+"` \uAC00 **"+target.getName()+"**#"+target.getDiscriminator()+"\uC5D0\uC11C \uC131\uACF5\uC801\uC73C\uB85C \uC81C\uAC70\uB428.");
+            event.replySuccess("`"+count+"` \uAC00 **"+ FormatUtil.formatUsername(target) +"\uC5D0\uC11C \uC131\uACF5\uC801\uC73C\uB85C \uC81C\uAC70\uB428.");
         }
     }
 }

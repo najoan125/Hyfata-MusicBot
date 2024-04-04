@@ -16,6 +16,8 @@
 package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
+import com.jagrosh.jmusicbot.queue.AbstractQueue;
+import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import com.jagrosh.jmusicbot.utils.synclyric.SyncLyricUtil;
@@ -32,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import com.jagrosh.jmusicbot.queue.FairQueue;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
@@ -60,7 +61,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     public final static String STOP_EMOJI = "<:stop:1131234190067761173>"; // ⏹
     public final static String NEXT_EMOJI = "<:next:1131227160846274582>";
 
-    private final FairQueue<QueuedTrack> queue = new FairQueue<>();
     private final List<AudioTrack> defaultQueue = new LinkedList<>();
     private final Set<String> votes = new HashSet<>();
 
@@ -69,11 +69,19 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private final long guildId;
 
     private AudioFrame lastFrame;
+    private AbstractQueue<QueuedTrack> queue;
 
     protected AudioHandler(PlayerManager manager, Guild guild, AudioPlayer player) {
         this.manager = manager;
         this.audioPlayer = player;
         this.guildId = guild.getIdLong();
+
+        this.setQueueType(manager.getBot().getSettingsManager().getSettings(guildId).getQueueType());
+    }
+
+    public void setQueueType(QueueType type)
+    {
+        queue = type.createInstance(queue);
     }
 
     public int addTrackToFront(QueuedTrack qtrack) {
@@ -94,7 +102,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             return queue.add(qtrack);
     }
 
-    public FairQueue<QueuedTrack> getQueue() {
+    public AbstractQueue<QueuedTrack> getQueue() {
         return queue;
     }
 
@@ -176,7 +184,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
         if (queue.isEmpty()) {
             if (!playFromDefault()) {
-                manager.getBot().getNowplayingHandler().onTrackUpdate(guildId, null, this);
+                manager.getBot().getNowplayingHandler().onTrackUpdate(null);
                 if (!manager.getBot().getConfig().getStay())
                     manager.getBot().closeAudioConnection(guildId);
                 // unpause, in the case when the player was paused and the track has been skipped.
@@ -192,7 +200,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
         votes.clear();
-        manager.getBot().getNowplayingHandler().onTrackUpdate(guildId, track, this);
+        manager.getBot().getNowplayingHandler().onTrackUpdate(track);
     }
 
 
@@ -209,9 +217,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             if (rm.getOwner() != 0L) {
                 User u = guild.getJDA().getUserById(rm.user.id);
                 if (u == null)
-                    eb.setAuthor(rm.user.username + "#" + rm.user.discrim, null, rm.user.avatar);
+                    eb.setAuthor(FormatUtil.formatUsername(rm.user), null, rm.user.avatar);
                 else
-                    eb.setAuthor(u.getName() + "#" + u.getDiscriminator(), null, u.getEffectiveAvatarUrl());
+                    eb.setAuthor(FormatUtil.formatUsername(u), null, u.getEffectiveAvatarUrl());
             }
 
             try {
@@ -403,21 +411,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                         .setDescription("`;재생` 또는 `;검색` 명령어를 이용해 음악을 재생하세요!")
                         .setColor(guild.getSelfMember().getColor())
                         .build()).build();
-    }
-
-    public String getTopicFormat(JDA jda) {
-        if (isMusicPlaying(jda)) {
-            long userid = getRequestMetadata().getOwner();
-            AudioTrack track = audioPlayer.getPlayingTrack();
-            String title = track.getInfo().title;
-            if (title == null || title.equals("Unknown Title"))
-                title = track.getInfo().uri;
-            return "**" + title + "** [" + (userid == 0 ? "autoplay" : "<@" + userid + ">") + "]"
-                    + "\n" + getStatusEmoji() + " "
-                    + "[" + FormatUtil.formatTime(track.getDuration()) + "] "
-                    + FormatUtil.volumeIcon(audioPlayer.getVolume());
-        } else
-            return "\uC74C\uC545\uC774 \uC7AC\uC0DD\uB418\uACE0\uC788\uC9C0 \uC54A\uC74C " + STOP_EMOJI + " " + FormatUtil.volumeIcon(audioPlayer.getVolume());
     }
 
     public String getStatusEmoji() {
