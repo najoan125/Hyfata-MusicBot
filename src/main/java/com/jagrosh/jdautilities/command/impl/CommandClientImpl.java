@@ -19,6 +19,7 @@ import com.jagrosh.jdautilities.command.*;
 import com.jagrosh.jdautilities.command.Command.Category;
 import com.jagrosh.jdautilities.commons.utils.FixedSizeCache;
 import com.jagrosh.jdautilities.commons.utils.SafeIdUtil;
+import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 
 import net.dv8tion.jda.api.JDA;
@@ -162,7 +163,7 @@ public class CommandClientImpl implements CommandClient, EventListener
                 User owner = event.getJDA().getUserById(ownerId);
                 if(owner!=null)
                 {
-                    builder.append("\n\n\uCD94\uAC00 \uB3C4\uC6C0\uC774 \uD544\uC694\uD558\uBA74, **").append(owner.getName()).append("**#").append(owner.getDiscriminator()).append(" \uB85C \uBB38\uC758\uD558\uC2ED\uC2DC\uC624.");
+                    builder.append("\n\n추가 도움이 필요하면, **").append(FormatUtil.formatUsername(owner)).append("**").append(" 으(로) 문의하십시오.");
                     if(serverInvite!=null)
                         builder.append(" or join ").append(serverInvite);
                 }

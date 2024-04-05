@@ -79,11 +79,7 @@ public class QueueCmd extends MusicCommand
             Message built = new MessageBuilder()
                     .setContent(event.getClient().getWarning() + " 대기열이 비어있습니다!")
                     .setEmbeds((nowp==null ? nonowp : nowp).getEmbeds().get(0)).build();
-            event.reply(built, m ->
-            {
-                if(nowp!=null)
-                    bot.getNowplayingHandler().setLastNPMessage(m);
-            });
+            event.reply(built);
             return;
         }
         String[] songs = new String[list.size()];
