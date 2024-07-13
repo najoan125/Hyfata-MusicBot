@@ -46,8 +46,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayCmd extends MusicCommand
 {
-    private final static String LOAD = "📥"; // �윋�
-    private final static String CANCEL = "🚫"; // �윓�
+    private final static String LOAD = "\uD83D\uDCE5"; // 📥
+    private final static String CANCEL = "\uD83D\uDEAB"; // 🚫
 
     private final String loadingEmoji;
 
