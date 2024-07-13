@@ -125,11 +125,12 @@ public class SearchCmd extends MusicCommand {
 
             int actionRowSize = actionRow.size();
             List<ActionRow> actionRows = new ArrayList<>();
-            if (actionRowSize <= 5) {
-                actionRows.add(ActionRow.of(actionRow.subList(0, actionRowSize)));
-            } else if (actionRowSize <= 10) {
-                actionRows.add(ActionRow.of(actionRow.subList(0, 5)));
-                actionRows.add(ActionRow.of(actionRow.subList(5, actionRowSize)));
+            for (int i = 0; i < actionRowSize; i += 5) {
+                if (i + 5 <= actionRowSize) {
+                    actionRows.add(ActionRow.of(actionRow.subList(i, i + 5)));
+                } else {
+                    actionRows.add(ActionRow.of(actionRow.subList(i, actionRowSize)));
+                }
             }
             actionRows.add(ActionRow.of(Button.danger("cancel", "취소")));
             ma.setActionRows(actionRows);
