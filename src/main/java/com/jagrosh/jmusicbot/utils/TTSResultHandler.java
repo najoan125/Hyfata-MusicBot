@@ -3,6 +3,7 @@ package com.jagrosh.jmusicbot.utils;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
@@ -67,11 +68,11 @@ public class TTSResultHandler implements AudioLoadResultHandler {
             AudioTrack cloned = nowPlaying.makeClone();
             cloned.setPosition(nowPlaying.getPosition());
             handler.addTrackToFront(new QueuedTrack(cloned, handler.getRequestMetadata()));
-            handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event)));
             handler.getPlayer().stopTrack();
         }
         else {
-            handler.addTrackToFront(new QueuedTrack(at, event.getAuthor()));
+            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event)));
         }
 
         if (!event.getGuild().getAudioManager().isConnected()){

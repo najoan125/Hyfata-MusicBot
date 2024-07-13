@@ -19,13 +19,17 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Message;
+
+import java.util.Objects;
 
 /**
  *
@@ -40,52 +44,52 @@ public class PlaynextCmd extends DJCommand
         super(bot);
         this.loadingEmoji = bot.getConfig().getLoading();
         this.name = "새치기";
-        this.arguments = "<\uC81C\uBAA9|URL>";
-        this.help = "\uD604\uC7AC \uACE1\uC774 \uB05D\uB098\uACE0 \uC0C8\uCE58\uAE30 \uD558\uC5EC \uC81C\uACF5\uB41C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4";
+        this.arguments = "<제목|URL>";
+        this.help = "현재 곡이 끝나고 새치기 하여 제공된 음악을 재생합니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
     }
-    
+
     @Override
     public void doCommand(CommandEvent event)
     {
         if(event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
         {
-            event.replyWarning("\uB178\uB798 \uC81C\uBAA9 \uB610\uB294 URL\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624!");
+            event.replyWarning("노래 제목 또는 URL을 포함하십시오!");
             return;
         }
-        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") 
-                ? event.getArgs().substring(1,event.getArgs().length()-1) 
+        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
+                ? event.getArgs().substring(1,event.getArgs().length()-1)
                 : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
         event.reply(loadingEmoji+" Loading... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
     }
-    
+
     private class ResultHandler implements AudioLoadResultHandler
     {
         private final Message m;
         private final CommandEvent event;
         private final boolean ytsearch;
-        
+
         private ResultHandler(Message m, CommandEvent event, boolean ytsearch)
         {
             this.m = m;
             this.event = event;
             this.ytsearch = ytsearch;
         }
-        
+
         private void loadSingle(AudioTrack track)
         {
             if(bot.getConfig().isTooLong(track))
             {
                 m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
-                        +FormatUtil.formatTime(track.getDuration())+"` > `"+FormatUtil.formatTime(bot.getConfig().getMaxSeconds()*1000)+"`")).queue();
+                        + TimeUtil.formatTime(track.getDuration())+"` > `"+ TimeUtil.formatTime(bot.getConfig().getMaxSeconds()*1000)+"`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            int pos = handler.addTrackToFront(new QueuedTrack(track, event.getAuthor()))+1;
+            int pos = Objects.requireNonNull(handler).addTrackToFront(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
             String addMsg = FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
-                    +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" (\uC774)\uAC00 "+pos+"\uC704\uCE58\uC5D0 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4"));
+                    +"** (`"+ TimeUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" (이)가 "+pos+"위치에 추가되었습니다"));
             m.editMessage(addMsg).queue();
         }
         

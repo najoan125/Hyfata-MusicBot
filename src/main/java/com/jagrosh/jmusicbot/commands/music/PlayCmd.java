@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.ButtonMenu;
@@ -35,6 +37,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,18 +46,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class PlayCmd extends MusicCommand
 {
-    private final static String LOAD = "\uD83D\uDCE5"; // �윋�
-    private final static String CANCEL = "\uD83D\uDEAB"; // �윓�
-    
+    private final static String LOAD = "📥"; // �윋�
+    private final static String CANCEL = "🚫"; // �윓�
+
     private final String loadingEmoji;
-    
+
     public PlayCmd(Bot bot)
     {
         super(bot);
         this.loadingEmoji = bot.getConfig().getLoading();
         this.name = "재생";
         this.arguments = "<제목|URL|subcommand>";
-        this.help = "\uC81C\uACF5\uB41C \uB178\uB798\uB97C \uC7AC\uC0DD\uD569\uB2C8\uB2E4";
+        this.help = "제공된 노래를 재생합니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
@@ -62,20 +65,20 @@ public class PlayCmd extends MusicCommand
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(CommandEvent event)
     {
         if(event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
         {
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            if(handler.getPlayer().getPlayingTrack()!=null && handler.getPlayer().isPaused())
+            if(Objects.requireNonNull(handler).getPlayer().getPlayingTrack()!=null && handler.getPlayer().isPaused())
             {
                 handler.getPlayer().setPaused(false);
-                event.replySuccess("**"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (\uC774)\uAC00 \uB2E4\uC2DC \uC7AC\uC0DD\uB428.");
+                event.replySuccess("**"+handler.getPlayer().getPlayingTrack().getInfo().title+"** (이)가 다시 재생됨.");
                 return;
             }
-            StringBuilder builder = new StringBuilder(event.getClient().getWarning()+" \uC7AC\uC0DD \uBA85\uB839\uC5B4:\n");
-            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <\uB178\uB798 \uC81C\uBAA9>` - \uC720\uD29C\uBE0C\uC5D0\uC11C \uCCAB\uBC88\uC9F8 \uACB0\uACFC\uB97C \uC7AC\uC0DD\uD569\uB2C8\uB2E4");
-            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <URL>` - \uC81C\uACF5\uB41C \uB178\uB798, \uC7AC\uC0DD \uBAA9\uB85D \uB610\uB294 \uC2E4\uC2DC\uAC04 \uC601\uC0C1\uC744 \uC7AC\uC0DD\uD569\uB2C8\uB2E4.");
+            StringBuilder builder = new StringBuilder(event.getClient().getWarning()+" 재생 명령어:\n");
+            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <노래 제목>` - 유튜브에서 첫번째 결과를 재생합니다");
+            builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" <URL>` - 제공된 노래, 재생 목록 또는 실시간 영상을 재생합니다.");
             for(Command cmd: children)
                 builder.append("\n`").append(event.getClient().getPrefix()).append(name).append(" ").append(cmd.getName()).append(" ").append(cmd.getArguments()).append("` - ").append(cmd.getHelp());
             event.reply(builder.toString());
@@ -84,7 +87,7 @@ public class PlayCmd extends MusicCommand
         String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") 
                 ? event.getArgs().substring(1,event.getArgs().length()-1) 
                 : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        event.reply(loadingEmoji+" \uB85C\uB529... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
+        event.reply(loadingEmoji+" 로딩... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
     }
     
     private class ResultHandler implements AudioLoadResultHandler
@@ -105,18 +108,18 @@ public class PlayCmd extends MusicCommand
             if(bot.getConfig().isTooLong(track))
             {
             	m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" 이 트랙 (**"+track.getInfo().title+ "**) (은)는 허용된 최대치보다 깁니다: `"
-                        +FormatUtil.formatTime(track.getDuration())+"` > `"+FormatUtil.formatTime(bot.getConfig().getMaxSeconds()*1000)+"`")).queue();
+                        + TimeUtil.formatTime(track.getDuration())+"` > `"+ TimeUtil.formatTime(bot.getConfig().getMaxSeconds()*1000)+"`")).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            int pos = handler.addTrack(new QueuedTrack(track, event.getAuthor()))+1;
+            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
             String addMsg = FormatUtil.filter(event.getClient().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"));
             if(playlist==null || !event.getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ADD_REACTION)) {
                 MessageAction ma = m.editMessage(addMsg);
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.setTitle(track.getInfo().title, track.getInfo().uri);
-                eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+FormatUtil.formatTime(track.getDuration())+"`)");
+                eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+ TimeUtil.formatTime(track.getDuration())+"`)");
                 ma.setEmbeds(eb.build()).queue();
             }
             else
@@ -146,7 +149,7 @@ public class PlayCmd extends MusicCommand
                 if(!bot.getConfig().isTooLong(track) && !track.equals(exclude))
                 {
                     AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                    handler.addTrack(new QueuedTrack(track, event.getAuthor()));
+                    Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)));
                     count[0]++;
                 }
             });
@@ -175,7 +178,7 @@ public class PlayCmd extends MusicCommand
             else
             {
                 int count = loadPlaylist(playlist, null);
-                if(playlist.getTracks().size() == 0)
+                if(playlist.getTracks().isEmpty())
                 {
                     m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" The playlist "+(playlist.getName()==null ? "" : "(**"+playlist.getName()
                             +"**) ")+" could not be loaded or contained 0 entries")).queue();
@@ -233,7 +236,7 @@ public class PlayCmd extends MusicCommand
         {
             if(event.getArgs().isEmpty())
             {
-                event.reply(event.getClient().getError()+" \uC7AC\uC0DD \uBAA9\uB85D \uC774\uB984\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
+                event.reply(event.getClient().getError()+" 재생 목록 이름을 포함하십시오.");
                 return;
             }
             Playlist playlist = bot.getPlaylistLoader().getPlaylist(event.getArgs());
@@ -242,13 +245,13 @@ public class PlayCmd extends MusicCommand
                 event.replyError("`"+event.getArgs()+".txt` 를 플레이리스트 폴더에서 찾을 수 없습니다.");
                 return;
             }
-            event.getChannel().sendMessage(loadingEmoji+" \uC7AC\uC0DD \uBAA9\uB85D **"+event.getArgs()+"** \uB85C\uB529\uC911... ("+playlist.getItems().size()+" \uD56D\uBAA9)").queue(m -> 
+            event.getChannel().sendMessage(loadingEmoji+" 재생 목록 **"+event.getArgs()+"** 로딩중... ("+playlist.getItems().size()+" 항목)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-                playlist.loadTracks(bot.getPlayerManager(), (at)->handler.addTrack(new QueuedTrack(at, event.getAuthor())), () -> {
+                playlist.loadTracks(bot.getPlayerManager(), (at)-> Objects.requireNonNull(handler).addTrack(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event))), () -> {
                     StringBuilder builder = new StringBuilder(playlist.getTracks().isEmpty() 
                             ? event.getClient().getWarning()+" 트랙이 로드되지 않았습니다!" 
-                            : event.getClient().getSuccess()+" **"+playlist.getTracks().size()+"** \uD2B8\uB799 \uB85C\uB4DC\uB428!");
+                            : event.getClient().getSuccess()+" **"+playlist.getTracks().size()+"** 트랙 로드됨!");
                     if(!playlist.getErrors().isEmpty())
                         builder.append("\n이 트랙들을 로드하는 데 실패하였습니다:");
                     playlist.getErrors().forEach(err -> builder.append("\n`[").append(err.getIndex()+1).append("]` **").append(err.getItem()).append("**: ").append(err.getReason()));

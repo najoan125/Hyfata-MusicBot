@@ -16,8 +16,8 @@
 package com.jagrosh.jmusicbot;
 
 import com.jagrosh.jmusicbot.entities.Prompt;
-import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.typesafe.config.*;
 import java.io.IOException;
@@ -41,10 +41,12 @@ public class BotConfig
     private Path path = null;
     private String token, prefix, altprefix, helpWord, playlistsFolder, logLevel,
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
+            evalEngine,
             spotifyId, spotifySecret, spotifyCountry,
             appleToken, appleCountry;
     private boolean stayInChannel, songInGame, npImages, updatealerts, useEval, dbots;
     private long owner, maxSeconds, aloneTimeUntilStop;
+    private int maxYTPlaylistPages;
     private double skipratio;
     private OnlineStatus status;
     private Activity game;
@@ -90,7 +92,9 @@ public class BotConfig
             updatealerts = config.getBoolean("updatealerts");
             logLevel = config.getString("loglevel");
             useEval = config.getBoolean("eval");
+            evalEngine = config.getString("evalengine");
             maxSeconds = config.getLong("maxtime");
+            maxYTPlaylistPages = config.getInt("maxytplaylistpages");
             aloneTimeUntilStop = config.getLong("alonetimeuntilstop");
             playlistsFolder = config.getString("playlistsfolder");
             aliases = config.getConfig("aliases");
@@ -109,13 +113,17 @@ public class BotConfig
             // validate bot token
             if(token==null || token.isEmpty() || token.equalsIgnoreCase("BOT_TOKEN_HERE"))
             {
-                token = prompt.prompt("Please provide a bot token."
-                        + "\nInstructions for obtaining a token can be found here:"
-                        + "\nhttps://github.com/jagrosh/MusicBot/wiki/Getting-a-Bot-Token."
-                        + "\nBot Token: ");
+                token = prompt.prompt("""
+                        Please provide a bot token.\
+
+                        Instructions for obtaining a token can be found here:\
+
+                        https://github.com/jagrosh/MusicBot/wiki/Getting-a-Bot-Token.\
+
+                        Bot Token:\s""");
                 if(token==null)
                 {
-                    prompt.alert(Prompt.Level.WARNING, CONTEXT, "No token provided! Exiting.\n\nConfig Location: " + path.toAbsolutePath().toString());
+                    prompt.alert(Prompt.Level.WARNING, CONTEXT, "No token provided! Exiting.\n\nConfig Location: " + path.toAbsolutePath());
                     return;
                 }
                 else
@@ -129,11 +137,16 @@ public class BotConfig
             {
                 try
                 {
-                    owner = Long.parseLong(prompt.prompt("Owner ID was missing, or the provided owner ID is not valid."
-                        + "\nPlease provide the User ID of the bot's owner."
-                        + "\nInstructions for obtaining your User ID can be found here:"
-                        + "\nhttps://github.com/jagrosh/MusicBot/wiki/Finding-Your-User-ID"
-                        + "\nOwner User ID: "));
+                    owner = Long.parseLong(prompt.prompt("""
+                            Owner ID was missing, or the provided owner ID is not valid.\
+
+                            Please provide the User ID of the bot's owner.\
+
+                            Instructions for obtaining your User ID can be found here:\
+
+                            https://github.com/jagrosh/MusicBot/wiki/Finding-Your-User-ID\
+
+                            Owner User ID:\s"""));
                 }
                 catch(NumberFormatException | NullPointerException ex)
                 {
@@ -141,7 +154,7 @@ public class BotConfig
                 }
                 if(owner<=0)
                 {
-                    prompt.alert(Prompt.Level.ERROR, CONTEXT, "Invalid User ID! Exiting.\n\nConfig Location: " + path.toAbsolutePath().toString());
+                    prompt.alert(Prompt.Level.ERROR, CONTEXT, "Invalid User ID! Exiting.\n\nConfig Location: " + path.toAbsolutePath());
                     return;
                 }
                 else
@@ -158,7 +171,7 @@ public class BotConfig
         }
         catch (ConfigException ex)
         {
-            prompt.alert(Prompt.Level.ERROR, CONTEXT, ex + ": " + ex.getMessage() + "\n\nConfig Location: " + path.toAbsolutePath().toString());
+            prompt.alert(Prompt.Level.ERROR, CONTEXT, ex + ": " + ex.getMessage() + "\n\nConfig Location: " + path.toAbsolutePath());
         }
     }
     
@@ -175,7 +188,7 @@ public class BotConfig
         {
             prompt.alert(Prompt.Level.WARNING, CONTEXT, "Failed to write new config options to config.txt: "+ex
                 + "\nPlease make sure that the files are not on your desktop or some other restricted area.\n\nConfig Location: " 
-                + path.toAbsolutePath().toString());
+                + path.toAbsolutePath());
         }
     }
     
@@ -207,7 +220,7 @@ public class BotConfig
         byte[] bytes = BotConfig.loadDefaultConfig().getBytes();
         try
         {
-            prompt.alert(Prompt.Level.INFO, "JMusicBot Config", "Writing default config file to " + path.toAbsolutePath().toString());
+            prompt.alert(Prompt.Level.INFO, "JMusicBot Config", "Writing default config file to " + path.toAbsolutePath());
             Files.write(path, bytes);
         }
         catch(Exception ex)
@@ -330,6 +343,11 @@ public class BotConfig
     {
         return useEval;
     }
+
+    public String getEvalEngine()
+    {
+        return evalEngine;
+    }
     
     public boolean useNPImages()
     {
@@ -340,10 +358,15 @@ public class BotConfig
     {
         return maxSeconds;
     }
+
+    public int getMaxYTPlaylistPages()
+    {
+        return maxYTPlaylistPages;
+    }
     
     public String getMaxTime()
     {
-        return FormatUtil.formatTime(maxSeconds * 1000);
+        return TimeUtil.formatTime(maxSeconds * 1000);
     }
 
     public long getAloneTimeUntilStop()

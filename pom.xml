@@ -3,24 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jagrosh</groupId>
     <artifactId>MusicBot</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.2</version>
     <packaging>jar</packaging>
     
     <repositories>
         <repository>
-            <id>TopiWTF-releases</id>
-            <name>Topis Maven Repo</name>
-            <url>https://maven.topi.wtf/releases</url>
-        </repository>
-        <repository>
             <id>m2.duncte123.dev</id>
             <name>m2-duncte123</name>
             <url>https://m2.duncte123.dev/releases</url>
-        </repository>
-        <repository>
-            <id>arbjergDev-snapshots</id>
-            <name>Lavalink Repository</name>
-            <url>https://maven.lavalink.dev/snapshots</url>
         </repository>
         <repository>
             <id>dv8tion</id>
@@ -40,8 +30,19 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
+        <!-- Lavalink -->
+        <repository>
+            <id>arbjergDev</id>
+            <name>Lavalink Repository</name>
+            <url>https://maven.lavalink.dev/releases</url>
+        </repository>
+        <repository>
+            <id>TopiWTF-releases</id>
+            <name>Topis Maven Repo</name>
+            <url>https://maven.topi.wtf/releases</url>
+        </repository>
     </repositories>
-    
+
     <dependencies>
         <!-- Discord Dependencies -->
         <dependency>
@@ -60,7 +61,12 @@
         <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>afec211f05c9dcf0b6ee44276a02f0316ea2458a-SNAPSHOT</version>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.lavalink.youtube</groupId>
+            <artifactId>common</artifactId>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.dunctebot</groupId>
@@ -68,16 +74,16 @@
             <version>1.9.0</version>
         </dependency>
 
-        <!-- Lyric Dependencies -->
+        <!-- LavaSrc(LavaSearch, LavaLyrics, Spotify) -->
         <dependency>
             <groupId>com.github.topi314.lavasrc</groupId>
             <artifactId>lavasrc</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.topi314.lavasrc</groupId>
             <artifactId>protocol-jvm</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.1</version>
         </dependency>
 
         <!-- Misc Internal Dependencies -->

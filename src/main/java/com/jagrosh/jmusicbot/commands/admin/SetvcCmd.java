@@ -33,36 +33,36 @@ public class SetvcCmd extends AdminCommand
     public SetvcCmd(Bot bot)
     {
         this.name = "setvc";
-        this.help = "\uC74C\uC545\uC744 \uC7AC\uC0DD\uD558\uAE30 \uC704\uD55C \uC74C\uC131 \uCC44\uB110\uC744 \uC124\uC815\uD569\uB2C8\uB2E4";
+        this.help = "음악을 재생하기 위한 음성 채널을 설정합니다";
         this.arguments = "<channel|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
-    
+
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(CommandEvent event)
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" \uC74C\uC131 \uCC44\uB110 \uB610\uB294 NONE\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624");
+            event.reply(event.getClient().getError()+" 음성 채널 또는 NONE을 포함하십시오");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uBAA8\uB4E0 \uCC44\uB110\uC5D0\uC11C \uC74C\uC545\uC744 \uC7AC\uC0DD\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4");
+            event.reply(event.getClient().getSuccess()+" 이제 모든 채널에서 음악을 재생할 수 있습니다");
         }
         else
         {
             List<VoiceChannel> list = FinderUtil.findVoiceChannels(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" \uC77C\uCE58\uD558\uB294 \uC74C\uC131 \uCC44\uB110\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC74C \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" 일치하는 음성 채널을 찾을 수 없음 \""+event.getArgs()+"\"");
             else if (list.size()>1)
-                event.reply(event.getClient().getWarning()+FormatUtil.listOfVChannels(list, event.getArgs()));
+                event.reply(event.getClient().getWarning()+ FormatUtil.listOfVChannels(list, event.getArgs()));
             else
             {
                 s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" \uC774\uC81C \uC74C\uC545\uC740 \uC624\uC9C1 "+list.get(0).getAsMention()+" \uC5D0\uC11C\uB9CC \uC7AC\uC0DD\uB429\uB2C8\uB2E4");
+                event.reply(event.getClient().getSuccess()+" 이제 음악은 오직 "+list.get(0).getAsMention()+" 에서만 재생됩니다");
             }
         }
     }

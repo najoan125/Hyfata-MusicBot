@@ -33,8 +33,8 @@ public class SetdjCmd extends AdminCommand
     public SetdjCmd(Bot bot)
     {
         this.name = "setdj";
-        this.help = "\uD2B9\uC815 \uC74C\uC545 \uBA85\uB839\uC758 DJ \uC5ED\uD560\uC744 \uC124\uC815\uD569\uB2C8\uB2E4";
-        this.arguments = "<\uC5ED\uD560\uC774\uB984|NONE>";
+        this.help = "특정 음악 명령의 DJ 역할을 설정합니다";
+        this.arguments = "<역할이름|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
     
@@ -43,26 +43,26 @@ public class SetdjCmd extends AdminCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" \uC5ED\uD560 \uC774\uB984 \uB610\uB294 NONE\uC744 \uD3EC\uD568\uD558\uC2ED\uC2DC\uC624.");
+            event.reply(event.getClient().getError()+" 역할 이름 또는 NONE을 포함하십시오.");
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setDJRole(null);
-            event.reply(event.getClient().getSuccess()+" DJ\uC5ED\uD560 \uCD08\uAE30\uD654\uB428; \uAD00\uB9AC\uC790\uB9CC DJ\uBA85\uB839\uC5B4\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
+            event.reply(event.getClient().getSuccess()+" DJ역할 초기화됨; 관리자만 DJ명령어를 사용할 수 있습니다.");
         }
         else
         {
             List<Role> list = FinderUtil.findRoles(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" \uC77C\uCE58\uD558\uB294 \uC5ED\uD560\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4 \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" 일치하는 역할을 찾을 수 없습니다 \""+event.getArgs()+"\"");
             else if (list.size()>1)
-                event.reply(event.getClient().getWarning()+FormatUtil.listOfRoles(list, event.getArgs()));
+                event.reply(event.getClient().getWarning()+ FormatUtil.listOfRoles(list, event.getArgs()));
             else
             {
                 s.setDJRole(list.get(0));
-                event.reply(event.getClient().getSuccess()+" \uC774\uC81C **"+list.get(0).getName()+"** \uC5ED\uD560\uC758 \uC0AC\uC6A9\uC790\uAC00 DJ \uBA85\uB839\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
+                event.reply(event.getClient().getSuccess()+" 이제 **"+list.get(0).getName()+"** 역할의 사용자가 DJ 명령을 사용할 수 있습니다.");
             }
         }
     }

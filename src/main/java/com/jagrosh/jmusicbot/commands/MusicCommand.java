@@ -25,6 +25,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
+import java.util.Objects;
+
 /**
  *
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -53,44 +55,43 @@ public abstract class MusicCommand extends Command
             {
                 event.getMessage().delete().queue();
             } catch(PermissionException ignore){}
-            event.replyInDm(event.getClient().getError()+" \uB2F9\uC2E0\uC740 "+tchannel.getAsMention()+" \uC5D0\uC11C\uB9CC \uBA85\uB839\uC5B4\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4!");
+            event.replyInDm(event.getClient().getError()+" 당신은 "+tchannel.getAsMention()+" 에서만 명령어를 사용할 수 있습니다!");
             return;
         }
         bot.getPlayerManager().setUpHandler(event.getGuild()); // no point constantly checking for this later
-        if(bePlaying && !((AudioHandler)event.getGuild().getAudioManager().getSendingHandler()).isMusicPlaying(event.getJDA()))
+        if(bePlaying && !((AudioHandler) Objects.requireNonNull(event.getGuild().getAudioManager().getSendingHandler())).isMusicPlaying(event.getJDA()))
         {
-            event.reply(event.getClient().getError()+" \uADF8\uAC78 \uC774\uC6A9\uD558\uB824\uBA74 \uC74C\uC545\uC774 \uC7AC\uC0DD\uB418\uACE0 \uC788\uC5B4\uC57C \uD574\uC694!");
+            event.reply(event.getClient().getError()+" 그걸 이용하려면 음악이 재생되고 있어야 해요!");
             return;
         }
         if(beListening)
         {
-            VoiceChannel current = event.getGuild().getSelfMember().getVoiceState().getChannel();
+            VoiceChannel current = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel();
             if(current==null)
                 current = settings.getVoiceChannel(event.getGuild());
             GuildVoiceState userState = event.getMember().getVoiceState();
-            if(!userState.inVoiceChannel() || userState.isDeafened() || (current!=null && !userState.getChannel().equals(current)))
+            if(!Objects.requireNonNull(userState).inVoiceChannel() || userState.isDeafened() || (current!=null && !Objects.requireNonNull(userState.getChannel()).equals(current)))
             {
-                event.replyError(""+(current==null ? "\uC74C\uC131 \uCC44\uB110" : "**"+current.getName()+"**")+" \uC5D0 \uC788\uC5B4\uC57C\uB9CC \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4!");
+                event.replyError((current==null ? "음성 채널" : "**"+current.getName()+"**")+" 에 있어야만 사용할 수 있습니다!");
                 return;
             }
 
             VoiceChannel afkChannel = userState.getGuild().getAfkChannel();
             if(afkChannel != null && afkChannel.equals(userState.getChannel()))
             {
-                event.replyError("AFK(\uC7A0\uC218) \uCC44\uB110\uC5D0\uC11C\uB294 \uC774 \uBA85\uB839\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!");
+                event.replyError("AFK(잠수) 채널에서는 이 명령을 사용할 수 없습니다!");
                 return;
             }
 
             if(!event.getGuild().getSelfMember().getVoiceState().inVoiceChannel())
             {
-                try 
+                try
                 {
                     event.getGuild().getAudioManager().openAudioConnection(userState.getChannel());
-                    event.getGuild().getAudioManager().setSelfDeafened(true);
                 }
-                catch(PermissionException ex) 
+                catch(PermissionException ex)
                 {
-                    event.reply(event.getClient().getError()+" "+userState.getChannel().getAsMention()+" *\uC73C*\uB85C \uC5F0\uACB0\uD558\uB294 \uAC83\uC774 \uBD88\uAC00\uB2A5\uD569\uB2C8\uB2E4!");
+                    event.reply(event.getClient().getError()+" "+ Objects.requireNonNull(userState.getChannel()).getAsMention()+" 으(로) 연결하는 것이 불가능합니다!");
                     return;
                 }
             }

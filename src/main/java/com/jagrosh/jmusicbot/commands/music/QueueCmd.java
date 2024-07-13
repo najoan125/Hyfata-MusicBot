@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.commands.music;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
@@ -27,6 +28,7 @@ import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -43,8 +45,8 @@ public class QueueCmd extends MusicCommand
     public QueueCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uB300\uAE30\uC5F4";
-        this.help = "\uD604\uC7AC \uB300\uAE30\uC5F4\uC744 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
+        this.name = "대기열";
+        this.help = "현재 대기열을 표시합니다";
         this.arguments = "[pagenum]";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
@@ -71,7 +73,7 @@ public class QueueCmd extends MusicCommand
         }
         catch(NumberFormatException ignore){}
         AudioHandler ah = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        List<QueuedTrack> list = ah.getQueue().getList();
+        List<QueuedTrack> list = Objects.requireNonNull(ah).getQueue().getList();
         if(list.isEmpty())
         {
             Message nowp = ah.getNowPlaying(event.getJDA());
@@ -108,7 +110,7 @@ public class QueueCmd extends MusicCommand
                     .append(ah.getPlayer().getPlayingTrack().getInfo().title).append("**\n");
         }
         return FormatUtil.filter(sb.append(success).append(" ").append(songslength)
-                .append("곡, `").append(FormatUtil.formatTime(total)).append("` ")
+                .append("곡, `").append(TimeUtil.formatTime(total)).append("` ")
                 .append("| ").append(queueType.getEmoji()).append(" `").append(queueType.getUserFriendlyName()).append('`')
                 .append(repeatmode.getEmoji() != null ? " | "+repeatmode.getEmoji() : "").toString());
     }

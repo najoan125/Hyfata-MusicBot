@@ -61,12 +61,9 @@ public class JMusicBot
     public static void main(String[] args)
     {	
         if(args.length > 0)
-            switch(args[0].toLowerCase())
-            {
-                case "generate-config":
-                    BotConfig.writeDefaultConfig();
-                    return;
-                default:
+            if (args[0].equalsIgnoreCase("generate-config")) {
+                BotConfig.writeDefaultConfig();
+                return;
             }
         startBot();
     }
@@ -200,6 +197,7 @@ public class JMusicBot
                         new SCSearchCmd(bot),
                         new SPSearchCmd(bot),
                         new AMSearchCmd(bot),
+                        new SeekCmd(bot),
                         new SkipCmd(bot),
                         new PauseCmd(bot),
                         new StopCmd(bot),

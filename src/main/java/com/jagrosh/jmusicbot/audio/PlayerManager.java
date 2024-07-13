@@ -19,10 +19,19 @@ import com.dunctebot.sourcemanagers.DuncteBotSources;
 import com.github.topi314.lavasrc.applemusic.AppleMusicSourceManager;
 import com.github.topi314.lavasrc.spotify.SpotifySourceManager;
 import com.jagrosh.jmusicbot.Bot;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.nico.NicoAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.Objects;
@@ -48,14 +57,26 @@ public class PlayerManager extends DefaultAudioPlayerManager
         String appleToken = bot.getConfig().getAppleToken();
         String appleCountry = bot.getConfig().getAppleCountry();
 
+        TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
+
+        YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(true);
+        yt.setPlaylistPageCount(bot.getConfig().getMaxYTPlaylistPages());
+        registerSourceManager(yt);
+
+        registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+        registerSourceManager(new BandcampAudioSourceManager());
+        registerSourceManager(new VimeoAudioSourceManager());
+        registerSourceManager(new TwitchStreamAudioSourceManager());
+        registerSourceManager(new BeamAudioSourceManager());
+        registerSourceManager(new GetyarnAudioSourceManager());
+        registerSourceManager(new NicoAudioSourceManager());
+        registerSourceManager(new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY));
         registerSourceManager(new SpotifySourceManager(null, spotifyId, spotifySecret, spotifyCountry, this));
         registerSourceManager(new AppleMusicSourceManager(null, appleToken, appleCountry, this));
 
-        TransformativeAudioSourceManager.createTransforms(bot.getConfig().getTransforms()).forEach(this::registerSourceManager);
-        AudioSourceManagers.registerRemoteSources(this);
         AudioSourceManagers.registerLocalSource(this);
+
         DuncteBotSources.registerAll(this, "en-US");
-        source(YoutubeAudioSourceManager.class).setPlaylistPageCount(10);
     }
     
     public Bot getBot()

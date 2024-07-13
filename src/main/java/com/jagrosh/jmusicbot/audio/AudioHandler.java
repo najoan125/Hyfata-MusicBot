@@ -21,24 +21,24 @@ import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import com.jagrosh.jmusicbot.utils.synclyric.SyncLyricUtil;
+import com.jagrosh.jmusicbot.settings.Settings;
+import com.jagrosh.jmusicbot.utils.FormatUtil;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
+
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-
-import com.jagrosh.jmusicbot.settings.Settings;
-import com.jagrosh.jmusicbot.utils.FormatUtil;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
-
 import java.nio.ByteBuffer;
+import java.util.*;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -50,7 +50,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -58,7 +60,7 @@ import org.jetbrains.annotations.NotNull;
 public class AudioHandler extends AudioEventAdapter implements AudioSendHandler {
     public final static String PLAY_EMOJI = "<:play:1131227162805018634>"; // ▶
     public final static String PAUSE_EMOJI = "<:pause:1131234191984578681>"; // ⏸
-    public final static String STOP_EMOJI = "<:stop:1131234190067761173>"; // ⏹
+    //public final static String STOP_EMOJI = "<:stop:1131234190067761173>"; // ⏹
     public final static String NEXT_EMOJI = "<:next:1131227160846274582>";
 
     private final List<AudioTrack> defaultQueue = new LinkedList<>();
@@ -79,8 +81,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         this.setQueueType(manager.getBot().getSettingsManager().getSettings(guildId).getQueueType());
     }
 
-    public void setQueueType(QueueType type)
-    {
+    public void setQueueType(QueueType type) {
         queue = type.createInstance(queue);
     }
 
@@ -114,7 +115,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     }
 
     public boolean isMusicPlaying(JDA jda) {
-        return guild(jda).getSelfMember().getVoiceState().inVoiceChannel() && audioPlayer.getPlayingTrack() != null;
+        return Objects.requireNonNull(guild(jda).getSelfMember().getVoiceState()).inVoiceChannel() && audioPlayer.getPlayingTrack() != null;
     }
 
     public Set<String> getVotes() {
@@ -198,6 +199,11 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     }
 
     @Override
+    public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+        LoggerFactory.getLogger("AudioHandler").error("Track " + track.getIdentifier() + " has failed to play", exception);
+    }
+
+    @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
         votes.clear();
         manager.getBot().getNowplayingHandler().onTrackUpdate(track);
@@ -210,7 +216,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             Guild guild = guild(jda);
             AudioTrack track = audioPlayer.getPlayingTrack();
             MessageBuilder mb = new MessageBuilder();
-            mb.append(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **현재 " + guild.getSelfMember().getVoiceState().getChannel().getAsMention() + "에서 재생중...**"));
+            mb.append(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **현재 " + Objects.requireNonNull(Objects.requireNonNull(guild.getSelfMember().getVoiceState()).getChannel()).getAsMention() + "에서 재생중...**"));
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(guild.getSelfMember().getColor());
             RequestMetadata rm = getRequestMetadata();
@@ -242,7 +248,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                     trackInfo + "\n\n"
                             + getStatusEmoji()
                             + " " + FormatUtil.progressBar(progress)
-                            + " `" + FormatUtil.formatTime(track.getPosition()) + " / " + FormatUtil.formatTime(track.getDuration()) + "` \n\n"
+                            + " `" + TimeUtil.formatTime(track.getPosition()) + " / " + TimeUtil.formatTime(track.getDuration()) + "` \n\n"
                             + repeatMode.getEmoji() + " **" + getRepeatModeName(repeatMode) + "** | "
                             + FormatUtil.volumeIcon(audioPlayer.getVolume()) + " **" + audioPlayer.getVolume() + "%**"
             );
@@ -388,7 +394,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 .append(getStatusEmoji()).append(" ")
                 .append(FormatUtil.progressBar(progress))
                 .append(" `")
-                .append(FormatUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).append(" / ").append(FormatUtil.formatTime(track.getDuration()))
+                .append(TimeUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).append(" / ").append(TimeUtil.formatTime(track.getDuration()))
                 .append("`");
         return mb.setEmbeds(eb.build()).build();
     }
@@ -405,7 +411,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     public Message getNoMusicPlaying(JDA jda) {
         Guild guild = guild(jda);
         return new MessageBuilder()
-                .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **\uC7AC\uC0DD\uC911\uC778 \uC74C\uC545 \uC5C6\uC74C...**"))
+                .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **재생중인 음악 없음...**"))
                 .setEmbeds(new EmbedBuilder()
                         .setTitle("현재 재생중인 음악이 없습니다!")
                         .setDescription("`;재생` 또는 `;검색` 명령어를 이용해 음악을 재생하세요!")

@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.commands.music.SearchCmd;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
+import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
@@ -74,8 +75,8 @@ public class Listener extends ListenerAdapter
         {
             try
             {
-                String defpl = bot.getSettingsManager().getSettings(guild).getDefaultPlaylist();
-                VoiceChannel vc = bot.getSettingsManager().getSettings(guild).getVoiceChannel(guild);
+                String defpl = Objects.requireNonNull(bot.getSettingsManager().getSettings(guild)).getDefaultPlaylist();
+                VoiceChannel vc = Objects.requireNonNull(bot.getSettingsManager().getSettings(guild)).getVoiceChannel(guild);
                 if(defpl!=null && vc!=null && bot.getPlayerManager().setUpHandler(guild).playFromDefault())
                 {
                     guild.getAudioManager().openAudioConnection(vc);
@@ -117,13 +118,13 @@ public class Listener extends ListenerAdapter
     }
 
     @Override
-    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event)
+    public void onGuildVoiceSelfDeafen(@NotNull GuildVoiceSelfDeafenEvent event)
     {
     	bot.getAloneInVoiceHandler().Deafen(event);
     }
 
     @Override
-    public void onShutdown(ShutdownEvent event)
+    public void onShutdown(@NotNull ShutdownEvent event)
     {
         bot.shutdown();
     }
@@ -140,7 +141,7 @@ public class Listener extends ListenerAdapter
     	User user = SearchCmd.searchCmdMap.get(messageId);
 
         AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
-        int volume = handler.getPlayer().getVolume();
+        int volume = Objects.requireNonNull(handler).getPlayer().getVolume();
         if(event.getComponentId().equals("pause") && Objects.requireNonNull(handler).isMusicPlaying(event.getJDA())){
             if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
                 return;
@@ -181,7 +182,7 @@ public class Listener extends ListenerAdapter
         else if (event.getComponentId().equals("repeat")){
             Settings settings = bot.getSettingsManager().getSettings(event.getGuild());
             RepeatMode value;
-            if(settings.getRepeatMode() == RepeatMode.OFF)
+            if(Objects.requireNonNull(settings).getRepeatMode() == RepeatMode.OFF)
                 value = RepeatMode.ALL;
             else
                 value = RepeatMode.OFF;
@@ -194,8 +195,8 @@ public class Listener extends ListenerAdapter
     }
 
     private void nextCmdClicked(ButtonClickEvent event){
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        RequestMetadata rm = handler.getRequestMetadata();
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        RequestMetadata rm = Objects.requireNonNull(handler).getRequestMetadata();
         if(event.getUser().getIdLong() == rm.getOwner())
         {
             event.reply(new MessageBuilder()
@@ -209,8 +210,8 @@ public class Listener extends ListenerAdapter
         }
         else
         {
-            int listeners = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
-                    .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
+            int listeners = (int) Objects.requireNonNull(Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel()).getMembers().stream()
+                    .filter(m -> !m.getUser().isBot() && !Objects.requireNonNull(m.getVoiceState()).isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getUser().getId()))
                 msg = bot.getConfig().getWarning()+" <@"+event.getUser().getId()+"> 이미 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
@@ -221,7 +222,7 @@ public class Listener extends ListenerAdapter
             }
             int skippers = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
-            int required = (int)Math.ceil(listeners * bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio());
+            int required = (int)Math.ceil(listeners * Objects.requireNonNull(bot.getSettingsManager().getSettings(event.getGuild())).getSkipRatio());
             msg += skippers + "표, " + required + "/" + listeners + " 필요]`";
             String embed;
             if(skippers>=required)
@@ -255,27 +256,27 @@ public class Listener extends ListenerAdapter
         AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
     	if (event.getComponentId().equals("cancel")) {
     		event.editMessage("검색이 취소되었습니다.").setEmbeds().setActionRows().queue();
-            if (!handler.isMusicPlaying(ev.getJDA()) && handler.getQueue().isEmpty()){
+            if (!Objects.requireNonNull(handler).isMusicPlaying(ev.getJDA()) && handler.getQueue().isEmpty()){
                 if (!bot.getConfig().getStay())
                     ev.getGuild().getAudioManager().closeAudioConnection();
             }
     	}
     	else {
-    		AudioTrack track = pl.getTracks().get(Integer.parseInt(event.getButton().getId())-1);
+    		AudioTrack track = pl.getTracks().get(Integer.parseInt(Objects.requireNonNull(Objects.requireNonNull(event.getButton()).getId()))-1);
     		if(bot.getConfig().isTooLong(track))
             {
     		    event.getMessage().delete().queue();
-                ev.replyWarning("\uC774 \uD2B8\uB799 (**"+track.getInfo().title+"**) (\uC740)\uB294 \uD5C8\uC6A9\uB41C \uCD5C\uB300\uCE58\uBCF4\uB2E4 \uAE41\uB2C8\uB2E4: `"
-                        +FormatUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
+                ev.replyWarning("이 트랙 (**"+track.getInfo().title+"**) 은(는) 허용된 최대치보다 깁니다: `"
+                        + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
                 return;
             }
-            int pos = handler.addTrack(new QueuedTrack(track, ev.getAuthor()))+1;
+            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, ev)))+1;
             Message addMsg = new MessageBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).build();
             MessageAction ma = event.getMessage().editMessage(addMsg);
             EmbedBuilder eb = new EmbedBuilder();
             eb.setTitle(track.getInfo().title, track.getInfo().uri);
-            eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+FormatUtil.formatTime(track.getDuration())+"`)");
+            eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+ TimeUtil.formatTime(track.getDuration())+"`)");
             ma.setEmbeds(eb.build()).queue();
             event.deferEdit().queue();
     	}
@@ -292,7 +293,7 @@ public class Listener extends ListenerAdapter
             return;
         if(bot.getConfig().getDBots())
             return;
-        jda.getTextChannelById(119222314964353025L)
+        Objects.requireNonNull(jda.getTextChannelById(119222314964353025L))
                 .sendMessage("This account is running JMusicBot. Please do not list bot clones on this server, <@"+bot.getConfig().getOwnerId()+">.").complete();
         dbots.leave().queue();
     }
