@@ -19,7 +19,6 @@ import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.queue.AbstractQueue;
 import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
-import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import com.jagrosh.jmusicbot.utils.synclyric.SyncLyricUtil;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
@@ -272,7 +271,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     int currentLyricIndex = 0;
     double ping;
 
-    public Message getInitLyric(Guild guild, AudioTrack track) throws LyricNotFoundException, IOException {
+    public Message getInitLyric(Guild guild, AudioTrack track) throws Exception {
         if (track.getInfo().isrc != null) {
             lyrics = SyncLyricUtil.getLyricByIsrc(track.getInfo().isrc);
         } else {
@@ -283,7 +282,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return getNewLyricMessage(guild, track);
     }
 
-    public Message getLyric(JDA jda, long ping) throws LyricNotFoundException, IOException {
+    public Message getLyric(JDA jda, long ping) throws Exception {
         this.ping = FormatUtil.formatTimeDouble(ping);
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
@@ -296,7 +295,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return null;
     }
 
-    public Message getSyncLyric(JDA jda) throws LyricNotFoundException, IOException {
+    public Message getSyncLyric(JDA jda) throws Exception {
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
             double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());

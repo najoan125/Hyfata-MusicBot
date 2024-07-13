@@ -11,12 +11,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
 /*
  * API: https://github.com/OrfiDev/orpheusdl-musixmatch/blob/master/musixmatch_api.py
  */
 public class SyncLyricUtil {
+
+    private static final String BASE_URL = "https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
+    private static final String ISRC_URL = "https://apic-desktop.musixmatch.com/ws/1.1/track.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
+
     public static LinkedHashMap<Double, String> getLyric(String track, String artist) throws IOException, LyricNotFoundException {
         JSONObject json = getJsonObjectFromConnection(getMusixmatchConnection(track, artist));
 
@@ -39,9 +44,16 @@ public class SyncLyricUtil {
         return getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
     }
 
-    public static LinkedHashMap<Double, String> getLyricByIsrc(String isrc) throws IOException, LyricNotFoundException {
+    public static LinkedHashMap<Double, String> getLyricByIsrc(String isrc) throws Exception {
         JSONObject json = getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(isrc));
-        if (json.getJSONObject("message").getJSONObject("header").getInt("status_code") == 404) {
+        int statusCode = json.getJSONObject("message").getJSONObject("header").getInt("status_code");
+        switch (statusCode) {
+            case 200: break;
+            case 404: throw new LyricNotFoundException();
+            case 401: throw new Exception("HTTP 401 Error! 사용량이 너무 많아 문제가 발생했을 수 있습니다. 잠시 후에 다시 시도하세요!");
+            default: throw new Exception("HTTP " + statusCode + " Error!");
+        }
+        if (json.getJSONObject("message").getJSONObject("header").getInt("available") == 0) {
             throw new LyricNotFoundException();
         }
 
@@ -79,9 +91,8 @@ public class SyncLyricUtil {
 
     @NotNull
     private static HttpURLConnection getMusixmatchConnection(String track, String artist) throws IOException {
-        String baseUrl = "https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
-        String query = "&q_track=" + URLEncoder.encode(track, "UTF-8") + "&q_artist=" + URLEncoder.encode(artist, "UTF-8");
-        URL url = new URL(baseUrl + query);
+        String query = "&q_track=" + URLEncoder.encode(track, StandardCharsets.UTF_8) + "&q_artist=" + URLEncoder.encode(artist, StandardCharsets.UTF_8);
+        URL url = new URL(BASE_URL + query);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -92,9 +103,8 @@ public class SyncLyricUtil {
 
     @NotNull
     private static HttpURLConnection getMusixmatchConnectionByIsrc(String isrc) throws IOException {
-        String baseUrl = "https://apic-desktop.musixmatch.com/ws/1.1/track.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
-        String query = "&track_isrc=" + URLEncoder.encode(isrc, "UTF-8");
-        URL url = new URL(baseUrl + query);
+        String query = "&track_isrc=" + URLEncoder.encode(isrc, StandardCharsets.UTF_8);
+        URL url = new URL(ISRC_URL + query);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");

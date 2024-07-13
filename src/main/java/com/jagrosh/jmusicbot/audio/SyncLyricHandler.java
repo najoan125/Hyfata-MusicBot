@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.audio;
 
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.commands.music.SyncLyricsCmd;
 import com.jagrosh.jmusicbot.entities.Pair;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
@@ -24,9 +25,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +76,7 @@ public class SyncLyricHandler {
             Message msg;
             boolean error = false;
             try {
-                if (!handler.isMusicPlaying(bot.getJDA())) {
+                if (!Objects.requireNonNull(handler).isMusicPlaying(bot.getJDA())) {
                     msg = handler.getNoMusicPlaying(bot.getJDA());
                     toRemove.add(guildId);
                 } else {
@@ -85,8 +86,9 @@ public class SyncLyricHandler {
                 msg = new MessageBuilder().setContent(bot.getConfig().getWarning() + SyncLyricsCmd.LYRIC_NOT_FOUND).build();
                 toRemove.add(guildId);
                 error = true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 msg = new MessageBuilder().setContent(bot.getConfig().getError() + SyncLyricsCmd.LYRIC_ERROR + e.getMessage()).build();
+                JMusicBot.LOG.error("isrc: {}", Objects.requireNonNull(handler).getPlayer().getPlayingTrack().getInfo().isrc);
                 e.printStackTrace(System.out);
                 toRemove.add(guildId);
                 error = true;

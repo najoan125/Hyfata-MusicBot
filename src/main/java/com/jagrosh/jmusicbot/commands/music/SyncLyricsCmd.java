@@ -17,13 +17,13 @@ package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 
-import java.io.IOException;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class SyncLyricsCmd extends MusicCommand {
     public static final String LYRIC_NOT_FOUND = " 싱크 가사를 찾을 수 없습니다! (Spotify 또는 Apple Music 으로 재생하면 싱크 가사가 지원될 가능성이 높습니다)";
-    public static final String LYRIC_ERROR = " 싱크 가사를 불러오는 중 오류가 발생하였습니다! : ";
+    public static final String LYRIC_ERROR = " 싱크 가사를 불러오는 중 오류가 발생하였습니다 : ";
     public SyncLyricsCmd(Bot bot) {
         super(bot);
         this.name = "싱크가사";
@@ -51,15 +51,18 @@ public class SyncLyricsCmd extends MusicCommand {
                 lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA(), ping);
             } catch (LyricNotFoundException e) {
                 msg.editMessage(bot.getConfig().getWarning() + LYRIC_NOT_FOUND).queue();
+                bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
                 return;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 msg.editMessage(bot.getConfig().getError() + LYRIC_ERROR + e.getMessage()).queue();
+                JMusicBot.LOG.error("isrc: {}", Objects.requireNonNull(handler).getPlayer().getPlayingTrack().getInfo().isrc);
                 e.printStackTrace(System.out);
+                bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
                 return;
             }
 
             if (lyricMsg == null) {
-                msg.editMessage(handler.getNoMusicPlaying(event.getJDA())).queue();
+                msg.editMessage(Objects.requireNonNull(handler).getNoMusicPlaying(event.getJDA())).queue();
                 bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
             } else {
                 msg.editMessage(lyricMsg).queue();
