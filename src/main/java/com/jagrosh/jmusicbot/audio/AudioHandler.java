@@ -382,7 +382,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                             + " "
             );
         }
-        eb.setFooter("가사 제공: Musixmatch");
         mb.append("**").append(manager.getBot().getConfig().getSuccess())
                 .append(" ")
                 .append(track.getInfo().author)
@@ -395,6 +394,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 .append(" `")
                 .append(TimeUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).append(" / ").append(TimeUtil.formatTime(track.getDuration()))
                 .append("`");
+        mb.append("\n\n가사 제공: [Musixmatch](https://www.musixmatch.com)");
         return mb.setEmbeds(eb.build()).build();
     }
 
