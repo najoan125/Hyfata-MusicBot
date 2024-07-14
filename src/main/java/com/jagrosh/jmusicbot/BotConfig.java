@@ -43,7 +43,8 @@ public class BotConfig
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
             evalEngine,
             spotifyId, spotifySecret, spotifyCountry,
-            appleToken, appleCountry;
+            appleToken, appleCountry,
+            musixmatchToken;
     private boolean stayInChannel, songInGame, npImages, updatealerts, useEval, dbots;
     private long owner, maxSeconds, aloneTimeUntilStop;
     private int maxYTPlaylistPages;
@@ -105,6 +106,7 @@ public class BotConfig
             spotifyCountry = config.getString("spotifyCountry");
             appleToken = config.getString("appleToken");
             appleCountry = config.getString("appleCountry");
+            musixmatchToken = config.getString("musixmatchToken");
             dbots = owner == 113156185389092864L;
             
             // we may need to write a new config file
@@ -411,6 +413,10 @@ public class BotConfig
 
     public String getAppleCountry() {
         return appleCountry;
+    }
+
+    public String getMusixmatchToken() {
+        return musixmatchToken;
     }
 
     public Config getTransforms()

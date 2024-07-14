@@ -273,9 +273,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
     public Message getInitLyric(Guild guild, AudioTrack track) throws Exception {
         if (track.getInfo().isrc != null) {
-            lyrics = SyncLyricUtil.getLyricByIsrc(track.getInfo().isrc);
+            lyrics = SyncLyricUtil.getLyricByIsrc(manager.getBot(), track.getInfo().isrc);
         } else {
-            lyrics = SyncLyricUtil.getLyric(track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
+            lyrics = SyncLyricUtil.getLyric(manager.getBot(), track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
         }
         this.track = track;
         lyricTimes = new ArrayList<>(lyrics.keySet());

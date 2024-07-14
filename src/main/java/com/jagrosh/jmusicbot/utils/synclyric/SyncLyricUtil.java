@@ -1,5 +1,6 @@
 package com.jagrosh.jmusicbot.utils.synclyric;
 
+import com.jagrosh.jmusicbot.Bot;
 import org.apache.http.client.HttpResponseException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -19,11 +20,10 @@ import java.util.LinkedHashMap;
  */
 public class SyncLyricUtil {
 
-    private static final String BASE_URL = "https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
-    private static final String ISRC_URL = "https://apic-desktop.musixmatch.com/ws/1.1/track.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
-
-    public static LinkedHashMap<Double, String> getLyric(String track, String artist) throws IOException, LyricNotFoundException {
-        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnection(track, artist));
+    public static LinkedHashMap<Double, String> getLyric(Bot bot, String track, String artist) throws Exception {
+        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnection(bot, track, artist));
+        int statusCode = json.getJSONObject("message").getJSONObject("header").getInt("status_code");
+        errorHandling(statusCode);
 
         JSONObject subtitleObject = json
                 .getJSONObject("message")
@@ -31,9 +31,8 @@ public class SyncLyricUtil {
                 .getJSONObject("macro_calls")
                 .getJSONObject("track.subtitles.get")
                 .getJSONObject("message");
-        if (subtitleObject.getJSONObject("header").getInt("status_code") == 404) {
-            throw new LyricNotFoundException();
-        }
+        int subtitleStatusCode = subtitleObject.getJSONObject("header").getInt("status_code");
+        errorHandling(subtitleStatusCode);
 
         String lyricArrayString = subtitleObject
                 .getJSONObject("body")
@@ -44,15 +43,11 @@ public class SyncLyricUtil {
         return getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
     }
 
-    public static LinkedHashMap<Double, String> getLyricByIsrc(String isrc) throws Exception {
-        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(isrc));
+    public static LinkedHashMap<Double, String> getLyricByIsrc(Bot bot, String isrc) throws Exception {
+        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(bot, isrc));
         int statusCode = json.getJSONObject("message").getJSONObject("header").getInt("status_code");
-        switch (statusCode) {
-            case 200: break;
-            case 404: throw new LyricNotFoundException();
-            case 401: throw new Exception("HTTP 401 Error! 사용량이 너무 많아 문제가 발생했을 수 있습니다. 잠시 후에 다시 시도하세요!");
-            default: throw new Exception("HTTP " + statusCode + " Error!");
-        }
+        errorHandling(statusCode);
+
         if (json.getJSONObject("message").getJSONObject("header").getInt("available") == 0) {
             throw new LyricNotFoundException();
         }
@@ -65,6 +60,37 @@ public class SyncLyricUtil {
                 .getJSONObject("subtitle")
                 .getString("subtitle_body");
         return getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
+    }
+
+    private static void errorHandling(int statusCode) throws Exception {
+        switch (statusCode) {
+            case 200:
+                break;
+            case 404:
+                throw new LyricNotFoundException();
+            case 401:
+                throw new Exception("musixmatch 인증에 실패했습니다! 사용량이 너무 많아 문제가 발생한 듯 합니다. 잠시 후에 다시 시도하세요.");
+            case 402:
+                throw new Exception("musixmatch 사용 한도에 도달했습니다! 하루 요청 한도를 초과한 듯 합니다. 내일 다시 시도하세요.");
+            case 500:
+                throw new Exception("앗, 뭔가 잘못됐어요! musixmatch 서버에 오류가 발생한 듯 합니다. 나중에 다시 시도하세요.");
+            case 503:
+                throw new Exception("현재 musixmatch 시스템이 너무 바빠서 요청을 처리할 수 없습니다! 나중에 다시 시도하세요.");
+            default:
+                throw new Exception("HTTP " + statusCode + " Error!");
+        }
+    }
+
+    private static String getAPI(Bot bot, boolean isrc) {
+        String method = isrc ? "track" : "macro";
+        return "https://apic-desktop.musixmatch.com/ws/1.1/" + method + ".subtitles.get?" +
+                "format=json&" +
+                "user_language=en&" +
+                "namespace=lyrics_synched&" +
+                "f_subtitle_length_max_deviation=1&" +
+                "subtitle_format=mxm&" +
+                "app_id=web-desktop-app-v1.0&" +
+                "usertoken=" + bot.getConfig().getMusixmatchToken();
     }
 
     @NotNull
@@ -90,9 +116,9 @@ public class SyncLyricUtil {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnection(String track, String artist) throws IOException {
+    private static HttpURLConnection getMusixmatchConnection(Bot bot, String track, String artist) throws IOException {
         String query = "&q_track=" + URLEncoder.encode(track, StandardCharsets.UTF_8) + "&q_artist=" + URLEncoder.encode(artist, StandardCharsets.UTF_8);
-        URL url = new URL(BASE_URL + query);
+        URL url = new URL(getAPI(bot,false) + query);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -102,9 +128,9 @@ public class SyncLyricUtil {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnectionByIsrc(String isrc) throws IOException {
+    private static HttpURLConnection getMusixmatchConnectionByIsrc(Bot bot, String isrc) throws IOException {
         String query = "&track_isrc=" + URLEncoder.encode(isrc, StandardCharsets.UTF_8);
-        URL url = new URL(ISRC_URL + query);
+        URL url = new URL(getAPI(bot,true) + query);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
