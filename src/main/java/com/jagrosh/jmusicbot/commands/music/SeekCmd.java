@@ -18,10 +18,13 @@ package com.jagrosh.jmusicbot.commands.music;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -31,6 +34,8 @@ import java.util.Objects;
  */
 public class SeekCmd extends MusicCommand
 {
+    private final static Logger LOG = LoggerFactory.getLogger("Seeking");
+
     public SeekCmd(Bot bot)
     {
         super(bot);
@@ -53,8 +58,7 @@ public class SeekCmd extends MusicCommand
             return;
         }
 
-
-        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(Long.class) != event.getAuthor().getIdLong())
+        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getAuthor().getIdLong())
         {
             event.replyError("**" + playingTrack.getInfo().title + "**은(는) 직접 추가한 곡이 아니기 때문에 탐색할 수 없습니다!");
             return;
@@ -75,19 +79,17 @@ public class SeekCmd extends MusicCommand
         if (seekMilliseconds > trackDuration)
         {
             event.replyError("현재 트랙의 길이가 `" + TimeUtil.formatTime(trackDuration) + "` 이기 때문에 `" + TimeUtil.formatTime(seekMilliseconds) + "` 위치로 이동할 수 없습니다!");
+            return;
         }
-        else
+
+        try {
+            playingTrack.setPosition(seekMilliseconds);
+        }
+        catch (Exception e)
         {
-            try
-            {
-                playingTrack.setPosition(seekMilliseconds);
-            }
-            catch (Exception e)
-            {
-                event.replyError("탐색을 시도하는 도중 오류 발생!");
-                e.printStackTrace();
-                return;
-            }
+            event.replyError("탐색을 시도하는 도중 오류가 발생하였습니다: " + e.getMessage());
+            LOG.warn("Failed to seek track " + playingTrack.getIdentifier(), e);
+            return;
         }
         event.replySuccess("성공적으로 `" + TimeUtil.formatTime(playingTrack.getPosition()) + "/" + TimeUtil.formatTime(playingTrack.getDuration()) + "`으(로) 탐색했습니다!");
     }

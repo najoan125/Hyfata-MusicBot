@@ -27,8 +27,6 @@ import java.nio.file.Paths;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.ApplicationInfo;
-import net.dv8tion.jda.api.entities.User;
 import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -218,9 +216,6 @@ public class OtherUtil
      */
     public static String getUnsupportedBotReason(JDA jda)
     {
-        if (jda.getSelfUser().getFlags().contains(User.UserFlag.VERIFIED_BOT))
-            return "The bot is verified. Using JMusicBot in a verified bot is not supported.";
-
         return null;
     }
 }
