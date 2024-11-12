@@ -78,12 +78,12 @@
         <dependency>
             <groupId>com.github.topi314.lavasrc</groupId>
             <artifactId>lavasrc</artifactId>
-            <version>4.1.1</version>
+            <version>4.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.topi314.lavasrc</groupId>
             <artifactId>protocol-jvm</artifactId>
-            <version>4.1.1</version>
+            <version>4.3.0</version>
         </dependency>
 
         <!-- Misc Internal Dependencies -->
