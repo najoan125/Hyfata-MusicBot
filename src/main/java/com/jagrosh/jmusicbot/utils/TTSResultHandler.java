@@ -67,7 +67,7 @@ public class TTSResultHandler implements AudioLoadResultHandler {
         if (Objects.requireNonNull(handler).getNowPlaying(event.getJDA()) != null && !isTTS) {
             AudioTrack cloned = nowPlaying.makeClone();
             cloned.setPosition(nowPlaying.getPosition());
-            handler.addTrackToFront(new QueuedTrack(cloned, handler.getRequestMetadata()));
+            handler.addTrackToFront(new QueuedTrack(cloned, handler.getRequestMetadata(), true));
             handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event)));
             handler.getPlayer().stopTrack();
         }

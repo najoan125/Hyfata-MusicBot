@@ -40,6 +40,17 @@ public class QueuedTrack implements Queueable
             track.setPosition(rm.requestInfo.startTimestamp);
         }
     }
+
+    public QueuedTrack(AudioTrack track, RequestMetadata rm, boolean positioned)
+    {
+        this.track = track;
+        this.track.setUserData(rm == null ? RequestMetadata.EMPTY : rm);
+
+        this.requestMetadata = rm;
+        if (!positioned && this.track.isSeekable() && rm != null) {
+            track.setPosition(rm.requestInfo.startTimestamp);
+        }
+    }
     
     @Override
     public long getIdentifier() 

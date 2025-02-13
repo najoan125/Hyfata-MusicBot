@@ -16,7 +16,7 @@ public class SyncLyricIsrcTest {
     private static final String ISRC_URL = "https://apic-desktop.musixmatch.com/ws/1.1/track.subtitles.get?format=json&user_language=en&namespace=lyrics_synched&f_subtitle_length_max_deviation=1&subtitle_format=mxm&app_id=web-desktop-app-v1.0&usertoken=201219dbdb0f6aaba1c774bd931d0e79a28024e28db027ae72955c";
 
     public static void main(String[] args) throws IOException {
-        String isrc = "ZZA0P2305775"; //QZEKE2084155 ZZA0P2305775
+        String isrc = "JPU902403617"; //QZEKE2084155 ZZA0P2305775
         JSONObject json = getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(isrc));
         System.out.println(json);
         if (json.getJSONObject("message").getJSONObject("header").getInt("available") == 0) {
