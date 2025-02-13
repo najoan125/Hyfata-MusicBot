@@ -23,6 +23,11 @@
             <url>https://jcenter.bintray.com</url>
         </repository>
         <repository>
+            <id>AddWhateverIdYouWant</id>
+            <name>SameHere</name>
+            <url>https://dl.cloudsmith.io/public/arcane/archive/maven/</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
             <snapshots>
