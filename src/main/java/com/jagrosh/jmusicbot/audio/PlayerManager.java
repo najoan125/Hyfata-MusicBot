@@ -74,7 +74,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
         registerSourceManager(new NicoAudioSourceManager());
         registerSourceManager(new HttpAudioSourceManager(MediaContainerRegistry.DEFAULT_REGISTRY));
         registerSourceManager(new SpotifySourceManager(null, spotifyId, spotifySecret, spotifyCountry, this));
-        registerSourceManager(new AppleMusicSourceManager(null, appleToken, appleCountry, this));
+        registerSourceManager(new AppleMusicSourceManager(null, appleToken, appleCountry, unused -> this));
 
         AudioSourceManagers.registerLocalSource(this);
 
