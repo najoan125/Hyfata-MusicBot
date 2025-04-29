@@ -42,6 +42,11 @@
             <url>https://maven.lavalink.dev/releases</url>
         </repository>
         <repository>
+            <id>arbjergDevSnapshot</id>
+            <name>Lavalink Repository</name>
+            <url>https://maven.lavalink.dev/snapshots</url>
+        </repository>
+        <repository>
             <id>TopiWTF-releases</id>
             <name>Topis Maven Repo</name>
             <url>https://maven.topi.wtf/releases</url>
@@ -71,7 +76,7 @@
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>common</artifactId>
-            <version>1.13.0</version>
+            <version>b4f2c98ce72ff7fc2affa449456d47757352f5a5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.dunctebot</groupId>
