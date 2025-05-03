@@ -76,7 +76,7 @@
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>common</artifactId>
-            <version>0e5cfca4e88c32db430ce76e6866b13035c85d22-SNAPSHOT</version>
+            <version>1.13.1</version>
         </dependency>
         <dependency>
             <groupId>com.dunctebot</groupId>
