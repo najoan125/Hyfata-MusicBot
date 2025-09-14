@@ -21,8 +21,8 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.util.Objects;
@@ -66,11 +66,11 @@ public abstract class MusicCommand extends Command
         }
         if(beListening)
         {
-            VoiceChannel current = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel();
+            VoiceChannel current = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel().asVoiceChannel();
             if(current==null)
                 current = settings.getVoiceChannel(event.getGuild());
             GuildVoiceState userState = event.getMember().getVoiceState();
-            if(!Objects.requireNonNull(userState).inVoiceChannel() || userState.isDeafened() || (current!=null && !Objects.requireNonNull(userState.getChannel()).equals(current)))
+            if(!Objects.requireNonNull(userState).inAudioChannel() || userState.isDeafened() || (current!=null && !Objects.requireNonNull(userState.getChannel()).equals(current)))
             {
                 event.replyError((current==null ? "음성 채널" : "**"+current.getName()+"**")+" 에 있어야만 사용할 수 있습니다!");
                 return;
@@ -83,7 +83,7 @@ public abstract class MusicCommand extends Command
                 return;
             }
 
-            if(!event.getGuild().getSelfMember().getVoiceState().inVoiceChannel())
+            if(!event.getGuild().getSelfMember().getVoiceState().inAudioChannel())
             {
                 try
                 {

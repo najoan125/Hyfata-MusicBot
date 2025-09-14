@@ -35,7 +35,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.exceptions.PermissionException;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +116,7 @@ public class PlayCmd extends MusicCommand
             String addMsg = FormatUtil.filter(event.getClient().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"));
             if(playlist==null || !event.getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ADD_REACTION)) {
-                MessageAction ma = m.editMessage(addMsg);
+                MessageEditAction ma = m.editMessage(addMsg);
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.setTitle(track.getInfo().title, track.getInfo().uri);
                 eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+ TimeUtil.formatTime(track.getDuration())+"`)");

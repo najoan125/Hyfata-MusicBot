@@ -15,19 +15,21 @@
  */
 package com.jagrosh.jdautilities.examples.command;
 
-import java.awt.Color;
-import java.util.concurrent.TimeUnit;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jdautilities.doc.standard.CommandInfo;
 import com.jagrosh.jdautilities.doc.standard.Error;
 import com.jagrosh.jdautilities.doc.standard.RequiredPermissions;
 import com.jagrosh.jdautilities.examples.doc.Author;
 import com.jagrosh.jdautilities.menu.Paginator;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.exceptions.PermissionException;
+
+import java.awt.Color;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -95,7 +97,7 @@ public class GuildlistCommand extends Command {
                 .forEach(pbuilder::addItems);
         Paginator p = pbuilder.setColor(event.isFromType(ChannelType.TEXT) ? event.getSelfMember().getColor() : Color.black)
                 .setText(event.getClient().getSuccess()+" Guilds that **"+event.getSelfUser().getName()+"** is connected to"
-                        +(event.getJDA().getShardInfo()==null ? ":" : "(Shard ID "+event.getJDA().getShardInfo().getShardId()+"):"))
+                        +(event.getJDA().getShardInfo()== JDA.ShardInfo.SINGLE ? ":" : "(Shard ID "+event.getJDA().getShardInfo().getShardId()+"):"))
                 .setUsers(event.getAuthor())
                 .build();
         p.paginate(event.getChannel(), page);

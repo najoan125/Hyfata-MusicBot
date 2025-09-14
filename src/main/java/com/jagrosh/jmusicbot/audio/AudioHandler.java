@@ -41,15 +41,18 @@ import java.util.*;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
 
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +117,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     }
 
     public boolean isMusicPlaying(JDA jda) {
-        return Objects.requireNonNull(guild(jda).getSelfMember().getVoiceState()).inVoiceChannel() && audioPlayer.getPlayingTrack() != null;
+        return Objects.requireNonNull(guild(jda).getSelfMember().getVoiceState()).inAudioChannel() && audioPlayer.getPlayingTrack() != null;
     }
 
     public Set<String> getVotes() {
@@ -210,12 +213,12 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
 
     // Formatting
-    public Message getNowPlaying(JDA jda) {
+    public MessageEditData getNowPlaying(JDA jda) {
         if (isMusicPlaying(jda)) {
             Guild guild = guild(jda);
             AudioTrack track = audioPlayer.getPlayingTrack();
-            MessageBuilder mb = new MessageBuilder();
-            mb.append(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **현재 " + Objects.requireNonNull(Objects.requireNonNull(guild.getSelfMember().getVoiceState()).getChannel()).getAsMention() + "에서 재생중...**"));
+            MessageEditBuilder mb = new MessageEditBuilder();
+            mb.setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **현재 " + Objects.requireNonNull(Objects.requireNonNull(guild.getSelfMember().getVoiceState()).getChannel()).getAsMention() + "에서 재생중...**"));
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(guild.getSelfMember().getColor());
             RequestMetadata rm = getRequestMetadata();
@@ -252,15 +255,15 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                             + FormatUtil.volumeIcon(audioPlayer.getVolume()) + " **" + audioPlayer.getVolume() + "%**"
             );
             ActionRow actionRow1 = ActionRow.of(
-                    Button.secondary("pause", Emoji.fromMarkdown(getReverseStatusEmoji())),
-                    Button.secondary("next", Emoji.fromMarkdown(NEXT_EMOJI))
+                    Button.secondary("pause", Emoji.fromFormatted(getReverseStatusEmoji())),
+                    Button.secondary("next", Emoji.fromFormatted(NEXT_EMOJI))
             );
             ActionRow actionRow2 = ActionRow.of(
                     Button.secondary("volumeDown", Emoji.fromUnicode("\uD83D\uDD09")),
                     Button.secondary("volumeUp", Emoji.fromUnicode("\uD83D\uDD0A")),
-                    Button.secondary("repeat", Emoji.fromMarkdown(repeatMode.getEmoji()))
+                    Button.secondary("repeat", Emoji.fromFormatted(repeatMode.getEmoji()))
             );
-            mb.setActionRows(actionRow1, actionRow2);
+            mb.setComponents(actionRow1, actionRow2);
             return mb.setEmbeds(eb.build()).build();
         } else return null;
     }
@@ -271,7 +274,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     int currentLyricIndex = 0;
     double ping;
 
-    public Message getInitLyric(Guild guild, AudioTrack track) throws Exception {
+    public MessageEditData getInitLyric(Guild guild, AudioTrack track) throws Exception {
         if (track.getInfo().isrc != null) {
             lyrics = SyncLyricUtil.getLyricByIsrc(manager.getBot(), track.getInfo().isrc);
         } else {
@@ -282,7 +285,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return getNewLyricMessage(guild, track);
     }
 
-    public Message getLyric(JDA jda, long ping) throws Exception {
+    public MessageEditData getLyric(JDA jda, long ping) throws Exception {
         this.ping = FormatUtil.formatTimeDouble(ping);
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
@@ -295,7 +298,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return null;
     }
 
-    public Message getSyncLyric(JDA jda) throws Exception {
+    public MessageEditData getSyncLyric(JDA jda) throws Exception {
         AudioTrack track = audioPlayer.getPlayingTrack();
         if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
             double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
@@ -333,9 +336,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         }
     }
 
-    private Message getNewLyricMessage(Guild guild, AudioTrack track) {
+    private MessageEditData getNewLyricMessage(Guild guild, AudioTrack track) {
         double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
-        MessageBuilder mb = new MessageBuilder();
+        MessageCreateBuilder mb = new MessageCreateBuilder();
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(guild.getSelfMember().getColor());
 
@@ -348,7 +351,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     }
 
     @NotNull
-    private Message getLyricMessage(MessageBuilder mb, EmbedBuilder eb) {
+    private MessageEditData getLyricMessage(MessageCreateBuilder mb, EmbedBuilder eb) {
         if (currentLyricIndex == -1) {
             eb.setDescription(
                     " \n \n### " + lyrics.get(lyricTimes.get(0))
@@ -382,20 +385,20 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                             + " "
             );
         }
-        mb.append("**").append(manager.getBot().getConfig().getSuccess())
-                .append(" ")
-                .append(track.getInfo().author)
-                .append(" - ").append(track.getInfo().title).append(" 재생 중...**");
+        mb.addContent("**").addContent(manager.getBot().getConfig().getSuccess())
+                .addContent(" ")
+                .addContent(track.getInfo().author)
+                .addContent(" - ").addContent(track.getInfo().title).addContent(" 재생 중...**");
 
         double progress = (double) audioPlayer.getPlayingTrack().getPosition() / track.getDuration();
-        mb.append("\n")
-                .append(getStatusEmoji()).append(" ")
-                .append(FormatUtil.progressBar(progress))
-                .append(" `")
-                .append(TimeUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).append(" / ").append(TimeUtil.formatTime(track.getDuration()))
-                .append("`");
-        mb.append("\n\n가사 제공: [Musixmatch](https://www.musixmatch.com)");
-        return mb.setEmbeds(eb.build()).build();
+        mb.addContent("\n")
+                .addContent(getStatusEmoji()).addContent(" ")
+                .addContent(FormatUtil.progressBar(progress))
+                .addContent(" `")
+                .addContent(TimeUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).addContent(" / ").addContent(TimeUtil.formatTime(track.getDuration()))
+                .addContent("`");
+        mb.addContent("\n\n가사 제공: [Musixmatch](https://www.musixmatch.com)");
+        return MessageEditData.fromCreateData(mb.setEmbeds(eb.build()).build());
     }
 
     private String getRepeatModeName(RepeatMode repeatMode) {
@@ -407,9 +410,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         return "단일 반복";
     }
 
-    public Message getNoMusicPlaying(JDA jda) {
+    public MessageEditData getNoMusicPlaying(JDA jda) {
         Guild guild = guild(jda);
-        return new MessageBuilder()
+        return new MessageEditBuilder()
                 .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **재생중인 음악 없음...**"))
                 .setEmbeds(new EmbedBuilder()
                         .setTitle("현재 재생중인 음악이 없습니다!")

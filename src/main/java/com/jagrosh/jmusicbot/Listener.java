@@ -34,17 +34,21 @@ import java.util.concurrent.TimeUnit;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceSelfDeafenEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +109,7 @@ public class Listener extends ListenerAdapter
     }
 
     @Override
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event)
+    public void onMessageDelete(MessageDeleteEvent event)
     {
         bot.getNowplayingHandler().onMessageDelete(event.getGuild(), event.getMessageIdLong());
         bot.getSyncLyricHandler().onMessageDelete(event.getGuild(), event.getMessageIdLong());
@@ -136,7 +140,7 @@ public class Listener extends ListenerAdapter
     }
 
     @Override
-    public void onButtonClick(ButtonClickEvent event) {
+    public void onButtonInteraction(ButtonInteractionEvent event) {
     	String messageId = event.getMessageId();
     	User user = SearchCmd.searchCmdMap.get(messageId);
 
@@ -194,12 +198,12 @@ public class Listener extends ListenerAdapter
     	}
     }
 
-    private void nextCmdClicked(ButtonClickEvent event){
+    private void nextCmdClicked(ButtonInteractionEvent event){
         AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         RequestMetadata rm = Objects.requireNonNull(handler).getRequestMetadata();
         if(event.getUser().getIdLong() == rm.getOwner())
         {
-            event.reply(new MessageBuilder()
+            event.reply(new MessageCreateBuilder()
                     .setContent(bot.getConfig().getSuccess()+"**<@"+event.getUser().getId()+">**님에 의해 건너뛰어졌습니다!")
                     .setEmbeds(new EmbedBuilder()
                         .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
@@ -230,7 +234,7 @@ public class Listener extends ListenerAdapter
                 msg += "\n" + bot.getConfig().getSuccess() + " 이 항목을 건너뛰었습니다!";
                 embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + rm.user.username + "**에 의해 요청됨)");
 
-                event.reply(new MessageBuilder()
+                event.reply(new MessageCreateBuilder()
                         .setContent(msg)
                         .setEmbeds(new EmbedBuilder()
                                 .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
@@ -246,7 +250,7 @@ public class Listener extends ListenerAdapter
         }
     }
 
-    private void searchCmdClicked(ButtonClickEvent event) {
+    private void searchCmdClicked(ButtonInteractionEvent event) {
     	String messageId = event.getMessageId();
     	SearchCmd.searchCmdExecutors.get(messageId).shutdownNow();
     	SearchCmd.searchCmdExecutors.remove(messageId);
@@ -255,7 +259,7 @@ public class Listener extends ListenerAdapter
     	CommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
         AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
     	if (event.getComponentId().equals("cancel")) {
-    		event.editMessage("검색이 취소되었습니다.").setEmbeds().setActionRows().queue();
+    		event.editMessage("검색이 취소되었습니다.").setEmbeds().setComponents().queue();
             if (!Objects.requireNonNull(handler).isMusicPlaying(ev.getJDA()) && handler.getQueue().isEmpty()){
                 if (!bot.getConfig().getStay())
                     ev.getGuild().getAudioManager().closeAudioConnection();
@@ -271,9 +275,9 @@ public class Listener extends ListenerAdapter
                 return;
             }
             int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, ev)))+1;
-            Message addMsg = new MessageBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
+            MessageEditData addMsg = new MessageEditBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).build();
-            MessageAction ma = event.getMessage().editMessage(addMsg);
+            MessageEditAction ma = event.getMessage().editMessage(addMsg);
             EmbedBuilder eb = new EmbedBuilder();
             eb.setTitle(track.getInfo().title, track.getInfo().uri);
             eb.setDescription("요청한 항목"+(pos==0?"을 바로 재생합니다!":"이 대기열에 추가되었습니다!")+"\n(`"+ TimeUtil.formatTime(track.getDuration())+"`)");

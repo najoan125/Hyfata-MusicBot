@@ -33,10 +33,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.Component;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -105,14 +105,14 @@ public class SearchCmd extends MusicCommand {
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
             //메시지 수정
-            MessageAction ma = m.editMessage(FormatUtil.filter(
+            MessageEditAction ma = m.editMessage(FormatUtil.filter(
                     event.getClient().getSuccess() + "`" + event.getArgs() + "` 검색 결과:"));
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(event.getSelfMember().getColor());
 
             //버튼 생성
             StringBuilder result = new StringBuilder();
-            LinkedList<Component> actionRow = new LinkedList<>();
+            LinkedList<ActionComponent> actionRow = new LinkedList<>();
             for (int i = 0; i < 10 && i < playlist.getTracks().size(); i++) {
                 AudioTrack track = playlist.getTracks().get(i);
                 actionRow.add(Button.primary(String.valueOf(i + 1), String.valueOf(i + 1)));
@@ -133,7 +133,7 @@ public class SearchCmd extends MusicCommand {
                 }
             }
             actionRows.add(ActionRow.of(Button.danger("cancel", "취소")));
-            ma.setActionRows(actionRows);
+            ma.setComponents(actionRows);
 
             //곡 제목들 표시
             eb.setDescription(result.toString());
@@ -156,7 +156,7 @@ public class SearchCmd extends MusicCommand {
                 }
                 m.editMessage("검색이 취소되었습니다.")
                         .setEmbeds()
-                        .setActionRows()
+                        .setComponents()
                         .queue();
 
 

@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public class SyncLyricsCmd extends MusicCommand {
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         event.reply(bot.getConfig().getLoading() + " 불러오는 중...", msg -> {
             long ping = event.getMessage().getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
-            Message lyricMsg;
+            MessageEditData lyricMsg;
             try {
                 lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA(), ping);
             } catch (LyricNotFoundException e) {

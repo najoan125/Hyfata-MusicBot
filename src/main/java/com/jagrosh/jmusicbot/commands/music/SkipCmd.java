@@ -23,7 +23,7 @@ import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 /**
  *
@@ -56,7 +56,7 @@ public class SkipCmd extends MusicCommand
         }
         if(event.getAuthor().getIdLong() == rm.getOwner() || skipRatio == 0)
         {
-            event.reply(new MessageBuilder()
+            event.reply(new MessageCreateBuilder()
                     .setContent(bot.getConfig().getSuccess()+" 현재 재생 중인 항목을 건너뛰었습니다!")
                     .setEmbeds(new EmbedBuilder()
                             .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)
@@ -88,7 +88,7 @@ public class SkipCmd extends MusicCommand
                 msg += "\n" + bot.getConfig().getSuccess() + " 이 항목을 건너뛰었습니다!";
                 embed = (rm.getOwner() == 0L ? "(자동 재생)" : "(**" + FormatUtil.formatUsername(rm.user) + "**에 의해 요청됨)");
 
-                event.reply(new MessageBuilder()
+                event.reply(new MessageCreateBuilder()
                         .setContent(msg)
                         .setEmbeds(new EmbedBuilder()
                                 .setTitle(handler.getPlayer().getPlayingTrack().getInfo().title, handler.getPlayer().getPlayingTrack().getInfo().uri)

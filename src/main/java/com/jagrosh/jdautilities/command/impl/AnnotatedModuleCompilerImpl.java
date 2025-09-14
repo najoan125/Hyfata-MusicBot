@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Default implementation for {@link com.jagrosh.jdautilities.command.AnnotatedModuleCompiler
+ * Default implementation for {@link AnnotatedModuleCompiler
  * AnnotatedModuleCompiler}.
  *
  * @since  1.8

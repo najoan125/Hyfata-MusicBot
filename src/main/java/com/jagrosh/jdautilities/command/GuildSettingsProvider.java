@@ -25,7 +25,7 @@ import java.util.Collection;
  *
  * <p>This interface allows the specification of any of the following functions:
  * <ul>
- *     <li>Guild Specific Prefixes (via {@link com.jagrosh.jdautilities.command.GuildSettingsProvider#getPrefixes()})</li>
+ *     <li>Guild Specific Prefixes (via {@link GuildSettingsProvider#getPrefixes()})</li>
  * </ul>
  *
  * Note that all of these functions are <b>OPTIONAL</b> to implement, and instructions
@@ -48,7 +48,7 @@ import java.util.Collection;
 public interface GuildSettingsProvider
 {
     /**
-     * Gets a {@link java.util.Collection Collection} of String prefixes available
+     * Gets a {@link Collection Collection} of String prefixes available
      * for the Guild represented by this implementation.
      *
      * <p>An empty Collection or {@code null} may be returned to signify the Guild

@@ -16,13 +16,14 @@
 package com.jagrosh.jdautilities.command.annotation;
 
 import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CooldownScope;
 import net.dv8tion.jda.api.Permission;
 
 import java.lang.annotation.*;
 
 /**
  * An Annotation applicable to {@link java.lang.reflect.Method Method}s that will act as
- * {@link com.jagrosh.jdautilities.command.Command Command}s when added to a Client
+ * {@link Command Command}s when added to a Client
  * using {@link com.jagrosh.jdautilities.command.CommandClientBuilder#addAnnotatedModule(Object)
  * CommandClientBuilder#addAnnotatedModule()} serving as metadata "constructors" for what
  * would be a class extending Command of the same functionality and settings.
@@ -37,17 +38,17 @@ import java.lang.annotation.*;
  * CommandBuilder}.
  *
  * <p>Classes that wish to be contain methods to be used as commands must be annotated with
- * {@link com.jagrosh.jdautilities.command.annotation.JDACommand.Module @Module}.
+ * {@link Module @Module}.
  * <br>Following that, any methods of said class annotated with this annotation (whose names
  * are also given as parameters of the {@code @Module} annotation) will be registered to the
  * module and "compiled" through the AnnotatedModuleCompiler provided in CommandClientBuilder.
  *
- * <pre><code>   {@link com.jagrosh.jdautilities.command.annotation.JDACommand.Module @JDACommand.Module}({@link com.jagrosh.jdautilities.command.annotation.JDACommand.Module#value() value} = "example")
+ * <pre><code>   {@link Module @JDACommand.Module}({@link Module#value() value} = "example")
  * public class AnnotatedModuleCmd {
  *
  *     {@literal @JDACommand(}
- *          {@link com.jagrosh.jdautilities.command.annotation.JDACommand#name() name} = {"example", "test", "demo"},
- *          {@link com.jagrosh.jdautilities.command.annotation.JDACommand#help() help} = "gives an example of what commands do"
+ *          {@link JDACommand#name() name} = {"example", "test", "demo"},
+ *          {@link JDACommand#help() help} = "gives an example of what commands do"
  *      )
  *      public void example(CommandEvent) {
  *          event.reply("Hey look! This would be the bot's reply if this was a command!");
@@ -55,7 +56,7 @@ import java.lang.annotation.*;
  *
  * }</code></pre>
  *
- * @see    com.jagrosh.jdautilities.command.annotation.JDACommand.Module
+ * @see    Module
  *
  * @since  1.7
  * @author Kaidan Gustave
@@ -113,19 +114,18 @@ public @interface JDACommand
     String arguments() default "";
 
     /**
-     * The {@link JDACommand.Cooldown JDACommand.Cooldown} for the command.
+     * The {@link Cooldown JDACommand.Cooldown} for the command.
      *
      * <p>This holds both metadata for both the
-     * {@link com.jagrosh.jdautilities.command.Command#cooldown Command#cooldown}
-     * and {@link com.jagrosh.jdautilities.command.Command#cooldownScope
-     * Command#cooldownScope}.
+     * {@link Command#getCooldown() Command#cooldown}
+     * and {@link Command#getCooldownScope() Command#cooldownScope}.
      *
      * @return The {@code @Cooldown} for the command.
      */
     Cooldown cooldown() default @Cooldown(0);
 
     /**
-     * The {@link net.dv8tion.jda.api.Permission Permissions} the bot must have
+     * The {@link Permission Permissions} the bot must have
      * on a guild to use this command.
      *
      * @return The required permissions the bot must have to use this command.
@@ -133,7 +133,7 @@ public @interface JDACommand
     Permission[] botPermissions() default {};
 
     /**
-     * The {@link net.dv8tion.jda.api.Permission Permissions} the user must have
+     * The {@link Permission Permissions} the user must have
      * on a guild to use this command.
      *
      * @return The required permissions a user must have to use this command.
@@ -145,7 +145,7 @@ public @interface JDACommand
      * <br>Default {@code true}.
      *
      * <p>For more information on topic tags, see
-     * {@link com.jagrosh.jdautilities.command.Command#usesTopicTags
+     * {@link Command#usesTopicTags
      * Command#usesTopicTags}
      *
      * @return {@code true} if this command uses topic tags, {@code false} otherwise.
@@ -167,9 +167,9 @@ public @interface JDACommand
     boolean isHidden() default false;
 
     /**
-     * The {@link JDACommand.Category JDACommand.Category} for this command.
+     * The {@link Category JDACommand.Category} for this command.
      * <br>This holds data to properly locate a <b>static field</b> representing
-     * this command's {@link com.jagrosh.jdautilities.command.Command.Category
+     * this command's {@link Command.Category
      * Category}.
      *
      * @return The {@code @Category} for this command.
@@ -178,7 +178,7 @@ public @interface JDACommand
 
     /**
      * A helper annotation to assist in location of methods that will generate
-     * into {@link com.jagrosh.jdautilities.command.Command Command}s.
+     * into {@link Command Command}s.
      *
      * <p>Method names provided to this annotation must have one or two parameters.
      * Either a single parameter {@link com.jagrosh.jdautilities.command.CommandEvent
@@ -206,12 +206,11 @@ public @interface JDACommand
     }
 
     /**
-     * A value wrapper for what would be {@link com.jagrosh.jdautilities.command.Command#cooldown
-     * Command#cooldown} and {@link com.jagrosh.jdautilities.command.Command#cooldownScope
-     * Command#cooldownScope}.
+     * A value wrapper for what would be {@link Command#getCooldown() Command#cooldown}
+     * and {@link Command#getCooldownScope() Command#cooldownScope}.
      *
-     * The default {@link com.jagrosh.jdautilities.command.Command.CooldownScope CooldownScope}
-     * is {@link com.jagrosh.jdautilities.command.Command.CooldownScope#USER CooldownScope.USER}.
+     * The default {@link CooldownScope}
+     * is {@link CooldownScope#USER CooldownScope.USER}.
      *
      * @see    JDACommand#cooldown()
      */
@@ -227,36 +226,35 @@ public @interface JDACommand
         int value();
 
         /**
-         * The {@link com.jagrosh.jdautilities.command.Command.CooldownScope CooldownScope}
+         * The {@link CooldownScope CooldownScope}
          * for the annotated Command.
          *
-         * <p>By default this is {@link com.jagrosh.jdautilities.command.Command.CooldownScope#USER
-         * CooldownScope.USER}.
+         * <p>By default this is {@link CooldownScope#USER CooldownScope.USER}.
          *
          * @return The CooldownScope for this annotated Command.
          */
-        Command.CooldownScope scope() default Command.CooldownScope.USER;
+        CooldownScope scope() default CooldownScope.USER;
     }
 
     /**
      * A helper annotation to assist in location of Category instance.
      *
      * <p>This will target a <b>static field</b> in the specified class
-     * {@link com.jagrosh.jdautilities.command.annotation.JDACommand.Category#location() location} using reflections, with a
-     * matching {@link com.jagrosh.jdautilities.command.annotation.JDACommand.Category#name() name}.
+     * {@link Category#location() location} using reflections, with a
+     * matching {@link Category#name() name}.
      *
      * <p>It is important to remember the target must be a <b>static field</b>
      * and any other attempted inputs will result in errors from the
      * {@link com.jagrosh.jdautilities.command.AnnotatedModuleCompiler compiler}.
      *
-     * @see    com.jagrosh.jdautilities.command.annotation.JDACommand#category()
+     * @see    JDACommand#category()
      */
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Category
     {
         /**
-         * The name of the <b>static field</b> in the {@link com.jagrosh.jdautilities.command.annotation.JDACommand.Category#location()
+         * The name of the <b>static field</b> in the {@link Category#location()
          * target class} that will be the category for the annotated command.
          *
          * @return The name of the <b>static field</b> in the target class.

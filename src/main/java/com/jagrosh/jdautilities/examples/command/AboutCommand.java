@@ -15,20 +15,21 @@
  */
 package com.jagrosh.jdautilities.examples.command;
 
-import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo;
 import com.jagrosh.jdautilities.doc.standard.CommandInfo;
 import com.jagrosh.jdautilities.examples.doc.Author;
-import net.dv8tion.jda.api.entities.ApplicationInfo;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ApplicationInfo;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  *
@@ -101,20 +102,20 @@ public class AboutCommand extends Command {
             descr.append("\n").append(event.getClient().getSuccess().startsWith("<") ? REPLACEMENT_ICON : event.getClient().getSuccess()).append(" ").append(feature);
         descr.append(" ```");
         builder.setDescription(descr);
-        if (event.getJDA().getShardInfo() == null)
+        if (event.getJDA().getShardInfo() == JDA.ShardInfo.SINGLE)
         {
-            builder.addField("\uD1B5\uACC4", event.getJDA().getGuilds().size() + " \uC11C\uBC84\n1 shard", true);
-            builder.addField("\uC0AC\uC6A9\uC790", event.getJDA().getUsers().size() + " unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " total", true);
-            builder.addField("\uCC44\uB110", event.getJDA().getTextChannels().size() + " \uCC44\uD305\n" + event.getJDA().getVoiceChannels().size() + " \uC74C\uC131", true);
+            builder.addField("통계", event.getJDA().getGuilds().size() + " 서버\n1 shard", true);
+            builder.addField("사용자", event.getJDA().getUsers().size() + " unique\n" + event.getJDA().getGuilds().stream().mapToInt(g -> g.getMembers().size()).sum() + " total", true);
+            builder.addField("채널", event.getJDA().getTextChannels().size() + " 채팅\n" + event.getJDA().getVoiceChannels().size() + " 음성", true);
         }
         else
         {
-            builder.addField("Stats", (event.getClient()).getTotalGuilds() + " \uC11C\uBC84\nShard " + (event.getJDA().getShardInfo().getShardId() + 1) 
+            builder.addField("Stats", (event.getClient()).getTotalGuilds() + " 서버\nShard " + (event.getJDA().getShardInfo().getShardId() + 1)
                     + "/" + event.getJDA().getShardInfo().getShardTotal(), true);
-            builder.addField("This shard", event.getJDA().getUsers().size() + " \uC0AC\uC6A9\uC790\n" + event.getJDA().getGuilds().size() + " \uC11C\uBC84", true);
-            builder.addField("", event.getJDA().getTextChannels().size() + " \uCC44\uD305 \uCC44\uB110\n" + event.getJDA().getVoiceChannels().size() + " \uC74C\uC131 \uCC44\uB110", true);
+            builder.addField("This shard", event.getJDA().getUsers().size() + " 사용자\n" + event.getJDA().getGuilds().size() + " 서버", true);
+            builder.addField("", event.getJDA().getTextChannels().size() + " 채팅 채널\n" + event.getJDA().getVoiceChannels().size() + " 음성 채널", true);
         }
-        builder.setFooter("\uCD5C\uADFC \uC7AC\uC2DC\uC791", null);
+        builder.setFooter("최근 재시작", null);
         builder.setTimestamp(event.getClient().getStartTime());
         event.reply(builder.build());
     }

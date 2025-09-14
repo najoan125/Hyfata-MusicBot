@@ -21,11 +21,13 @@ import com.jagrosh.jdautilities.commons.utils.FinderUtil;
 import java.awt.Color;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 /**
  *
@@ -83,7 +85,7 @@ public class RoleinfoCommand extends Command
         StringBuilder desr = new StringBuilder(LINESTART + "ID: **" + role.getId() + "**\n"
                 + LINESTART + "Creation: **" + role.getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME)+"**\n"
                 + LINESTART + "Position: **" + role.getPosition()+"**\n"
-                + LINESTART + "Color: **#" + (color==null ? "000000" : Integer.toHexString(color.getRGB()).toUpperCase().substring(2)) + "**\n"
+                + LINESTART + "Color: **#" + (color==null ? "000000" : Integer.toHexString(color.getRGB()).toUpperCase(Locale.ROOT).substring(2)) + "**\n"
                 + LINESTART + "Mentionable: **" + role.isMentionable() + "**\n"
                 + LINESTART + "Hoisted: **" + role.isHoisted() + "**\n"
                 + LINESTART + "Managed: **" + role.isManaged() + "**\n"
@@ -96,9 +98,9 @@ public class RoleinfoCommand extends Command
         if(list.size() * 24 <= 2048-desr.length())
             list.forEach(m -> desr.append("<@").append(m.getUser().getId()).append("> "));
         
-        event.reply(new MessageBuilder()
-                .append(title)
-                .setEmbed(new EmbedBuilder()
+        event.reply(new MessageCreateBuilder()
+                .setContent(title)
+                .setEmbeds(new EmbedBuilder()
                         .setDescription(desr.toString().trim())
                         .setColor(role.getColor()).build())
                 .build());

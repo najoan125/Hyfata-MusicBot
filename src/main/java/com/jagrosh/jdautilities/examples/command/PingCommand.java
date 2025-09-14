@@ -35,7 +35,7 @@ public class PingCommand extends Command {
     public PingCommand()
     {
         this.name = "ping";
-        this.help = "\uBD07\uC758 \uB300\uAE30 \uC2DC\uAC04\uC744 \uD655\uC778\uD569\uB2C8\uB2E4";
+        this.help = "checks the bot's latency";
         this.guildOnly = false;
         this.aliases = new String[]{"pong"};
     }
