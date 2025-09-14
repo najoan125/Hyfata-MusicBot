@@ -61,8 +61,8 @@ public class SettcCmd extends AdminCommand
                 event.reply(event.getClient().getWarning()+ FormatUtil.listOfTChannels(list, event.getArgs()));
             else
             {
-                s.setTextChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" 이제 음악 명령어는 오직 <#"+list.get(0).getId()+"> 에서만 사용 가능합니다");
+                s.setTextChannel(list.getFirst());
+                event.reply(event.getClient().getSuccess()+" 이제 음악 명령어는 오직 <#"+list.getFirst().getId()+"> 에서만 사용 가능합니다");
             }
         }
     }

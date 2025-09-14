@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * A class that represents an interaction with a user.

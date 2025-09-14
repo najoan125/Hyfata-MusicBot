@@ -28,6 +28,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
+import java.util.Objects;
+
 /**
  *
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -70,7 +72,7 @@ public class SettingsCmd extends Command
                         + "\n\uAE30\uBCF8 \uC7AC\uC0DD\uBAA9\uB85D: " + (s.getDefaultPlaylist() == null ? "\uC5C6\uC74C" : "**" + s.getDefaultPlaylist() + "**")
                         )
                 .setFooter(event.getJDA().getGuilds().size() + " \uC11C\uBC84 | "
-                        + event.getJDA().getGuilds().stream().filter(g -> g.getSelfMember().getVoiceState().inAudioChannel()).count()
+                        + event.getJDA().getGuilds().stream().filter(g -> Objects.requireNonNull(g.getSelfMember().getVoiceState()).inAudioChannel()).count()
                         + " \uC624\uB514\uC624 \uC5F0\uACB0", null);
         event.getChannel().sendMessage(builder.setEmbeds(ebuilder.build()).build()).queue();
     }

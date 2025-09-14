@@ -43,14 +43,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
@@ -137,7 +135,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
     public boolean playFromDefault() {
         if (!defaultQueue.isEmpty()) {
-            audioPlayer.playTrack(defaultQueue.remove(0));
+            audioPlayer.playTrack(defaultQueue.removeFirst());
             return true;
         }
         Settings settings = manager.getBot().getSettingsManager().getSettings(guildId);
@@ -342,7 +340,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(guild.getSelfMember().getColor());
 
-        if (trackPosition < lyricTimes.get(0) - ping) {
+        if (trackPosition < lyricTimes.getFirst() - ping) {
             currentLyricIndex = -1;
         } else {
             loadCurrentLyricIndex(trackPosition);
@@ -354,7 +352,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
     private MessageEditData getLyricMessage(MessageCreateBuilder mb, EmbedBuilder eb) {
         if (currentLyricIndex == -1) {
             eb.setDescription(
-                    " \n \n### " + lyrics.get(lyricTimes.get(0))
+                    " \n \n### " + lyrics.get(lyricTimes.getFirst())
             );
         } else if (currentLyricIndex == 0) {
             eb.setDescription(
@@ -414,6 +412,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         Guild guild = guild(jda);
         return new MessageEditBuilder()
                 .setContent(FormatUtil.filter(manager.getBot().getConfig().getSuccess() + " **재생중인 음악 없음...**"))
+                .setComponents()
                 .setEmbeds(new EmbedBuilder()
                         .setTitle("현재 재생중인 음악이 없습니다!")
                         .setDescription("`;재생` 또는 `;검색` 명령어를 이용해 음악을 재생하세요!")

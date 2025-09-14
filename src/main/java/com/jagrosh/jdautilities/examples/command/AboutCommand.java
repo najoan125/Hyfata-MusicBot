@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
+import java.util.Objects;
 
 /**
  *
@@ -85,13 +86,13 @@ public class AboutCommand extends Command {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(event.isFromType(ChannelType.TEXT) ? event.getGuild().getSelfMember().getColor() : color);
-        builder.setAuthor("" + event.getSelfUser().getName() + "의 모든 것!", null, event.getSelfUser().getAvatarUrl());
+        builder.setAuthor(event.getSelfUser().getName() + "의 모든 것!", null, event.getSelfUser().getAvatarUrl());
         boolean join = !(event.getClient().getServerInvite() == null || event.getClient().getServerInvite().isEmpty());
         boolean inv = !oauthLink.isEmpty();
         String invline = "\n" + (join ? "Join my server [`here`](" + event.getClient().getServerInvite() + ")" : (inv ? "당신의 서버에 저를 " : ""))
                 + (inv ? (join ? ", or " : "") + "[`초대`](" + oauthLink + ") 해주세요" : "") + "!";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId())==null ? "<@" + event.getClient().getOwnerId()+">" 
-                : event.getJDA().getUserById(event.getClient().getOwnerId()).getName();
+                : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
         StringBuilder descr = new StringBuilder().append("안녕하세요! 저는 **").append(event.getSelfUser().getName()).append("** 입니다, ")
                 .append(description).append("\n저는 ").append(IS_AUTHOR ? "was written in Java" : "").append("**")
                 .append(author).append("** 에 의해 만들어졌고 " + JDAUtilitiesInfo.AUTHOR + "의 [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")

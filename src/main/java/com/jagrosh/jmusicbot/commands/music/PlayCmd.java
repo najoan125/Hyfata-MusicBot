@@ -86,7 +86,7 @@ public class PlayCmd extends MusicCommand
         }
         String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") 
                 ? event.getArgs().substring(1,event.getArgs().length()-1) 
-                : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
+                : event.getArgs().isEmpty() ? event.getMessage().getAttachments().getFirst().getUrl() : event.getArgs();
         event.reply(loadingEmoji+" 로딩... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
     }
     
@@ -145,7 +145,7 @@ public class PlayCmd extends MusicCommand
         private int loadPlaylist(AudioPlaylist playlist, AudioTrack exclude)
         {
             int[] count = {0};
-            playlist.getTracks().stream().forEach((track) -> {
+            playlist.getTracks().forEach((track) -> {
                 if(!bot.getConfig().isTooLong(track) && !track.equals(exclude))
                 {
                     AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
@@ -167,7 +167,7 @@ public class PlayCmd extends MusicCommand
         {
             if(playlist.getTracks().size()==1 || playlist.isSearchResult())
             {
-                AudioTrack single = playlist.getSelectedTrack()==null ? playlist.getTracks().get(0) : playlist.getSelectedTrack();
+                AudioTrack single = playlist.getSelectedTrack()==null ? playlist.getTracks().getFirst() : playlist.getSelectedTrack();
                 loadSingle(single, null);
             }
             else if (playlist.getSelectedTrack()!=null)

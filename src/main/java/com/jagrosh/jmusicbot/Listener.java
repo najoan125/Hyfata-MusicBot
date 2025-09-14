@@ -44,7 +44,6 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
@@ -276,7 +275,7 @@ public class Listener extends ListenerAdapter
             }
             int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, ev)))+1;
             MessageEditData addMsg = new MessageEditBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
-                    (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).build();
+                    (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).setComponents().build();
             MessageEditAction ma = event.getMessage().editMessage(addMsg);
             EmbedBuilder eb = new EmbedBuilder();
             eb.setTitle(track.getInfo().title, track.getInfo().uri);

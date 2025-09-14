@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.audio.AudioHandler;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.util.Objects;
@@ -66,8 +67,9 @@ public abstract class MusicCommand extends Command
         }
         if(beListening)
         {
-            VoiceChannel current = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel().asVoiceChannel();
-            if(current==null)
+            VoiceChannel current = null;
+            AudioChannelUnion union = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel();
+            if(union==null)
                 current = settings.getVoiceChannel(event.getGuild());
             GuildVoiceState userState = event.getMember().getVoiceState();
             if(!Objects.requireNonNull(userState).inAudioChannel() || userState.isDeafened() || (current!=null && !Objects.requireNonNull(userState.getChannel()).equals(current)))
@@ -87,7 +89,7 @@ public abstract class MusicCommand extends Command
             {
                 try
                 {
-                    event.getGuild().getAudioManager().openAudioConnection(userState.getChannel());
+                    event.getGuild().getAudioManager().openAudioConnection(Objects.requireNonNull(userState.getChannel()));
                 }
                 catch(PermissionException ex)
                 {

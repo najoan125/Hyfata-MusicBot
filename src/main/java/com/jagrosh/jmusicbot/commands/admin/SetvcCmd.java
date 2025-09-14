@@ -61,8 +61,8 @@ public class SetvcCmd extends AdminCommand
                 event.reply(event.getClient().getWarning()+ FormatUtil.listOfVChannels(list, event.getArgs()));
             else
             {
-                s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" 이제 음악은 오직 "+list.get(0).getAsMention()+" 에서만 재생됩니다");
+                s.setVoiceChannel(list.getFirst());
+                event.reply(event.getClient().getSuccess()+" 이제 음악은 오직 "+list.getFirst().getAsMention()+" 에서만 재생됩니다");
             }
         }
     }

@@ -25,6 +25,8 @@ import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
+import java.util.Objects;
+
 /**
  *
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -68,8 +70,8 @@ public class SkipCmd extends MusicCommand
         }
         else
         {
-            int listeners = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
-                    .filter(m -> !m.getUser().isBot() && !m.getVoiceState().isDeafened()).count();
+            int listeners = (int) Objects.requireNonNull(Objects.requireNonNull(event.getSelfMember().getVoiceState()).getChannel()).getMembers().stream()
+                    .filter(m -> !m.getUser().isBot() && !Objects.requireNonNull(m.getVoiceState()).isDeafened()).count();
             String msg;
             if(handler.getVotes().contains(event.getAuthor().getId()))
                 msg = event.getClient().getWarning()+" 이미 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";

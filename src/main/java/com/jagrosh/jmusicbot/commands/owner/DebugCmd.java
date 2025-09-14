@@ -83,6 +83,6 @@ public class DebugCmd extends OwnerCommand
                 || event.getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_ATTACH_FILES))
             event.getChannel().sendFiles(FileUpload.fromData(sb.toString().getBytes(), "debug_information.txt")).queue();
         else
-            event.reply("Debug Information: " + sb.toString());
+            event.reply("Debug Information: " + sb);
     }
 }
