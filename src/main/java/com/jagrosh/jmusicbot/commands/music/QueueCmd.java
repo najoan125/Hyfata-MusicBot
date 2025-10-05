@@ -15,10 +15,12 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import com.jagrosh.jdautilities.command.CommandEvent;
+
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -31,6 +33,8 @@ import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.exceptions.PermissionException;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
@@ -61,18 +65,18 @@ public class QueueCmd extends MusicCommand
                 .wrapPageEnds(true)
                 .setEventWaiter(bot.getWaiter())
                 .setTimeout(1, TimeUnit.MINUTES);
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.INTEGER, "페이지_번호", "대기열 목록의 페이지 번호")
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event)
+    public void doCommand(SlashCommandEvent event)
     {
-        int pagenum = 1;
-        try
-        {
-            pagenum = Integer.parseInt(event.getArgs());
-        }
-        catch(NumberFormatException ignore){}
-        AudioHandler ah = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        var option = event.getOption("페이지_번호");
+        int pagenum = option == null ? 1 : option.getAsInt();
+        AudioHandler ah = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         List<QueuedTrack> list = Objects.requireNonNull(ah).getQueue().getList();
         if(list.isEmpty())
         {
@@ -80,8 +84,8 @@ public class QueueCmd extends MusicCommand
             MessageCreateData nonowp = MessageCreateData.fromEditData(ah.getNoMusicPlaying(event.getJDA()));
             MessageCreateData built = new MessageCreateBuilder()
                     .setContent(event.getClient().getWarning() + " 대기열이 비어있습니다!")
-                    .setEmbeds((nowp==null ? nonowp : nowp).getEmbeds().get(0)).build();
-            event.reply(built);
+                    .setEmbeds((!ah.isMusicPlaying(event.getJDA()) ? nonowp : nowp).getEmbeds().getFirst()).build();
+            event.reply(built).queue();
             return;
         }
         String[] songs = new String[list.size()];
@@ -95,8 +99,8 @@ public class QueueCmd extends MusicCommand
         long fintotal = total;
         builder.setText((i1,i2) -> getQueueTitle(ah, event.getClient().getSuccess(), songs.length, fintotal, settings.getRepeatMode(), settings.getQueueType()))
                 .setItems(songs)
-                .setUsers(event.getAuthor())
-                .setColor(event.getSelfMember().getColor())
+                .setUsers(event.getUser())
+                .setColor(event.getGuild().getSelfMember().getColor())
                 ;
         builder.build().paginate(event.getChannel(), pagenum);
     }

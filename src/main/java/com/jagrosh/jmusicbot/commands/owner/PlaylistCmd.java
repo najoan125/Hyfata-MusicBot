@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.OwnerCommand;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 
 /**
  *
@@ -33,7 +34,7 @@ public class PlaylistCmd extends OwnerCommand
     public PlaylistCmd(Bot bot)
     {
         this.bot = bot;
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.name = "playlist";
         this.arguments = "<append|delete|make|setdefault>";
         this.help = "playlist management";

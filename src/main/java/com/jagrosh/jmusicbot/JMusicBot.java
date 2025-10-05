@@ -179,15 +179,23 @@ public class JMusicBot
                 .setHelpWord(config.getHelp())
                 .setLinkedCacheSize(200)
                 .setGuildSettingsManager(settings)
-                .addCommands(aboutCommand,
+                .addCommands(
+                        new AutoplaylistCmd(bot),
+                        new DebugCmd(bot),
+                        new PlaylistCmd(bot),
+                        new SetavatarCmd(bot),
+                        new SetgameCmd(bot),
+                        new SetnameCmd(bot),
+                        new SetstatusCmd(bot),
+                        new ShutdownCmd(bot),
+                        new RnjsskaCmd(bot)
+                )
+                .addSlashCommands(aboutCommand,
                         new PingCommand(),
                         new SettingsCmd(bot),
                         
                         new PlayCmd(bot),
                         new SearchCmd(bot),
-                        new SCSearchCmd(bot),
-                        new SPSearchCmd(bot),
-                        new AMSearchCmd(bot),
                         new SeekCmd(bot),
                         new SkipCmd(bot),
                         new PauseCmd(bot),
@@ -210,24 +218,14 @@ public class JMusicBot
                         new MoveTrackCmd(bot),
                         new PlaynextCmd(bot),
                         new SkiptoCmd(bot),
-                        
-                        new PrefixCmd(bot),
+
                         new QueueTypeCmd(bot),
                         new SetdjCmd(bot),
                         new SkipratioCmd(bot),
                         new SettcCmd(bot),
-                        new SetvcCmd(bot),
-                        
-                        new AutoplaylistCmd(bot),
-                        new DebugCmd(bot),
-                        new PlaylistCmd(bot),
-                        new SetavatarCmd(bot),
-                        new SetgameCmd(bot),
-                        new SetnameCmd(bot),
-                        new SetstatusCmd(bot),
-                        new ShutdownCmd(bot),
-                        new RnjsskaCmd(bot)
+                        new SetvcCmd(bot)
                 );
+        cb.forceGuildOnly("1131232737181839391"); // my test server
 
         // enable eval if applicable
         if(config.useEval())

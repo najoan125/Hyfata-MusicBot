@@ -15,8 +15,8 @@
  */
 package com.jagrosh.jdautilities.examples.command;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo;
 import com.jagrosh.jdautilities.doc.standard.CommandInfo;
 import com.jagrosh.jdautilities.examples.doc.Author;
@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import java.util.Objects;
     description = "Gets information about the bot."
 )
 @Author("John Grosh (jagrosh)")
-public class AboutCommand extends Command {
+public class AboutCommand extends SlashCommand {
     private boolean IS_AUTHOR = true;
     private String REPLACEMENT_ICON = "+";
     private final Color color;
@@ -57,7 +58,7 @@ public class AboutCommand extends Command {
         this.features = features;
         this.name = "about";
         this.help = "봇에 대한 정보를 표시합니다";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.perms = perms;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
@@ -73,7 +74,7 @@ public class AboutCommand extends Command {
     }
     
     @Override
-    protected void execute(CommandEvent event) {
+    protected void execute(SlashCommandEvent event) {
         if (oauthLink == null) {
             try {
                 ApplicationInfo info = event.getJDA().retrieveApplicationInfo().complete();
@@ -85,15 +86,15 @@ public class AboutCommand extends Command {
             }
         }
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(event.isFromType(ChannelType.TEXT) ? event.getGuild().getSelfMember().getColor() : color);
-        builder.setAuthor(event.getSelfUser().getName() + "의 모든 것!", null, event.getSelfUser().getAvatarUrl());
+        builder.setColor(event.isFromType(ChannelType.TEXT) ? Objects.requireNonNull(event.getGuild()).getSelfMember().getColor() : color);
+        builder.setAuthor(event.getJDA().getSelfUser().getName() + "의 모든 것!", null, event.getJDA().getSelfUser().getAvatarUrl());
         boolean join = !(event.getClient().getServerInvite() == null || event.getClient().getServerInvite().isEmpty());
         boolean inv = !oauthLink.isEmpty();
         String invline = "\n" + (join ? "Join my server [`here`](" + event.getClient().getServerInvite() + ")" : (inv ? "당신의 서버에 저를 " : ""))
                 + (inv ? (join ? ", or " : "") + "[`초대`](" + oauthLink + ") 해주세요" : "") + "!";
         String author = event.getJDA().getUserById(event.getClient().getOwnerId())==null ? "<@" + event.getClient().getOwnerId()+">" 
                 : Objects.requireNonNull(event.getJDA().getUserById(event.getClient().getOwnerId())).getName();
-        StringBuilder descr = new StringBuilder().append("안녕하세요! 저는 **").append(event.getSelfUser().getName()).append("** 입니다, ")
+        StringBuilder descr = new StringBuilder().append("안녕하세요! 저는 **").append(event.getJDA().getSelfUser().getName()).append("** 입니다, ")
                 .append(description).append("\n저는 ").append(IS_AUTHOR ? "was written in Java" : "").append("**")
                 .append(author).append("** 에 의해 만들어졌고 " + JDAUtilitiesInfo.AUTHOR + "의 [Commands Extension](" + JDAUtilitiesInfo.GITHUB + ") (")
                 .append(JDAUtilitiesInfo.VERSION).append(") 과 [JDA library](https://github.com/DV8FromTheWorld/JDA) (")
@@ -118,7 +119,7 @@ public class AboutCommand extends Command {
         }
         builder.setFooter("최근 재시작", null);
         builder.setTimestamp(event.getClient().getStartTime());
-        event.reply(builder.build());
+        event.replyEmbeds(builder.build()).queue();
     }
     
 }

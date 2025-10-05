@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -17,7 +18,7 @@ public class AudioUtil {
      */
     public static String getTTSBase64(String lang, String text) throws IOException, TTSTooLongException {
         if (text.length() <= 200) {
-            String tts = "https://www.google.com/async/translate_tts?yv=3&ttsp=tl:" + lang + ",txt:" + URLEncoder.encode(text, "UTF-8").replace("%","%25") + ",spd:2&cs=1&async=_fmt:jspb";
+            String tts = "https://www.google.com/async/translate_tts?yv=3&ttsp=tl:" + lang + ",txt:" + URLEncoder.encode(text, StandardCharsets.UTF_8).replace("%","%25") + ",spd:2&cs=1&async=_fmt:jspb";
             JSONObject jo = JSON.readFromURL(tts, 2);
             JSONArray array = Objects.requireNonNull(jo).getJSONArray("translate_tts");
             return array.getString(0);

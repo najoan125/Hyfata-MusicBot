@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.commands.owner;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.OwnerCommand;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 
 /**
  *
@@ -33,13 +34,12 @@ public class ShutdownCmd extends OwnerCommand
         this.name = "shutdown";
         this.help = "safely shuts down";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
     }
     
     @Override
     protected void execute(CommandEvent event)
     {
-        event.replyWarning("Shutting down...");
-        bot.shutdown();
+        event.replyWarning("Shutting down...", m -> bot.shutdown());
     }
 }

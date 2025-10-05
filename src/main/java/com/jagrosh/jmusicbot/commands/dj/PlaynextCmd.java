@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -27,8 +27,11 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -37,60 +40,60 @@ import java.util.Objects;
  */
 public class PlaynextCmd extends DJCommand
 {
-    private final String loadingEmoji;
-    
     public PlaynextCmd(Bot bot)
     {
         super(bot);
-        this.loadingEmoji = bot.getConfig().getLoading();
         this.name = "새치기";
         this.arguments = "<제목|URL>";
         this.help = "현재 곡이 끝나고 새치기 하여 제공된 음악을 재생합니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "제목_또는_url", "제목 또는 URL로 제공된 곡을 새치기하여 재생").setRequired(true)
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event)
+    public void doCommand(SlashCommandEvent event)
     {
-        if(event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
-        {
-            event.replyWarning("노래 제목 또는 URL을 포함하십시오!");
-            return;
-        }
-        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
-                ? event.getArgs().substring(1,event.getArgs().length()-1)
-                : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        event.reply(loadingEmoji+" Loading... `["+args+"]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false)));
+        var option = event.getOption("제목_또는_url");
+        String args = option == null ? "" : option.getAsString();
+
+        event.deferReply().queue(
+                m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), args, new ResultHandler(m,event,false, args))
+        );
     }
 
     private class ResultHandler implements AudioLoadResultHandler
     {
-        private final Message m;
-        private final CommandEvent event;
+        private final InteractionHook m;
+        private final SlashCommandEvent event;
         private final boolean ytsearch;
+        private final String args;
 
-        private ResultHandler(Message m, CommandEvent event, boolean ytsearch)
+        private ResultHandler(InteractionHook m, SlashCommandEvent event, boolean ytsearch, String args)
         {
             this.m = m;
             this.event = event;
             this.ytsearch = ytsearch;
+            this.args = args;
         }
 
         private void loadSingle(AudioTrack track)
         {
             if(bot.getConfig().isTooLong(track))
             {
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
+                m.editOriginal(FormatUtil.filter(event.getClient().getWarning()+" This track (**"+track.getInfo().title+"**) is longer than the allowed maximum: `"
                         + TimeUtil.formatTime(track.getDuration())+"` > `"+ TimeUtil.formatTime(bot.getConfig().getMaxSeconds()*1000)+"`")).queue();
                 return;
             }
-            AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-            int pos = Objects.requireNonNull(handler).addTrackToFront(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
+            AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+            int pos = Objects.requireNonNull(handler).addTrackToFront(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event, args)))+1;
             String addMsg = FormatUtil.filter(event.getClient().getSuccess()+" **"+track.getInfo().title
                     +"** (`"+ TimeUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" (이)가 "+pos+"위치에 추가되었습니다"));
-            m.editMessage(addMsg).queue();
+            m.editOriginal(addMsg).queue();
         }
         
         @Override
@@ -104,11 +107,11 @@ public class PlaynextCmd extends DJCommand
         {
             AudioTrack single;
             if(playlist.getTracks().size()==1 || playlist.isSearchResult())
-                single = playlist.getSelectedTrack()==null ? playlist.getTracks().get(0) : playlist.getSelectedTrack();
+                single = playlist.getSelectedTrack()==null ? playlist.getTracks().getFirst() : playlist.getSelectedTrack();
             else if (playlist.getSelectedTrack()!=null)
                 single = playlist.getSelectedTrack();
             else
-                single = playlist.getTracks().get(0);
+                single = playlist.getTracks().getFirst();
             loadSingle(single);
         }
 
@@ -116,18 +119,18 @@ public class PlaynextCmd extends DJCommand
         public void noMatches()
         {
             if(ytsearch)
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" No results found for `"+event.getArgs()+"`.")).queue();
+                m.editOriginal(FormatUtil.filter(event.getClient().getWarning()+" `"+args+"`에 대한 검색 결과가 없습니다.")).queue();
             else
-                bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytsearch:"+event.getArgs(), new ResultHandler(m,event,true));
+                bot.getPlayerManager().loadItemOrdered(event.getGuild(), "ytsearch:"+args, new ResultHandler(m,event,true, args));
         }
 
         @Override
         public void loadFailed(FriendlyException throwable)
         {
             if(throwable.severity==FriendlyException.Severity.COMMON)
-                m.editMessage(event.getClient().getError()+" Error loading: "+throwable.getMessage()).queue();
+                m.editOriginal(event.getClient().getError()+" 로딩 오류: "+throwable.getMessage()).queue();
             else
-                m.editMessage(event.getClient().getError()+" Error loading track.").queue();
+                m.editOriginal(event.getClient().getError()+" 트랙을 불러오는 동안 오류가 발생했습니다.").queue();
         }
     }
 }

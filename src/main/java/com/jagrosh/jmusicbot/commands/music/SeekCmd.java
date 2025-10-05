@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
@@ -23,9 +23,12 @@ import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Objects;
 
 
@@ -45,30 +48,36 @@ public class SeekCmd extends MusicCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "재생_위치", "[+ | -] <HH:MM:SS | MM:SS | SS>|<0h0m0s | 0m0s | 0s>").setRequired(true)
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event)
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+        var option = event.getOption("재생_위치");
+        String args = option == null ? "" : option.getAsString();
+
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         AudioTrack playingTrack = Objects.requireNonNull(handler).getPlayer().getPlayingTrack();
         if (!playingTrack.isSeekable())
         {
-            event.replyError("이 트랙은 탐색할 수 없습니다.");
+            event.reply(event.getClient().getError() + " 이 트랙은 탐색할 수 없습니다.").setEphemeral(true).queue();
             return;
         }
 
-        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getAuthor().getIdLong())
+        if (!DJCommand.checkDJPermission(event) && playingTrack.getUserData(RequestMetadata.class).getOwner() != event.getUser().getIdLong())
         {
-            event.replyError("**" + playingTrack.getInfo().title + "**은(는) 직접 추가한 곡이 아니기 때문에 탐색할 수 없습니다!");
+            event.reply(event.getClient().getError() + " **" + playingTrack.getInfo().title + "**은(는) 직접 추가한 곡이 아니기 때문에 탐색할 수 없습니다!").setEphemeral(true).queue();
             return;
         }
 
-        String args = event.getArgs();
         TimeUtil.SeekTime seekTime = TimeUtil.parseTime(args);
         if (seekTime == null)
         {
-            event.replyError("잘못된 탐색입니다! 예상 형식: " + arguments + "\n예: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`");
+            event.reply(event.getClient().getError() + " 잘못된 탐색입니다! 예상 형식: " + arguments + "\n예: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`").setEphemeral(true).queue();
             return;
         }
 
@@ -78,7 +87,7 @@ public class SeekCmd extends MusicCommand
         long seekMilliseconds = seekTime.relative ? currentPosition + seekTime.milliseconds : seekTime.milliseconds;
         if (seekMilliseconds > trackDuration)
         {
-            event.replyError("현재 트랙의 길이가 `" + TimeUtil.formatTime(trackDuration) + "` 이기 때문에 `" + TimeUtil.formatTime(seekMilliseconds) + "` 위치로 이동할 수 없습니다!");
+            event.reply(event.getClient().getError() + " 현재 트랙의 길이가 `" + TimeUtil.formatTime(trackDuration) + "` 이기 때문에 `" + TimeUtil.formatTime(seekMilliseconds) + "` 위치로 이동할 수 없습니다!").setEphemeral(true).queue();
             return;
         }
 
@@ -87,10 +96,10 @@ public class SeekCmd extends MusicCommand
         }
         catch (Exception e)
         {
-            event.replyError("탐색을 시도하는 도중 오류가 발생하였습니다: " + e.getMessage());
+            event.reply(event.getClient().getError() + " 탐색을 시도하는 도중 오류가 발생하였습니다: " + e.getMessage()).setEphemeral(true).queue();
             LOG.warn("Failed to seek track " + playingTrack.getIdentifier(), e);
             return;
         }
-        event.replySuccess("성공적으로 `" + TimeUtil.formatTime(playingTrack.getPosition()) + "/" + TimeUtil.formatTime(playingTrack.getDuration()) + "`으(로) 탐색했습니다!");
+        event.reply(event.getClient().getSuccess() + " 성공적으로 `" + TimeUtil.formatTime(playingTrack.getPosition()) + "/" + TimeUtil.formatTime(playingTrack.getDuration()) + "`으(로) 탐색했습니다!").queue();
     }
 }

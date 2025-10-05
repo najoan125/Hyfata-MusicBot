@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
@@ -255,8 +255,8 @@ public class Listener extends ListenerAdapter
     	SearchCmd.searchCmdExecutors.remove(messageId);
 
     	AudioPlaylist pl = SearchCmd.searchCmdPlaylist.get(messageId);
-    	CommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
-        AudioHandler handler = (AudioHandler)ev.getGuild().getAudioManager().getSendingHandler();
+    	SlashCommandEvent ev = SearchCmd.searchCmdEvent.get(messageId);
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(ev.getGuild()).getAudioManager().getSendingHandler();
     	if (event.getComponentId().equals("cancel")) {
     		event.editMessage("검색이 취소되었습니다.").setEmbeds().setComponents().queue();
             if (!Objects.requireNonNull(handler).isMusicPlaying(ev.getJDA()) && handler.getQueue().isEmpty()){
@@ -269,11 +269,11 @@ public class Listener extends ListenerAdapter
     		if(bot.getConfig().isTooLong(track))
             {
     		    event.getMessage().delete().queue();
-                ev.replyWarning("이 트랙 (**"+track.getInfo().title+"**) 은(는) 허용된 최대치보다 깁니다: `"
-                        + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
+                ev.reply(ev.getClient().getWarning() + " 이 트랙 (**"+track.getInfo().title+"**) 은(는) 허용된 최대치보다 깁니다: `"
+                        + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`").setEphemeral(true).queue();
                 return;
             }
-            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, ev)))+1;
+            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, ev, Objects.requireNonNull(ev.getOption("검색어")).getAsString())))+1;
             MessageEditData addMsg = new MessageEditBuilder().setContent(FormatUtil.filter(bot.getConfig().getSuccess()+
                     (pos==0?" 요청한 항목을 바로 재생합니다":" 요청한 항목이 **대기열 위치 "+pos+"** 에 추가되었습니다"))).setComponents().build();
             MessageEditAction ma = event.getMessage().editMessage(addMsg);

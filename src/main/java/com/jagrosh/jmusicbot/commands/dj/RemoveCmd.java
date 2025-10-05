@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
@@ -23,6 +23,11 @@ import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  *
@@ -34,51 +39,57 @@ public class RemoveCmd extends DJCommand
     {
         super(bot);
         this.name = "제거";
-        this.help = "\uB178\uB798\uB97C \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uD569\uB2C8\uB2E4";
-        this.arguments = "<position|ALL>";
+        this.help = "노래를 대기열에서 제거합니다";
+        this.arguments = "<트랙 위치|ALL>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "트랙_위치", "`/대기열`에서 제거할 트랙 위치. `all`을 입력하면 모두 제거")
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        if(handler.getQueue().isEmpty())
+        var option = event.getOption("트랙_위치");
+        String args = option == null ? "" : option.getAsString();
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        if(Objects.requireNonNull(handler).getQueue().isEmpty())
         {
-            event.replyError("\uADF8\uAC83\uC740 \uB300\uAE30\uC5F4\uC5D0 \uC5C6\uC2B5\uB2C8\uB2E4!");
+            event.reply(event.getClient().getError() + " 대기열이 비어있습니다!").setEphemeral(true).queue();
             return;
         }
-        if(event.getArgs().equalsIgnoreCase("all"))
+        if(args.equalsIgnoreCase("all"))
         {
-            int count = handler.getQueue().removeAll(event.getAuthor().getIdLong());
+            int count = handler.getQueue().removeAll(event.getUser().getIdLong());
             if(count==0)
-                event.replyWarning("\uB300\uAE30\uC5F4\uC5D0 \uC5B4\uB5A4 \uB178\uB798\uB3C4 \uC5C6\uC2B5\uB2C8\uB2E4!");
+                event.reply(event.getClient().getWarning() + " 대기열에 어떤 노래도 없습니다!").setEphemeral(true).queue();
             else
-                event.replySuccess("\uC131\uACF5\uC801\uC73C\uB85C "+count+" \uD56D\uBAA9\uC744 \uC81C\uAC70\uD558\uC600\uC2B5\uB2C8\uB2E4.");
+                event.reply(event.getClient().getSuccess() + " 성공적으로 "+count+" 항목을 제거하였습니다.").queue();
             return;
         }
         int pos;
         try {
-            pos = Integer.parseInt(event.getArgs());
+            pos = Integer.parseInt(args);
         } catch(NumberFormatException e) {
             pos = 0;
         }
         if(pos<1 || pos>handler.getQueue().size())
         {
-            event.replyError("\uC704\uCE58\uB294 1\uACFC "+handler.getQueue().size()+" \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
+            event.reply(event.getClient().getError() + " 위치는 1과 "+handler.getQueue().size()+" 사이의 유효한 정수여야 합니다!").setEphemeral(true).queue();
             return;
         }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        boolean isDJ = event.getMember().hasPermission(Permission.MANAGE_SERVER);
+        boolean isDJ = Objects.requireNonNull(event.getMember()).hasPermission(Permission.MANAGE_SERVER);
         if(!isDJ)
             isDJ = event.getMember().getRoles().contains(settings.getRole(event.getGuild()));
         QueuedTrack qt = handler.getQueue().get(pos-1);
-        if(qt.getIdentifier()==event.getAuthor().getIdLong())
+        if(qt.getIdentifier()==event.getUser().getIdLong())
         {
             handler.getQueue().remove(pos-1);
-            event.replySuccess("**"+qt.getTrack().getInfo().title+"** (\uC774)\uAC00 \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uB428");
+            event.reply(event.getClient().getSuccess() + " **"+qt.getTrack().getInfo().title+"** (이)가 대기열에서 제거됨").queue();
         }
         else if(isDJ)
         {
@@ -89,12 +100,12 @@ public class RemoveCmd extends DJCommand
             } catch(Exception e) {
                 u = null;
             }
-            event.replySuccess("**"+qt.getTrack().getInfo().title
-                    +"** (\uC774)\uAC00 \uB300\uAE30\uC5F4\uC5D0\uC11C \uC81C\uAC70\uB428 ("+(u==null ? "someone" : "**"+u.getName()+"** \uC5D0 \uC758\uD574 \uC694\uCCAD\uB428")+")");
+            event.reply(event.getClient().getSuccess() + " **"+qt.getTrack().getInfo().title
+                    +"** (이)가 대기열에서 제거됨 ("+(u==null ? "someone" : "**"+u.getName()+"** 에 의해 요청됨")+")").queue();
         }
         else
         {
-            event.replyError("**"+qt.getTrack().getInfo().title+"** (\uC744)\uB97C \uCD94\uAC00\uD558\uC9C0 \uC54A\uC558\uC73C\uBBC0\uB85C \uC81C\uAC70\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!");
+            event.reply(event.getClient().getError() + " **"+qt.getTrack().getInfo().title+"** (을)를 추가하지 않았으므로 제거할 수 없습니다!").setEphemeral(true).queue();
         }
     }
 }

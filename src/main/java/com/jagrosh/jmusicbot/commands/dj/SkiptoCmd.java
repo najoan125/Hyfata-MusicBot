@@ -15,11 +15,16 @@
  */
 package com.jagrosh.jmusicbot.commands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  *
@@ -35,33 +40,31 @@ public class SkiptoCmd extends DJCommand
         this.arguments = "<대기열 위치>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.INTEGER, "대기열_위치", "건너뛸 대기열 위치(번호)")
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        int index = 0;
-        try
-        {
-            index = Integer.parseInt(event.getArgs());
-        }
-        catch(NumberFormatException e)
-        {
-            event.reply(event.getClient().getError()+" `"+event.getArgs()+"` (\uC740)\uB294 \uC62C\uBC14\uB978 \uC815\uC218\uAC00 \uC544\uB2D9\uB2C8\uB2E4!");
-            return;
-        }
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        var option = event.getOption("대기열_위치");
+        int index = option == null ? 0 : option.getAsInt();
+
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        Objects.requireNonNull(handler);
         if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
-            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못함 ㅋㅋ ㅅㄱ");
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못함 ㅋㅋ ㅅㄱ").queue();
             return;
         }
         if(index<1 || index>handler.getQueue().size())
         {
-            event.reply(event.getClient().getError()+" \uC704\uCE58\uB294 1\uACFC "+handler.getQueue().size()+" \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
+            event.reply(event.getClient().getError()+" 위치는 1과 "+handler.getQueue().size()+" 사이의 유효한 정수여야 합니다!").setEphemeral(true).queue();
             return;
         }
         handler.getQueue().skip(index-1);
-        event.reply(event.getClient().getSuccess()+" **"+handler.getQueue().get(0).getTrack().getInfo().title+"** (\uC73C)\uB85C \uAC74\uB108\uB700");
+        event.reply(event.getClient().getSuccess()+" **"+handler.getQueue().get(0).getTrack().getInfo().title+"** (으)로 건너뜀").queue();
         handler.getPlayer().stopTrack();
     }
 }

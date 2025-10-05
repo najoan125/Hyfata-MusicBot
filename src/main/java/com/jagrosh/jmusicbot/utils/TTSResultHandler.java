@@ -1,6 +1,6 @@
 package com.jagrosh.jmusicbot.utils;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
@@ -19,27 +19,30 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public class TTSResultHandler implements AudioLoadResultHandler {
-    CommandEvent event;
+    SlashCommandEvent event;
     String filepath;
     Message m;
+    String args;
     boolean sPgmld = false;
     String sPgmldStr = "";
 
-    public TTSResultHandler(CommandEvent event, String filepath, Message message){
+    public TTSResultHandler(SlashCommandEvent event, String filepath, Message message, String args){
         this.event = event;
         this.filepath = filepath;
         this.m = message;
+        this.args = args;
     }
-    public TTSResultHandler(CommandEvent event, String filepath, Message message, boolean sPgmld, String text){
+    public TTSResultHandler(SlashCommandEvent event, String filepath, Message message, boolean sPgmld, String text, String args){
         this.event = event;
         this.filepath = filepath;
         this.m = message;
         this.sPgmld = sPgmld;
         sPgmldStr = text;
+        this.args = args;
     }
     @Override
     public void trackLoaded(AudioTrack track) {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         AudioTrack nowPlaying = Objects.requireNonNull(handler).getPlayer().getPlayingTrack();
 
         boolean isTTS;
@@ -68,16 +71,16 @@ public class TTSResultHandler implements AudioLoadResultHandler {
             AudioTrack cloned = nowPlaying.makeClone();
             cloned.setPosition(nowPlaying.getPosition());
             handler.addTrackToFront(new QueuedTrack(cloned, handler.getRequestMetadata(), true));
-            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event)));
+            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event, args)));
             handler.getPlayer().stopTrack();
         }
         else {
-            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event)));
+            handler.addTrackToFront(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event, args)));
         }
 
         if (!event.getGuild().getAudioManager().isConnected()){
             GuildVoiceState userState = event.getMember().getVoiceState();
-            event.getGuild().getAudioManager().openAudioConnection(Objects.requireNonNull(userState).getChannel());
+            event.getGuild().getAudioManager().openAudioConnection(Objects.requireNonNull(Objects.requireNonNull(userState).getChannel()));
         }
     }
 

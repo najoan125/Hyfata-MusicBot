@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -42,10 +42,10 @@ public class SyncLyricsCmd extends MusicCommand {
     }
 
     @Override
-    public void doCommand(CommandEvent event) {
-        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-        event.reply(bot.getConfig().getLoading() + " 불러오는 중...", msg -> {
-            long ping = event.getMessage().getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
+    public void doCommand(SlashCommandEvent event) {
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        event.deferReply().queue(hook -> hook.retrieveOriginal().queue(msg -> {
+            long ping = msg.getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
             MessageEditData lyricMsg;
             try {
                 lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA(), ping);
@@ -69,6 +69,6 @@ public class SyncLyricsCmd extends MusicCommand {
                 bot.getSyncLyricHandler().setLastLyricMessage(msg);
                 bot.getNowplayingHandler().clearLastNPMessage(event.getGuild());
             }
-        });
+        }));
     }
 }

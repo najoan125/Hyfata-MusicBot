@@ -15,13 +15,18 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jlyrics.LyricsClient;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  *
@@ -39,41 +44,48 @@ public class LyricsCmd extends MusicCommand
         this.help = "현재 재생 중인 노래의 가사를 벅스(Bugs!)에서 찾아 보여줍니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "제목", "찾을 가사의 노래 제목")
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event)
+    public void doCommand(SlashCommandEvent event)
     {
+        var option = event.getOption("제목");
+        String args = option == null ? "" : option.getAsString();
+
         String title;
-        if(event.getArgs().isEmpty())
+        if(args.isEmpty())
         {
-            AudioHandler sendingHandler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-            if (sendingHandler.isMusicPlaying(event.getJDA()))
+            AudioHandler sendingHandler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+            if (Objects.requireNonNull(sendingHandler).isMusicPlaying(event.getJDA()))
                 title = sendingHandler.getPlayer().getPlayingTrack().getInfo().title;
             else
             {
-                event.replyError("사용법: `;가사 <노래 제목>`");
+                event.reply(event.getClient().getError() + " 사용법: `/가사 <노래 제목>`").setEphemeral(true).queue();
                 return;
             }
         }
         else
-            title = event.getArgs();
+            title = args;
         event.getChannel().sendTyping().queue();
         client.getLyrics(title).thenAccept(lyrics -> 
         {
             if(lyrics == null)
             {
-                event.replyError("`" + title + "` \uC758 \uAC00\uC0AC\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4!" + (event.getArgs().isEmpty() ? " \uC218\uB3D9\uC73C\uB85C \uB178\uB798 \uC774\uB984\uC744 \uC785\uB825\uD574 \uBCF4\uC2ED\uC2DC\uC624 (`\uAC00\uC0AC [\uB178\uB798 \uC81C\uBAA9]`)" : ""));
+                event.reply(event.getClient().getError() + " `" + title + "` 의 가사를 찾을 수 없습니다!" + (args.isEmpty() ? " 수동으로 노래 이름을 입력해 보십시오 (`가사 [노래 제목]`)" : "")).setEphemeral(true).queue();
                 return;
             }
 
             EmbedBuilder eb = new EmbedBuilder()
                     .setAuthor(lyrics.getAuthor())
-                    .setColor(event.getSelfMember().getColor())
+                    .setColor(Objects.requireNonNull(event.getGuild()).getSelfMember().getColor())
                     .setTitle(lyrics.getTitle(), lyrics.getURL());
             if(lyrics.getContent().length()>15000)
             {
-                event.replyWarning("`" + title + "` \uC758 \uAC00\uC0AC\uAC00 \uBC1C\uACAC\uB418\uC5C8\uC9C0\uB9CC \uC815\uD655\uD558\uC9C0 \uC54A\uC744 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4: " + lyrics.getURL());
+                event.reply(event.getClient().getWarning() + " `" + title + "` 의 가사가 발견되었지만 정확하지 않을 것 같습니다: " + lyrics.getURL()).setEphemeral(true).queue();
             }
             else if(lyrics.getContent().length()>2000)
             {
@@ -87,14 +99,14 @@ public class LyricsCmd extends MusicCommand
                         index = content.lastIndexOf(" ", 2000);
                     if(index == -1)
                         index = 2000;
-                    event.reply(eb.setDescription(content.substring(0, index).trim()).build());
+                    event.replyEmbeds(eb.setDescription(content.substring(0, index).trim()).build()).queue();
                     content = content.substring(index).trim();
                     eb.setAuthor(null).setTitle(null, null);
                 }
-                event.reply(eb.setDescription(content).build());
+                event.replyEmbeds(eb.setDescription(content).build()).queue();
             }
             else
-                event.reply(eb.setDescription(lyrics.getContent()).build());
+                event.replyEmbeds(eb.setDescription(lyrics.getContent()).build()).queue();
         });
     }
 }

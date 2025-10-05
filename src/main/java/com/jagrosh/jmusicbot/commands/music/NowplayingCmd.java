@@ -15,13 +15,15 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
+
+import java.util.Objects;
 
 /**
  *
@@ -33,24 +35,27 @@ public class NowplayingCmd extends MusicCommand
     {
         super(bot);
         this.name = "현재";
-        this.help = "\uD604\uC7AC \uC7AC\uC0DD \uC911\uC778 \uB178\uB798\uB97C \uBCF4\uC5EC\uC90D\uB2C8\uB2E4";
+        this.help = "현재 재생 중인 노래를 보여줍니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        MessageEditData m = handler.getNowPlaying(event.getJDA());
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        MessageEditData m = Objects.requireNonNull(handler).getNowPlaying(event.getJDA());
         if(m==null)
         {
-            event.reply(MessageCreateData.fromEditData(handler.getNoMusicPlaying(event.getJDA())));
+            event.reply(MessageCreateData.fromEditData(handler.getNoMusicPlaying(event.getJDA()))).queue();
             bot.getNowplayingHandler().clearLastNPMessage(event.getGuild());
         }
         else
         {
-            event.reply(MessageCreateData.fromEditData(m), msg -> bot.getNowplayingHandler().setLastNPMessage(msg));
+            event.reply(MessageCreateData.fromEditData(m)).queue(hook -> hook.retrieveOriginal().queue(
+                            msg -> bot.getNowplayingHandler().setLastNPMessage(msg)
+                    )
+            );
             bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());
         }
     }

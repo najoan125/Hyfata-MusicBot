@@ -20,6 +20,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.commands.OwnerCommand;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ public class RnjsskaCmd extends OwnerCommand {
         this.name = "rnjsska";
         this.help = "권남을 사용합니다 ㅋㅋ";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.arguments = "<add|remove|list|NONE> <user id>";
     }
 

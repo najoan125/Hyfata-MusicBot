@@ -15,8 +15,8 @@
  */
 package com.jagrosh.jmusicbot.commands;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.exceptions.PermissionException;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 
 import java.util.Objects;
 
@@ -32,7 +33,7 @@ import java.util.Objects;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public abstract class MusicCommand extends Command 
+public abstract class MusicCommand extends SlashCommand
 {
     protected final Bot bot;
     protected boolean bePlaying;
@@ -41,28 +42,27 @@ public abstract class MusicCommand extends Command
     public MusicCommand(Bot bot)
     {
         this.bot = bot;
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         this.category = new Category("Music");
     }
     
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(SlashCommandEvent event)
     {
+        if (event.getGuild() == null) {
+            return;
+        }
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         TextChannel tchannel = settings.getTextChannel(event.getGuild());
         if(tchannel!=null && !event.getTextChannel().equals(tchannel))
         {
-            try 
-            {
-                event.getMessage().delete().queue();
-            } catch(PermissionException ignore){}
-            event.replyInDm(event.getClient().getError()+" 당신은 "+tchannel.getAsMention()+" 에서만 명령어를 사용할 수 있습니다!");
+            event.reply(event.getClient().getError()+" 당신은 "+tchannel.getAsMention()+" 에서만 명령어를 사용할 수 있습니다!").setEphemeral(true).queue();
             return;
         }
         bot.getPlayerManager().setUpHandler(event.getGuild()); // no point constantly checking for this later
         if(bePlaying && !((AudioHandler) Objects.requireNonNull(event.getGuild().getAudioManager().getSendingHandler())).isMusicPlaying(event.getJDA()))
         {
-            event.reply(event.getClient().getError()+" 그걸 이용하려면 음악이 재생되고 있어야 해요!");
+            event.reply(event.getClient().getError()+" 그걸 이용하려면 음악이 재생되고 있어야 해요!").setEphemeral(true).queue();
             return;
         }
         if(beListening)
@@ -71,17 +71,17 @@ public abstract class MusicCommand extends Command
             AudioChannelUnion union = Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel();
             if(union==null)
                 current = settings.getVoiceChannel(event.getGuild());
-            GuildVoiceState userState = event.getMember().getVoiceState();
+            GuildVoiceState userState = Objects.requireNonNull(event.getMember()).getVoiceState();
             if(!Objects.requireNonNull(userState).inAudioChannel() || userState.isDeafened() || (current!=null && !Objects.requireNonNull(userState.getChannel()).equals(current)))
             {
-                event.replyError((current==null ? "음성 채널" : "**"+current.getName()+"**")+" 에 있어야만 사용할 수 있습니다!");
+                event.reply(event.getClient().getError() + " " + (current==null ? "음성 채널" : "**"+current.getName()+"**")+" 에 있어야만 사용할 수 있습니다!").setEphemeral(true).queue();
                 return;
             }
 
             VoiceChannel afkChannel = userState.getGuild().getAfkChannel();
             if(afkChannel != null && afkChannel.equals(userState.getChannel()))
             {
-                event.replyError("AFK(잠수) 채널에서는 이 명령을 사용할 수 없습니다!");
+                event.reply(event.getClient().getError() + " AFK(잠수) 채널에서는 이 명령을 사용할 수 없습니다!").setEphemeral(true).queue();
                 return;
             }
 
@@ -93,14 +93,21 @@ public abstract class MusicCommand extends Command
                 }
                 catch(PermissionException ex)
                 {
-                    event.reply(event.getClient().getError()+" "+ Objects.requireNonNull(userState.getChannel()).getAsMention()+" 으(로) 연결하는 것이 불가능합니다!");
+                    event.reply(event.getClient().getError()+" "+ Objects.requireNonNull(userState.getChannel()).getAsMention()+" 으(로) 연결하는 것이 불가능합니다!").setEphemeral(true).queue();
                     return;
                 }
             }
         }
-        
-        doCommand(event);
+
+        if (check(event))
+            doCommand(event);
+        else
+            event.reply(event.getClient().getError() + " 이 명령어를 사용할 권한이 없습니다!").setEphemeral(true).queue();
+    }
+
+    public boolean check(SlashCommandEvent event) {
+        return true;
     }
     
-    public abstract void doCommand(CommandEvent event);
+    public abstract void doCommand(SlashCommandEvent event);
 }

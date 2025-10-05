@@ -15,13 +15,15 @@
  */
 package com.jagrosh.jmusicbot.commands.dj;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
+
+import java.util.Objects;
 
 /**
  *
@@ -39,16 +41,19 @@ public class ForceskipCmd extends DJCommand
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
-            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 강제 스킵 못함 ㅋㅋ ㅅㄱ");
+        if (event.getGuild() == null) {
             return;
         }
-        RequestMetadata rm = handler.getRequestMetadata();
+        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
+            event.reply(event.getClient().getError() + " 봇의 소유자가 권남 모드 활성화해서 강제 스킵 못함 ㅋㅋ ㅅㄱ").queue();
+            return;
+        }
+        RequestMetadata rm = Objects.requireNonNull(handler).getRequestMetadata();
         event.reply(event.getClient().getSuccess()+" **"+handler.getPlayer().getPlayingTrack().getInfo().title
-        		+"** "+(rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + FormatUtil.formatUsername(rm.user) + "**)"));
+        		+"** "+(rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + FormatUtil.formatUsername(rm.user) + "**)")).queue();
         handler.getPlayer().stopTrack();
     }
 }

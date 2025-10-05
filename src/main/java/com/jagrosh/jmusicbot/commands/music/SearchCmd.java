@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.menu.OrderedMenu;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
@@ -33,6 +33,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.ActionComponent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -48,44 +50,63 @@ import java.util.concurrent.TimeUnit;
  */
 public class SearchCmd extends MusicCommand {
     protected String searchPrefix = "ytsearch:";
-    private final String searchingEmoji;
 
     //Listener.java에 사용할 HashMap
     public static HashMap<String, User> searchCmdMap = new HashMap<>();
     public static HashMap<String, AudioPlaylist> searchCmdPlaylist = new HashMap<>();
-    public static HashMap<String, CommandEvent> searchCmdEvent = new HashMap<>();
+    public static HashMap<String, SlashCommandEvent> searchCmdEvent = new HashMap<>();
     public static HashMap<String, ExecutorService> searchCmdExecutors = new HashMap<>();
 
     public SearchCmd(Bot bot) {
         super(bot);
-        this.searchingEmoji = bot.getConfig().getSearching();
         this.name = "검색";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.arguments = "<검색어>";
-        this.help = "제공된 요청을 Youtube에서 검색합니다.";
+        this.help = "제공된 요청을 Youtube, SoundCloud, Apple Music 또는 Spotify에서 검색합니다.";
         this.beListening = true;
         this.bePlaying = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+
+        List<OptionData> options = new ArrayList<>();
+        options.add(new OptionData(OptionType.STRING, "플랫폼", "검색할 플랫폼")
+                .addChoice("Youtube", "ytsearch:")
+                .addChoice("Apple Music", "amsearch:")
+                .addChoice("Spotify", "spsearch:")
+                .addChoice("SoundCloud", "scsearch:")
+                .setRequired(true));
+        options.add(new OptionData(OptionType.STRING, "검색어", "검색할 검색어").setRequired(true));
+        this.options = options;
     }
 
 
     @Override
-    public void doCommand(CommandEvent event) {
-        if (event.getArgs().isEmpty()) {
-            event.replyError("검색어를 포함하십시오.");
+    public void doCommand(SlashCommandEvent event) {
+        var platform = event.getOption("플랫폼");
+        var search = event.getOption("검색어");
+        String args = search == null ? "" : search.getAsString().trim();
+        String platformValue = platform == null ? "" : platform.getAsString().trim();
+
+        if (args.isEmpty()) {
+            event.reply(event.getClient().getError() + " 검색어를 포함하십시오.").setEphemeral(true).queue();
             return;
         }
-        event.reply(searchingEmoji + " 검색 중... `[" + event.getArgs() + "]`",
-                m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), searchPrefix + event.getArgs(), new ResultHandler(m, event)));
+        if (!platformValue.isEmpty()) {
+            searchPrefix = platformValue;
+        }
+        event.deferReply().queue(
+                hook -> hook.retrieveOriginal().queue(m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), searchPrefix + args, new ResultHandler(m, event, args))
+                ));
     }
 
     private class ResultHandler implements AudioLoadResultHandler {
         private final Message m;
-        private final CommandEvent event;
+        private final SlashCommandEvent event;
+        private final String args;
 
-        private ResultHandler(Message m, CommandEvent event) {
+        private ResultHandler(Message m, SlashCommandEvent event, String args) {
             this.m = m;
             this.event = event;
+            this.args = args;
         }
 
         @Override
@@ -95,8 +116,8 @@ public class SearchCmd extends MusicCommand {
                         + TimeUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`")).queue();
                 return;
             }
-            AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event))) + 1;
+            AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+            int pos = Objects.requireNonNull(handler).addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event, args))) + 1;
             m.editMessage(FormatUtil.filter(event.getClient().getSuccess() + " **" + track.getInfo().title
                     + "** (`" + TimeUtil.formatTime(track.getDuration()) + "`) " + (pos == 0 ? "(이)가 추가되어 재생을 시작합니다"
                     : " (이)가 대기열 위치 " + pos + "에 추가됨"))).queue();
@@ -106,9 +127,9 @@ public class SearchCmd extends MusicCommand {
         public void playlistLoaded(AudioPlaylist playlist) {
             //메시지 수정
             MessageEditAction ma = m.editMessage(FormatUtil.filter(
-                    event.getClient().getSuccess() + "`" + event.getArgs() + "` 검색 결과:"));
+                    event.getClient().getSuccess() + "`" + args + "` 검색 결과:"));
             EmbedBuilder eb = new EmbedBuilder();
-            eb.setColor(event.getSelfMember().getColor());
+            eb.setColor(Objects.requireNonNull(event.getGuild()).getSelfMember().getColor());
 
             //버튼 생성
             StringBuilder result = new StringBuilder();
@@ -142,7 +163,7 @@ public class SearchCmd extends MusicCommand {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
 
             //HashMap에 등록
-            searchCmdMap.put(m.getId(), event.getAuthor());
+            searchCmdMap.put(m.getId(), event.getUser());
             searchCmdPlaylist.put(m.getId(), playlist);
             searchCmdEvent.put(m.getId(), event);
             searchCmdExecutors.put(m.getId(), executorService);
@@ -179,7 +200,7 @@ public class SearchCmd extends MusicCommand {
 
         @Override
         public void noMatches() {
-            m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " 검색 결과가 없음 `" + event.getArgs() + "`.")).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning() + " 검색 결과가 없음 `" + args + "`.")).queue();
         }
 
         @Override

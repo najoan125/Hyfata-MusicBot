@@ -667,7 +667,7 @@ public class CommandClientImpl implements CommandClient, EventListener
 
         if(activity != null)
             event.getJDA().getPresence().setPresence(status==null ? OnlineStatus.ONLINE : status,
-                "default".equals(activity.getName()) ? Activity.playing(textPrefix+helpWord+" 를 입력하세요! | ver " + OtherUtil.getCurrentVersion() + " | Made by Najoan") : activity);
+                "default".equals(activity.getName()) ? Activity.playing("ver " + OtherUtil.getCurrentVersion() + " | Made by Najoan") : activity);
 
         // Start SettingsManager if necessary
         GuildSettingsManager<?> manager = getSettingsManager();

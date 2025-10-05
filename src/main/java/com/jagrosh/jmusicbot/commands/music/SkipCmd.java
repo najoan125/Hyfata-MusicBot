@@ -15,7 +15,7 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
@@ -37,26 +37,26 @@ public class SkipCmd extends MusicCommand
     {
         super(bot);
         this.name = "스킵";
-        this.help = "\uD604\uC7AC \uB178\uB798 \uAC74\uB108\uB6F0\uAE30\uC5D0 \uD22C\uD45C\uD569\uB2C8\uB2E4.";
+        this.help = "현재 노래 건너뛰기에 투표합니다.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
-            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못하쥬? 킹받쥬? ㅋㅋ ㅅㄱ");
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 스킵 못하쥬? 킹받쥬? ㅋㅋ ㅅㄱ").queue();
             return;
         }
-        RequestMetadata rm = handler.getRequestMetadata();
-        double skipRatio = bot.getSettingsManager().getSettings(event.getGuild()).getSkipRatio();
+        RequestMetadata rm = Objects.requireNonNull(handler).getRequestMetadata();
+        double skipRatio = Objects.requireNonNull(bot.getSettingsManager().getSettings(event.getGuild())).getSkipRatio();
         if(skipRatio == -1) {
             skipRatio = bot.getConfig().getSkipRatio();
         }
-        if(event.getAuthor().getIdLong() == rm.getOwner() || skipRatio == 0)
+        if(event.getUser().getIdLong() == rm.getOwner() || skipRatio == 0)
         {
             event.reply(new MessageCreateBuilder()
                     .setContent(bot.getConfig().getSuccess()+" 현재 재생 중인 항목을 건너뛰었습니다!")
@@ -65,22 +65,22 @@ public class SkipCmd extends MusicCommand
                             .setDescription("이 항목을 건너뛰었습니다!")
                             .build())
                     .build()
-            );
+            ).queue();
             handler.getPlayer().stopTrack();
         }
         else
         {
-            int listeners = (int) Objects.requireNonNull(Objects.requireNonNull(event.getSelfMember().getVoiceState()).getChannel()).getMembers().stream()
+            int listeners = (int) Objects.requireNonNull(Objects.requireNonNull(event.getGuild().getSelfMember().getVoiceState()).getChannel()).getMembers().stream()
                     .filter(m -> !m.getUser().isBot() && !Objects.requireNonNull(m.getVoiceState()).isDeafened()).count();
             String msg;
-            if(handler.getVotes().contains(event.getAuthor().getId()))
+            if(handler.getVotes().contains(event.getUser().getId()))
                 msg = event.getClient().getWarning()+" 이미 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
             else
             {
                 msg = event.getClient().getSuccess()+" 현재 재생 중인 항목을 건너뛰기로 투표했습니다 `[";
-                handler.getVotes().add(event.getAuthor().getId());
+                handler.getVotes().add(event.getUser().getId());
             }
-            int skippers = (int)event.getSelfMember().getVoiceState().getChannel().getMembers().stream()
+            int skippers = (int)event.getGuild().getSelfMember().getVoiceState().getChannel().getMembers().stream()
                     .filter(m -> handler.getVotes().contains(m.getUser().getId())).count();
             int required = (int)Math.ceil(listeners * skipRatio);
             msg += skippers + "표, " + required + "/" + listeners + " 필요]`";
@@ -97,11 +97,11 @@ public class SkipCmd extends MusicCommand
                                 .setDescription(embed)
                                 .build()
                         ).build()
-                );
+                ).queue();
                 handler.getPlayer().stopTrack();
             }
             else
-                event.reply(msg);
+                event.reply(msg).queue();
         }
     }
     

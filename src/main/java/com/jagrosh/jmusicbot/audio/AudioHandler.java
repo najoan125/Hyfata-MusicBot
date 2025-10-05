@@ -415,7 +415,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
                 .setComponents()
                 .setEmbeds(new EmbedBuilder()
                         .setTitle("현재 재생중인 음악이 없습니다!")
-                        .setDescription("`;재생` 또는 `;검색` 명령어를 이용해 음악을 재생하세요!")
+                        .setDescription("`/재생` 또는 `/검색` 명령어를 이용해 음악을 재생하세요!")
                         .setColor(guild.getSelfMember().getColor())
                         .build()).build();
     }

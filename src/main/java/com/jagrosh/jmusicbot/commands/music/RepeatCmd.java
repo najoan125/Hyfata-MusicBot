@@ -15,11 +15,16 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.Collections;
 
 /**
  *
@@ -30,30 +35,31 @@ public class RepeatCmd extends MusicCommand
     public RepeatCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uBC18\uBCF5";
+        this.name = "반복";
         this.help = "대기열 전체를 반복하거나 노래 한곡만 단일 반복 합니다.";
-        this.arguments = "[끄기|켜기(전체)|단일]";
+        this.arguments = "[끄기|전체 반복|단일 반복]";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "반복_모드", "반복 모드를 설정")
+                        .addChoice("전체 반복", "all")
+                        .addChoice("단일 반복", "single")
+                        .addChoice("끄기", "off")
+        );
     }
     
-    // override musiccommand's execute because we don't actually care where this is used
+    // override music command's execute because we don't care where this is used
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(SlashCommandEvent event)
     {
-        String args = event.getArgs();
-        RepeatMode value;
+        var option = event.getOption("반복_모드");
+        String args = option == null ? "" : option.getAsString();
+        RepeatMode value = RepeatMode.OFF;
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         if(args.isEmpty())
         {
-            if(settings.getRepeatMode() == RepeatMode.OFF)
-                value = RepeatMode.ALL;
-            else
-                value = RepeatMode.OFF;
-        }
-        else if(args.equalsIgnoreCase("false") || args.equalsIgnoreCase("off") || args.equalsIgnoreCase("끄기"))
-        {
-        	value = RepeatMode.OFF;
+            event.reply(event.getClient().getSuccess() + " 현재 반복 모드: `" + settings.getRepeatMode().getUserFriendlyName() + "`").queue();
+            return;
         }
         else if(args.equalsIgnoreCase("true") || args.equalsIgnoreCase("on") || args.equalsIgnoreCase("all") || args.equalsIgnoreCase("켜기") || args.equalsIgnoreCase("전체"))
         {
@@ -63,15 +69,15 @@ public class RepeatCmd extends MusicCommand
         {
             value = RepeatMode.SINGLE;
         }
-        else
+        else if (!args.equalsIgnoreCase("off"))
         {
-            event.replyError("\uC720\uD6A8\uD55C \uC635\uC158\uC740 `전체` \uB610\uB294 `끄기` 또는 `단일` \uC785\uB2C8\uB2E4 (또는 비워두면 `꺼짐` 과 `전체` 로 전환됩니다)");
+            event.reply(event.getClient().getError() + " 유효한 옵션은 `전체 반복` 또는 `단일 반복` 또는 `끄기` 입니다.").setEphemeral(true).queue();
             return;
         }
         settings.setRepeatMode(value);
-        event.replySuccess("반복 모드: `"+value.getUserFriendlyName()+"`");
+        event.reply(event.getClient().getSuccess() + " 반복 모드를 `"+value.getUserFriendlyName()+"`(으)로 설정했습니다!").queue();
     }
 
     @Override
-    public void doCommand(CommandEvent event) { /* Intentionally Empty */ }
+    public void doCommand(SlashCommandEvent event) { /* Intentionally Empty */ }
 }

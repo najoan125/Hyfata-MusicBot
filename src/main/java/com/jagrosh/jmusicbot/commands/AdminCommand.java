@@ -15,25 +15,41 @@
  */
 package com.jagrosh.jmusicbot.commands;
 
-import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
+
+import java.util.Objects;
 
 /**
  *
  * @author John Grosh (john.a.grosh@gmail.com)
  */
-public abstract class AdminCommand extends Command
+public abstract class AdminCommand extends SlashCommand
 {
     public AdminCommand()
     {
-        this.category = new Category("\uAD00\uB9AC\uC790", event ->
-        {
-            if(event.getAuthor().getId().equals(event.getClient().getOwnerId()))
-                return true;
-            if(event.getGuild()==null)
-                return true;
-            return event.getMember().hasPermission(Permission.MANAGE_SERVER);
-        });
-        this.guildOnly = true;
+        this.category = new Category("관리자");
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
     }
+
+    private boolean check(SlashCommandEvent event) {
+        if(event.getUser().getId().equals(event.getClient().getOwnerId()))
+            return true;
+        if(event.getGuild()==null)
+            return true;
+        return Objects.requireNonNull(event.getMember()).hasPermission(Permission.MANAGE_SERVER);
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        if (check(event)) {
+            doCommand(event);
+        } else {
+            event.reply(event.getClient().getError() + " 이 명령어를 사용할 권한이 없습니다!").setEphemeral(true).queue();
+        }
+    }
+
+    public abstract void doCommand(SlashCommandEvent event);
 }

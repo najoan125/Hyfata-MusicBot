@@ -15,13 +15,18 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  *
@@ -32,41 +37,43 @@ public class VolumeCmd extends MusicCommand
     public VolumeCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uC74C\uB7C9";
+        this.name = "음량";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.help = "\uBCFC\uB968\uC744 \uC124\uC815\uD558\uAC70\uB098 \uD45C\uC2DC\uD569\uB2C8\uB2E4";
+        this.help = "음량을 설정하거나 표시합니다";
         this.arguments = "[0-150]";
+
+        this.options = Collections.singletonList(
+                new OptionData(OptionType.INTEGER, "음량", "설정할 음량 (0-150)")
+        );
     }
 
     @Override
-    public void doCommand(CommandEvent event)
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
+        var option = event.getOption("음량");
+        Integer reqVolume = option == null ? null : option.getAsInt();
+
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
-            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조정 못하쥬? ㅋㅋ 어쩔거임? ㅄ ㅋㅋ");
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 볼륨 조정 못하쥬? ㅋㅋ 어쩔거임? ㅄ ㅋㅋ").queue();
             return;
         }
+
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        int volume = handler.getPlayer().getVolume();
-        if(event.getArgs().isEmpty())
+        int volume = Objects.requireNonNull(handler).getPlayer().getVolume();
+        if(reqVolume == null)
         {
-            event.reply(FormatUtil.volumeIcon(volume)+" \uD604\uC7AC \uC74C\uB7C9\uC740 `"+volume+"` \uC785\uB2C8\uB2E4");
+            event.reply(FormatUtil.volumeIcon(volume)+" 현재 음량은 `"+volume+"` 입니다").queue();
         }
         else
         {
-            int nvolume;
-            try{
-                nvolume = Integer.parseInt(event.getArgs());
-            }catch(NumberFormatException e){
-                nvolume = -1;
-            }
-            if(nvolume<0 || nvolume>150)
-                event.reply(event.getClient().getError()+" \uC74C\uB7C9\uC740 0\uACFC 150 \uC0AC\uC774\uC758 \uC720\uD6A8\uD55C \uC815\uC218\uC5EC\uC57C \uD569\uB2C8\uB2E4!");
+            if(reqVolume<0 || reqVolume>150)
+                event.reply(event.getClient().getError()+" 음량은 0과 150 사이의 유효한 정수여야 합니다!").setEphemeral(true).queue();
             else
             {
-                handler.getPlayer().setVolume(nvolume);
-                settings.setVolume(nvolume);
-                event.reply(FormatUtil.volumeIcon(nvolume)+" \uC74C\uB7C9\uC774 `"+volume+"` \uC5D0\uC11C `"+nvolume+"` (\uC73C)\uB85C \uBCC0\uACBD\uB418\uC5C8\uC2B5\uB2C8\uB2E4");
+                handler.getPlayer().setVolume(reqVolume);
+                settings.setVolume(reqVolume);
+                event.reply(FormatUtil.volumeIcon(reqVolume)+" 음량이 `"+volume+"` 에서 `"+reqVolume+"` (으)로 변경되었습니다").queue();
             }
         }
     }

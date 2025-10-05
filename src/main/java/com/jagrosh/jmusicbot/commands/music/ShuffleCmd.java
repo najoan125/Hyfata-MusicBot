@@ -15,10 +15,12 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
+
+import java.util.Objects;
 
 /**
  *
@@ -29,28 +31,28 @@ public class ShuffleCmd extends MusicCommand
     public ShuffleCmd(Bot bot)
     {
         super(bot);
-        this.name = "\uC154\uD50C";
-        this.help = "\uCD94\uAC00\uD55C \uB178\uB798\uB97C \uC11E\uC2B5\uB2C8\uB2E4";
+        this.name = "셔플";
+        this.help = "추가한 노래를 섞습니다";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
     }
 
     @Override
-    public void doCommand(CommandEvent event) 
+    public void doCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
-        int s = handler.getQueue().shuffle(event.getAuthor().getIdLong());
-        switch (s) 
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
+        int s = Objects.requireNonNull(handler).getQueue().shuffle(event.getUser().getIdLong());
+        switch (s)
         {
             case 0:
-                event.replyError("\uB300\uAE30\uC5F4\uC5D0 \uC11E\uC744 \uC74C\uC545\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
+                event.reply(event.getClient().getError() + " 대기열에 섞을 음악이 없습니다!").setEphemeral(true).queue();
                 break;
             case 1:
-                event.replyWarning("\uB300\uAE30\uC5F4\uC5D0 \uB178\uB798\uAC00 \uD558\uB098\uB9CC \uC788\uC2B5\uB2C8\uB2E4!");
+                event.reply(event.getClient().getWarning() + " 대기열에 노래가 하나만 있습니다!").setEphemeral(true).queue();
                 break;
             default:
-                event.replySuccess(s+" \uD56D\uBAA9\uC744 \uC131\uACF5\uC801\uC73C\uB85C \uC11E\uC5C8\uC2B5\uB2C8\uB2E4");
+                event.reply(event.getClient().getSuccess() + " " + s + " 항목을 성공적으로 섞었습니다").queue();
                 break;
         }
     }

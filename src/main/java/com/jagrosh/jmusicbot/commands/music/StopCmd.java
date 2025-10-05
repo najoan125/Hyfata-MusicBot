@@ -15,11 +15,13 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
+
+import java.util.Objects;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -27,21 +29,21 @@ import com.jagrosh.jmusicbot.utils.RnjsskaUtil;
 public class StopCmd extends MusicCommand {
     public StopCmd(Bot bot) {
         super(bot);
-        this.name = "\uC815\uC9C0";
-        this.help = "\uD604\uC7AC \uB178\uB798\uB97C \uC911\uC9C0\uD558\uACE0 \uB300\uAE30\uC5F4\uC744 \uC9C0\uC6C1\uB2C8\uB2E4";
+        this.name = "나가";
+        this.help = "대기열을 지우고 통화방에서 나갑니다.";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = false;
     }
 
     @Override
-    public void doCommand(CommandEvent event) {
-        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
+    public void doCommand(SlashCommandEvent event) {
+        AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         if (RnjsskaUtil.hasNoTrackPermission(handler, event.getMember())) {
-            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 못 멈춤 ㅋㅋ ㅅㄱ");
+            event.reply(event.getClient().getError() + "봇의 소유자가 권남 모드 활성화해서 못 멈춤 ㅋㅋ ㅅㄱ").queue();
             return;
         }
-        handler.stopAndClear();
+        Objects.requireNonNull(handler).stopAndClear();
         event.getGuild().getAudioManager().closeAudioConnection();
-        event.reply(event.getClient().getSuccess() + " \uD50C\uB808\uC774\uC5B4\uAC00 \uC911\uC9C0\uB418\uACE0 \uB300\uAE30\uC5F4\uC774 \uC9C0\uC6CC\uC84C\uC2B5\uB2C8\uB2E4.");
+        event.reply(":wave: 음악을 정지하고 나갈게요").queue();
     }
 }
