@@ -61,8 +61,14 @@ public class TTSCmdUtil {
             String ttsBase64 = getTTSBase64(event, lang, args, m);
             if(ttsBase64==null) return;
 
-            String file = createMP3FromBase64(event, ttsBase64, m); //name.mp3
-            if(file==null) return;
+            String originalFile = createMP3FromBase64(event, ttsBase64, m); //name.mp3
+            String file = m.getId() + ".mp3";
+            if(originalFile==null) return;
+            try {
+                AudioNormalizer.normalizeLoudness(originalFile, file);
+            } catch (IOException | InterruptedException e) {
+                JMusicBot.LOG.error("An error occurred while normalizing TTS in TTSCmdUtil", e);
+            }
 
             bot.getPlayerManager().loadItemOrdered(event.getGuild(), file, new TTSResultHandler(event, file, m, true, text, args));
         }));
