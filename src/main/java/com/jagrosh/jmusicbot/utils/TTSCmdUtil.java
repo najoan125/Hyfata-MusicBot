@@ -25,12 +25,12 @@ public class TTSCmdUtil {
 
     private static String createMP3FromBase64(SlashCommandEvent event, String base64, Message m) {
         try {
-            return AudioUtil.createMP3FromBase64(base64, m.getId());
+            return AudioUtil.createMP3FromBase64(base64, m.getId() + "_original");
         } catch (IOException e) {
             JMusicBot.LOG.error("An error occurred while creating MP3 from base64 TTS in TTSCmdUtil", e);
             m.editMessage(event.getClient().getError()+" TTS 변환 도중 알 수 없는 문제가 발생하였습니다! 관리자에게 문의해주세요!").queue();
             try {
-                Files.delete(Paths.get(m.getId() + ".mp3"));
+                Files.delete(Paths.get(m.getId() + "_original.mp3"));
             } catch (IOException ex) {
                 JMusicBot.LOG.error("An error occurred while deleting MP3 from base64 TTS in TTSCmdUtil", ex);
             }
@@ -43,8 +43,14 @@ public class TTSCmdUtil {
             String ttsBase64 = getTTSBase64(event, lang, args, m);
             if(ttsBase64==null) return;
 
-            String file = createMP3FromBase64(event, ttsBase64, m); //name.mp3
-            if(file==null) return;
+            String originalFile = createMP3FromBase64(event, ttsBase64, m); //name.mp3
+            String file = m.getId() + ".mp3";
+            if(originalFile==null) return;
+            try {
+                AudioNormalizer.normalizeLoudness(originalFile, file);
+            } catch (IOException | InterruptedException e) {
+                JMusicBot.LOG.error("An error occurred while normalizing TTS in TTSCmdUtil", e);
+            }
 
             bot.getPlayerManager().loadItemOrdered(event.getGuild(), file, new TTSResultHandler(event, file, m, args));
         }));
