@@ -224,7 +224,7 @@ public class JMusicBot
                         new SettcCmd(bot),
                         new SetvcCmd(bot)
                 );
-        cb.forceGuildOnly("1131232737181839391"); // my test server
+//        cb.forceGuildOnly("1131232737181839391"); // my test server
 
         // enable eval if applicable
         if(config.useEval())
