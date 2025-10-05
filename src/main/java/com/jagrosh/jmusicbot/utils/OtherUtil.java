@@ -18,19 +18,18 @@ package com.jagrosh.jmusicbot.utils;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.entities.Prompt;
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import okhttp3.*;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  *
@@ -38,10 +37,6 @@ import org.json.JSONTokener;
  */
 public class OtherUtil
 {
-    public final static String NEW_VERSION_AVAILABLE = "There is a new version of JMusicBot available!\n"
-                    + "Current version: %s\n"
-                    + "New Version: %s\n\n"
-                    + "Please visit https://github.com/jagrosh/MusicBot/releases/latest to get the latest release.";
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
     
     /**
@@ -76,7 +71,7 @@ public class OtherUtil
      */
     public static String loadResource(Object clazz, String name)
     {
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(clazz.getClass().getResourceAsStream(name))))
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(clazz.getClass().getResourceAsStream(name)))))
         {
             StringBuilder sb = new StringBuilder();
             reader.lines().forEach(line -> sb.append("\r\n").append(line));
@@ -100,12 +95,12 @@ public class OtherUtil
             return null;
         try 
         {
-            URL u = new URL(url);
+            URL u = new URI(url).toURL();
             URLConnection urlConnection = u.openConnection();
             urlConnection.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36");
             return urlConnection.getInputStream();
         }
-        catch(IOException | IllegalArgumentException ignore) {}
+        catch(IOException | URISyntaxException | IllegalArgumentException ignore) {}
         return null;
     }
     
@@ -148,8 +143,7 @@ public class OtherUtil
     {
         if(status==null || status.trim().isEmpty())
             return OnlineStatus.ONLINE;
-        OnlineStatus st = OnlineStatus.fromKey(status);
-        return st == null ? OnlineStatus.ONLINE : st;
+        return OnlineStatus.fromKey(status);
     }
     
     public static void checkJavaVersion(Prompt prompt)
@@ -158,20 +152,6 @@ public class OtherUtil
             prompt.alert(Prompt.Level.WARNING, "Java Version", 
                     "It appears that you may not be using a supported Java version. Please use 64-bit java.");
     }
-
-    public static void checkVersion(Prompt prompt)
-    {
-        // Get current version number
-        String version = getCurrentVersion();
-        
-        // Check for new version
-        String latestVersion = getLatestVersion();
-        
-        if(latestVersion!=null && !latestVersion.equals(version))
-        {
-            prompt.alert(Prompt.Level.WARNING, "JMusicBot Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
-        }
-    }
     
     public static String getCurrentVersion()
     {
@@ -179,35 +159,6 @@ public class OtherUtil
             return JMusicBot.class.getPackage().getImplementationVersion();
         else
             return "UNKNOWN";
-    }
-    
-    public static String getLatestVersion()
-    {
-        try
-        {
-            Response response = new OkHttpClient.Builder().build()
-                    .newCall(new Request.Builder().get().url("https://api.github.com/repos/jagrosh/MusicBot/releases/latest").build())
-                    .execute();
-            ResponseBody body = response.body();
-            if(body != null)
-            {
-                try(Reader reader = body.charStream())
-                {
-                    JSONObject obj = new JSONObject(new JSONTokener(reader));
-                    return obj.getString("tag_name");
-                }
-                finally
-                {
-                    response.close();
-                }
-            }
-            else
-                return null;
-        }
-        catch(IOException | JSONException | NullPointerException ex)
-        {
-            return null;
-        }
     }
 
     /**
