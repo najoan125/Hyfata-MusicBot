@@ -15,6 +15,7 @@
  */
 package com.jagrosh.jmusicbot.audio;
 
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.queue.AbstractQueue;
 import com.jagrosh.jmusicbot.settings.QueueType;
@@ -179,7 +180,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             try {
                 Files.delete(fileToDelete);
             } catch (IOException e) {
-                e.printStackTrace();
+                JMusicBot.LOG.error("Failed to delete TTS file while running onTrackEnd in AudioHandler", e);
             }
         }
 

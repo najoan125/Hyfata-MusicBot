@@ -35,9 +35,9 @@ public class SetgameCmd extends OwnerCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.children = new OwnerCommand[]{
-            new SetlistenCmd(),
-            new SetstreamCmd(),
-            new SetwatchCmd()
+                new SetlistenCmd(),
+                new SetstreamCmd(),
+                new SetwatchCmd()
         };
     }
     
@@ -57,7 +57,7 @@ public class SetgameCmd extends OwnerCommand
         }
     }
     
-    private class SetstreamCmd extends OwnerCommand
+    private static class SetstreamCmd extends OwnerCommand
     {
         private SetstreamCmd()
         {
@@ -65,7 +65,7 @@ public class SetgameCmd extends OwnerCommand
             this.aliases = new String[]{"twitch","streaming"};
             this.help = "sets the game the bot is playing to a stream";
             this.arguments = "<username> <game>";
-            this.guildOnly = false;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override
@@ -90,7 +90,7 @@ public class SetgameCmd extends OwnerCommand
         }
     }
     
-    private class SetlistenCmd extends OwnerCommand
+    private static class SetlistenCmd extends OwnerCommand
     {
         private SetlistenCmd()
         {
@@ -98,7 +98,7 @@ public class SetgameCmd extends OwnerCommand
             this.aliases = new String[]{"listening"};
             this.help = "sets the game the bot is listening to";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override
@@ -120,7 +120,7 @@ public class SetgameCmd extends OwnerCommand
         }
     }
     
-    private class SetwatchCmd extends OwnerCommand
+    private static class SetwatchCmd extends OwnerCommand
     {
         private SetwatchCmd()
         {
@@ -128,7 +128,7 @@ public class SetgameCmd extends OwnerCommand
             this.aliases = new String[]{"watching"};
             this.help = "sets the game the bot is watching";
             this.arguments = "<title>";
-            this.guildOnly = false;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override

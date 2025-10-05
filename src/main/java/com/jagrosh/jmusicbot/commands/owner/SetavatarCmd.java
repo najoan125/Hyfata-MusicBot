@@ -44,8 +44,8 @@ public class SetavatarCmd extends OwnerCommand
     {
         String url;
         if(event.getArgs().isEmpty())
-            if(!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).isImage())
-                url = event.getMessage().getAttachments().get(0).getUrl();
+            if(!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().getFirst().isImage())
+                url = event.getMessage().getAttachments().getFirst().getUrl();
             else
                 url = null;
         else

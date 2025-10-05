@@ -1,6 +1,7 @@
 package com.jagrosh.jmusicbot.utils;
 
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
@@ -96,19 +97,19 @@ public class TTSResultHandler implements AudioLoadResultHandler {
         try {
             Files.delete(fileToDelete);
         } catch (IOException e) {
-            e.printStackTrace();
+            JMusicBot.LOG.error("An error occurred while deleting MP3 from base64 TTS in TTSResultHandler", e);
         }
     }
 
     @Override
     public void loadFailed(FriendlyException exception) {
         m.editMessage(event.getClient().getError()+" TTS 로드를 실패했습니다! 관리자에게 문의하세요!").queue();
-        exception.printStackTrace();
+        JMusicBot.LOG.error("An error occurred while loading TTS track in TTSResultHandler", exception);
         Path fileToDelete = Paths.get(filepath);
         try {
             Files.delete(fileToDelete);
         } catch (IOException e) {
-            e.printStackTrace();
+            JMusicBot.LOG.error("An error occurred while deleting MP3 from base64 TTS in TTSResultHandler", e);
         }
     }
 

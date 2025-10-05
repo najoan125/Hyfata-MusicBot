@@ -42,9 +42,9 @@ public class PlaylistCmd extends OwnerCommand
         this.children = new OwnerCommand[]{
             new ListCmd(),
             new AppendlistCmd(),
-            new DeletelistCmd(),
-            new MakelistCmd(),
-            new DefaultlistCmd(bot)
+            new DeletelistCmd(bot),
+            new MakelistCmd(bot),
+                new DefaultlistCmd(bot)
         };
     }
 
@@ -58,23 +58,25 @@ public class PlaylistCmd extends OwnerCommand
         event.reply(builder.toString());
     }
     
-    public class MakelistCmd extends OwnerCommand 
+    public static class MakelistCmd extends OwnerCommand
     {
-        public MakelistCmd()
+        private final Bot bot;
+        public MakelistCmd(Bot bot)
         {
             this.name = "make";
             this.aliases = new String[]{"create"};
             this.help = "makes a new playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            this.bot = bot;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override
         protected void execute(CommandEvent event) 
         {
             String pname = event.getArgs().replaceAll("\\s+", "_");
-            pname = pname.replaceAll("[*?|\\/\":<>]", "");
-            if(pname == null || pname.isEmpty()) 
+            pname = pname.replaceAll("[*?|/\":<>]", "");
+            if(pname.isEmpty())
             {
                 event.replyError("플레이리스트의 이름을 입력하십시오!");
             } 
@@ -95,15 +97,17 @@ public class PlaylistCmd extends OwnerCommand
         }
     }
     
-    public class DeletelistCmd extends OwnerCommand 
+    public static class DeletelistCmd extends OwnerCommand
     {
-        public DeletelistCmd()
+        private final Bot bot;
+        public DeletelistCmd(Bot bot)
         {
             this.name = "delete";
             this.aliases = new String[]{"remove"};
             this.help = "deletes an existing playlist";
             this.arguments = "<name>";
-            this.guildOnly = false;
+            this.bot = bot;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override
@@ -135,7 +139,7 @@ public class PlaylistCmd extends OwnerCommand
             this.aliases = new String[]{"add"};
             this.help = "appends songs to an existing playlist";
             this.arguments = "<name> <URL> | <URL> | ...";
-            this.guildOnly = false;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         }
 
         @Override
@@ -176,7 +180,7 @@ public class PlaylistCmd extends OwnerCommand
         }
     }
     
-    public class DefaultlistCmd extends AutoplaylistCmd 
+    public static class DefaultlistCmd extends AutoplaylistCmd
     {
         public DefaultlistCmd(Bot bot)
         {
@@ -184,7 +188,7 @@ public class PlaylistCmd extends OwnerCommand
             this.name = "setdefault";
             this.aliases = new String[]{"default"};
             this.arguments = "<playlistname|NONE>";
-            this.guildOnly = true;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         }
     }
     
@@ -195,7 +199,7 @@ public class PlaylistCmd extends OwnerCommand
             this.name = "all";
             this.aliases = new String[]{"available","list"};
             this.help = "lists all available playlists";
-            this.guildOnly = true;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         }
 
         @Override
