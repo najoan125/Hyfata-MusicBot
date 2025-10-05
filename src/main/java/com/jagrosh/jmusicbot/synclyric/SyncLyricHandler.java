@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.jmusicbot.audio;
+package com.jagrosh.jmusicbot.synclyric;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
+import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.music.SyncLyricsCmd;
 import com.jagrosh.jmusicbot.entities.Pair;
-import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -81,7 +81,7 @@ public class SyncLyricHandler {
                     msg = handler.getNoMusicPlaying(bot.getJDA());
                     toRemove.add(guildId);
                 } else {
-                    msg = handler.getSyncLyric(bot.getJDA());
+                    msg = handler.getSyncLyric().pollLyricUpdate(bot.getJDA());
                 }
             } catch (LyricNotFoundException e) {
                 msg = new MessageEditBuilder().setContent(bot.getConfig().getWarning() + SyncLyricsCmd.LYRIC_NOT_FOUND).build();

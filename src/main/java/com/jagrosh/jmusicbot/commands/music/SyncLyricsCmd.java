@@ -20,7 +20,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
-import com.jagrosh.jmusicbot.utils.synclyric.LyricNotFoundException;
+import com.jagrosh.jmusicbot.synclyric.LyricNotFoundException;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
@@ -45,10 +45,10 @@ public class SyncLyricsCmd extends MusicCommand {
     public void doCommand(SlashCommandEvent event) {
         AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
         event.deferReply().queue(hook -> hook.retrieveOriginal().queue(msg -> {
-            long ping = msg.getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
+            long ping = event.getTimeCreated().until(msg.getTimeCreated(), ChronoUnit.MILLIS);
             MessageEditData lyricMsg;
             try {
-                lyricMsg = Objects.requireNonNull(handler).getLyric(event.getJDA(), ping);
+                lyricMsg = Objects.requireNonNull(handler).getSyncLyric().getLyric(event.getJDA(), ping);
             } catch (LyricNotFoundException e) {
                 msg.editMessage(bot.getConfig().getWarning() + LYRIC_NOT_FOUND).queue();
                 bot.getSyncLyricHandler().clearLastLyricMessage(event.getGuild());

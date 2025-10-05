@@ -49,11 +49,25 @@ public class FormatUtil {
         return (double) Math.round(duration / 1000.0 * 100) / 100;
     }
 
+    public static long secondsToMillis(double seconds) {
+        return (long) (seconds * 1000);
+    }
+
     public static String progressBar(double percent) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < 20; i++)
             if (i <= (int) (percent * 20))
                 str.append("[▬](https://discord.gg/tmqUgaY)"); // 🔘
+            else
+                str.append("▬");
+        return str.toString();
+    }
+
+    public static String progressBar(double percent, String url) {
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < 20; i++)
+            if (i <= (int) (percent * 20))
+                str.append("[▬](").append(url).append(")"); // 🔘
             else
                 str.append("▬");
         return str.toString();

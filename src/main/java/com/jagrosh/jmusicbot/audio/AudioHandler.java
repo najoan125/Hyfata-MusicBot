@@ -20,7 +20,7 @@ import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.queue.AbstractQueue;
 import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
-import com.jagrosh.jmusicbot.utils.synclyric.SyncLyricUtil;
+import com.jagrosh.jmusicbot.synclyric.SyncLyric;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
@@ -49,10 +49,8 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -73,13 +71,19 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
 
     private AudioFrame lastFrame;
     private AbstractQueue<QueuedTrack> queue;
+    private final SyncLyric syncLyric;
 
     protected AudioHandler(PlayerManager manager, Guild guild, AudioPlayer player) {
         this.manager = manager;
         this.audioPlayer = player;
         this.guildId = guild.getIdLong();
+        this.syncLyric = new SyncLyric(manager.getBot(), this, guild);
 
         this.setQueueType(manager.getBot().getSettingsManager().getSettings(guildId).getQueueType());
+    }
+
+    public SyncLyric getSyncLyric() {
+        return syncLyric;
     }
 
     public void setQueueType(QueueType type) {
@@ -210,7 +214,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
         manager.getBot().getNowplayingHandler().onTrackUpdate(track);
     }
 
-
     // Formatting
     public MessageEditData getNowPlaying(JDA jda) {
         if (isMusicPlaying(jda)) {
@@ -265,139 +268,6 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler 
             mb.setComponents(actionRow1, actionRow2);
             return mb.setEmbeds(eb.build()).build();
         } else return null;
-    }
-
-    AudioTrack track;
-    LinkedHashMap<Double, String> lyrics;
-    ArrayList<Double> lyricTimes;
-    int currentLyricIndex = 0;
-    double ping;
-
-    public MessageEditData getInitLyric(Guild guild, AudioTrack track) throws Exception {
-        if (track.getInfo().isrc != null) {
-            lyrics = SyncLyricUtil.getLyricByIsrc(manager.getBot(), track.getInfo().isrc);
-        } else {
-            lyrics = SyncLyricUtil.getLyric(manager.getBot(), track.getInfo().title, track.getInfo().author.replace(" - Topic", ""));
-        }
-        this.track = track;
-        lyricTimes = new ArrayList<>(lyrics.keySet());
-        return getNewLyricMessage(guild, track);
-    }
-
-    public MessageEditData getLyric(JDA jda, long ping) throws Exception {
-        this.ping = FormatUtil.formatTimeDouble(ping);
-        AudioTrack track = audioPlayer.getPlayingTrack();
-        if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
-            Guild guild = guild(jda);
-            if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
-                return getInitLyric(guild, track);
-            }
-            return getNewLyricMessage(guild, track);
-        }
-        return null;
-    }
-
-    public MessageEditData getSyncLyric(JDA jda) throws Exception {
-        AudioTrack track = audioPlayer.getPlayingTrack();
-        if (isMusicPlaying(jda) && track != null && !(track.getInfo() != null && track.getInfo().uri != null && track.getInfo().uri.startsWith("TTS"))) {
-            double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
-            Guild guild = guild(jda);
-
-            // init
-            if (this.track == null || !this.track.getInfo().uri.equals(track.getInfo().uri)) {
-                return getInitLyric(guild, track);
-            }
-
-            // currentLyric == lastLyric
-            if (lyricTimes.size() == currentLyricIndex + 1) {
-                if (trackPosition < lyricTimes.get(currentLyricIndex) - ping) {
-                    return getNewLyricMessage(guild, track);
-                }
-            }
-            // ex: When played again from the beginning || current track position >= nextLyric time
-            else if (currentLyricIndex != -1 && trackPosition < lyricTimes.get(currentLyricIndex) - ping ||
-                    trackPosition >= lyricTimes.get(currentLyricIndex + 1) - ping) {
-                return getNewLyricMessage(guild, track);
-            }
-        }
-        return null;
-    }
-
-    private void loadCurrentLyricIndex(double trackPosition) {
-        int i = 0;
-        for (double time : lyricTimes) {
-            if (trackPosition >= time - ping) {
-                currentLyricIndex = i;
-            } else {
-                break;
-            }
-            i++;
-        }
-    }
-
-    private MessageEditData getNewLyricMessage(Guild guild, AudioTrack track) {
-        double trackPosition = FormatUtil.formatTimeDouble(track.getPosition());
-        MessageCreateBuilder mb = new MessageCreateBuilder();
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setColor(guild.getSelfMember().getColor());
-
-        if (trackPosition < lyricTimes.getFirst() - ping) {
-            currentLyricIndex = -1;
-        } else {
-            loadCurrentLyricIndex(trackPosition);
-        }
-        return getLyricMessage(mb, eb);
-    }
-
-    @NotNull
-    private MessageEditData getLyricMessage(MessageCreateBuilder mb, EmbedBuilder eb) {
-        if (currentLyricIndex == -1) {
-            eb.setDescription(
-                    " \n \n### " + lyrics.get(lyricTimes.getFirst())
-            );
-        } else if (currentLyricIndex == 0) {
-            eb.setDescription(
-                    " \n"
-                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n### "
-                            + lyrics.get(lyricTimes.get(currentLyricIndex + 1))
-            );
-        } else if (lyrics.size() != currentLyricIndex + 1) {
-            String nextLyric = lyrics.get(lyricTimes.get(currentLyricIndex + 1));
-            if (!nextLyric.isEmpty()) {
-                nextLyric = "### " + nextLyric;
-            }
-            eb.setDescription(
-                    "### " + lyrics.get(lyricTimes.get(currentLyricIndex - 1))
-                            + "\n"
-                            + "# " + lyrics.get(lyricTimes.get(currentLyricIndex)) + "\n"
-                            + nextLyric
-            );
-        } else {
-            String lyric = lyrics.get(lyricTimes.get(currentLyricIndex));
-            if (!lyric.isEmpty()) {
-                lyric = "# " + lyric;
-            }
-            eb.setDescription(
-                    "### " + lyrics.get(lyricTimes.get(currentLyricIndex - 1))
-                            + "\n"
-                            + lyric + "\n"
-                            + " "
-            );
-        }
-        mb.addContent("**").addContent(manager.getBot().getConfig().getSuccess())
-                .addContent(" ")
-                .addContent(track.getInfo().author)
-                .addContent(" - ").addContent(track.getInfo().title).addContent(" 재생 중...**");
-
-        double progress = (double) audioPlayer.getPlayingTrack().getPosition() / track.getDuration();
-        mb.addContent("\n")
-                .addContent(getStatusEmoji()).addContent(" ")
-                .addContent(FormatUtil.progressBar(progress))
-                .addContent(" `")
-                .addContent(TimeUtil.formatTime(audioPlayer.getPlayingTrack().getPosition())).addContent(" / ").addContent(TimeUtil.formatTime(track.getDuration()))
-                .addContent("`");
-        mb.addContent("\n\n가사 제공: [Musixmatch](https://www.musixmatch.com)");
-        return MessageEditData.fromCreateData(mb.setEmbeds(eb.build()).build());
     }
 
     private String getRepeatModeName(RepeatMode repeatMode) {

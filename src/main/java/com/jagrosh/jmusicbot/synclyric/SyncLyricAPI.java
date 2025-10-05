@@ -1,4 +1,4 @@
-package com.jagrosh.jmusicbot.utils.synclyric;
+package com.jagrosh.jmusicbot.synclyric;
 
 import com.jagrosh.jmusicbot.Bot;
 import org.apache.http.client.HttpResponseException;
@@ -9,16 +9,14 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
 /*
  * API: https://github.com/OrfiDev/orpheusdl-musixmatch/blob/master/musixmatch_api.py
  */
-public class SyncLyricUtil {
+public class SyncLyricAPI {
 
     public static LinkedHashMap<Double, String> getLyric(Bot bot, String track, String artist) throws Exception {
         JSONObject json = getJsonObjectFromConnection(getMusixmatchConnection(bot, track, artist));
@@ -116,9 +114,9 @@ public class SyncLyricUtil {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnection(Bot bot, String track, String artist) throws IOException {
+    private static HttpURLConnection getMusixmatchConnection(Bot bot, String track, String artist) throws IOException, URISyntaxException {
         String query = "&q_track=" + URLEncoder.encode(track, StandardCharsets.UTF_8) + "&q_artist=" + URLEncoder.encode(artist, StandardCharsets.UTF_8);
-        URL url = new URL(getAPI(bot,false) + query);
+        URL url = new URI(getAPI(bot,false) + query).toURL();
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -128,9 +126,9 @@ public class SyncLyricUtil {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnectionByIsrc(Bot bot, String isrc) throws IOException {
+    private static HttpURLConnection getMusixmatchConnectionByIsrc(Bot bot, String isrc) throws IOException, URISyntaxException {
         String query = "&track_isrc=" + URLEncoder.encode(isrc, StandardCharsets.UTF_8);
-        URL url = new URL(getAPI(bot,true) + query);
+        URL url = new URI(getAPI(bot,true) + query).toURL();
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
