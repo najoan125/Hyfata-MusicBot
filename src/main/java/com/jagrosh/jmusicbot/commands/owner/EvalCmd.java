@@ -21,7 +21,6 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.OwnerCommand;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
 
 /**
  *
@@ -39,7 +38,7 @@ public class EvalCmd extends OwnerCommand
         this.help = "evaluates nashorn code";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.engine = bot.getConfig().getEvalEngine();
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.guildOnly = false;
     }
     
     @Override

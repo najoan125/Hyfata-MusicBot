@@ -24,7 +24,6 @@ import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
@@ -44,7 +43,7 @@ public class DebugCmd extends OwnerCommand
         this.name = "debug";
         this.help = "shows debug info";
         this.aliases = bot.getConfig().getAliases(this.name);
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.guildOnly = false;
     }
 
     @Override

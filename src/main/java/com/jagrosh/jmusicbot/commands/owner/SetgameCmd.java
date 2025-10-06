@@ -128,7 +128,7 @@ public class SetgameCmd extends OwnerCommand
             this.aliases = new String[]{"watching"};
             this.help = "sets the game the bot is watching";
             this.arguments = "<title>";
-            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+            this.guildOnly = false;
         }
 
         @Override

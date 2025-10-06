@@ -121,7 +121,7 @@ public class PlaylistsCmd extends MusicCommand
                 event.reply(event.getClient().getError() + " `"+args+".txt` 를 플레이리스트 폴더에서 찾을 수 없습니다.").setEphemeral(true).queue();
                 return;
             }
-            event.getChannel().sendMessage(" 재생 목록 **"+args+"** 로딩중... ("+playlist.getItems().size()+" 항목)").queue(m ->
+            event.reply(" 재생 목록 **"+args+"** 로딩중... ("+playlist.getItems().size()+" 항목)").queue(m ->
             {
                 AudioHandler handler = (AudioHandler) Objects.requireNonNull(event.getGuild()).getAudioManager().getSendingHandler();
                 playlist.loadTracks(bot.getPlayerManager(), (at)-> Objects.requireNonNull(handler).addTrack(new QueuedTrack(at, RequestMetadata.fromResultHandler(at, event, args))), () -> {
@@ -134,7 +134,7 @@ public class PlaylistsCmd extends MusicCommand
                     String str = builder.toString();
                     if(str.length()>2000)
                         str = str.substring(0,1994)+" (...)";
-                    m.editMessage(FormatUtil.filter(str)).queue();
+                    m.editOriginal(FormatUtil.filter(str)).queue();
                 });
             });
         }

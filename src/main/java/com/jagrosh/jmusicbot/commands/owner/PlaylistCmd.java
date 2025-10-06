@@ -34,7 +34,7 @@ public class PlaylistCmd extends OwnerCommand
     public PlaylistCmd(Bot bot)
     {
         this.bot = bot;
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.guildOnly = false;
         this.name = "playlist";
         this.arguments = "<append|delete|make|setdefault>";
         this.help = "playlist management";
@@ -68,7 +68,7 @@ public class PlaylistCmd extends OwnerCommand
             this.help = "makes a new playlist";
             this.arguments = "<name>";
             this.bot = bot;
-            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+            this.guildOnly = false;
         }
 
         @Override
@@ -107,7 +107,7 @@ public class PlaylistCmd extends OwnerCommand
             this.help = "deletes an existing playlist";
             this.arguments = "<name>";
             this.bot = bot;
-            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+            this.guildOnly = false;
         }
 
         @Override
@@ -139,7 +139,7 @@ public class PlaylistCmd extends OwnerCommand
             this.aliases = new String[]{"add"};
             this.help = "appends songs to an existing playlist";
             this.arguments = "<name> <URL> | <URL> | ...";
-            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+            this.guildOnly = false;
         }
 
         @Override
