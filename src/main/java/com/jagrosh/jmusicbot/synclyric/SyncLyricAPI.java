@@ -1,25 +1,26 @@
 package com.jagrosh.jmusicbot.synclyric;
 
 import com.jagrosh.jmusicbot.Bot;
-import org.apache.http.client.HttpResponseException;
+import com.jagrosh.jmusicbot.utils.JSON;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /*
  * API: https://github.com/OrfiDev/orpheusdl-musixmatch/blob/master/musixmatch_api.py
  */
 public class SyncLyricAPI {
+    private List<String> translations = null;
+    private List<String> tlits = null;
 
-    public static LinkedHashMap<Double, String> getLyric(Bot bot, String track, String artist) throws Exception {
-        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnection(bot, track, artist));
+    public LinkedHashMap<Double, String> getLyric(Bot bot, String track, String artist) throws Exception {
+        JSONObject json = JSON.getJsonObjectFromConnection(getMusixmatchConnection(bot, track, artist));
         int statusCode = json.getJSONObject("message").getJSONObject("header").getInt("status_code");
         errorHandling(statusCode);
 
@@ -38,11 +39,27 @@ public class SyncLyricAPI {
                 .getJSONObject(0)
                 .getJSONObject("subtitle")
                 .getString("subtitle_body");
-        return getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
+
+        String lang = json
+                .getJSONObject("message")
+                .getJSONObject("body")
+                .getJSONArray("subtitle_list")
+                .getJSONObject(0)
+                .getJSONObject("subtitle")
+                .getString("subtitle_language");
+
+        var lyric = getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
+        if (lang.equals("ja")) {
+            translations = PapagoAPI.getTranslation(lang, lyric.values().toArray(new String[0]));
+            tlits = PapagoAPI.getTlit(lang, lyric.values().toArray(new String[0]));
+        } else if (!lang.equals("ko")) {
+            translations = PapagoAPI.getTranslation(lang, lyric.values().toArray(new String[0]));
+        }
+        return lyric;
     }
 
-    public static LinkedHashMap<Double, String> getLyricByIsrc(Bot bot, String isrc) throws Exception {
-        JSONObject json = getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(bot, isrc));
+    public LinkedHashMap<Double, String> getLyricByIsrc(Bot bot, String isrc) throws Exception {
+        JSONObject json = JSON.getJsonObjectFromConnection(getMusixmatchConnectionByIsrc(bot, isrc));
         int statusCode = json.getJSONObject("message").getJSONObject("header").getInt("status_code");
         errorHandling(statusCode);
 
@@ -57,10 +74,37 @@ public class SyncLyricAPI {
                 .getJSONObject(0)
                 .getJSONObject("subtitle")
                 .getString("subtitle_body");
-        return getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
+
+        String lang = json
+                .getJSONObject("message")
+                .getJSONObject("body")
+                .getJSONArray("subtitle_list")
+                .getJSONObject(0)
+                .getJSONObject("subtitle")
+                .getString("subtitle_language");
+
+        var lyric = getTimeLyricLinkedHashMap(new JSONArray(lyricArrayString));
+        if (lang.equals("ja")) {
+            translations = PapagoAPI.getTranslation(lang, lyric.values().toArray(new String[0]));
+            tlits = PapagoAPI.getTlit(lang, lyric.values().toArray(new String[0]));
+        } else if (!lang.equals("ko")) {
+            if (lang.equals("en") || lang.equals("zh") || lang.equals("es") || lang.equals("fr") || lang.equals("de")
+            || lang.equals("it") || lang.equals("pt") || lang.equals("ru") || lang.equals("vi") || lang.equals("th") ||
+            lang.equals("id") || lang.equals("hi") || lang.equals("ar"))
+                translations = PapagoAPI.getTranslation(lang, lyric.values().toArray(new String[0]));
+        }
+        return lyric;
     }
 
-    private static void errorHandling(int statusCode) throws Exception {
+    public List<String> getTranslations() {
+        return translations;
+    }
+
+    public List<String> getTlits() {
+        return tlits;
+    }
+
+    private void errorHandling(int statusCode) throws Exception {
         switch (statusCode) {
             case 200:
                 break;
@@ -79,7 +123,7 @@ public class SyncLyricAPI {
         }
     }
 
-    private static String getAPI(Bot bot, boolean isrc) {
+    private String getAPI(Bot bot, boolean isrc) {
         String method = isrc ? "track" : "macro";
         return "https://apic-desktop.musixmatch.com/ws/1.1/" + method + ".subtitles.get?" +
                 "format=json&" +
@@ -92,7 +136,7 @@ public class SyncLyricAPI {
     }
 
     @NotNull
-    private static LinkedHashMap<Double, String> getTimeLyricLinkedHashMap(JSONArray lyricArray) {
+    private LinkedHashMap<Double, String> getTimeLyricLinkedHashMap(JSONArray lyricArray) {
         LinkedHashMap<Double, String> result = new LinkedHashMap<>(); // time, lyricText
         for (int i = 0; i < lyricArray.length(); i++) {
             JSONObject lyricObject = lyricArray.getJSONObject(i);
@@ -114,7 +158,7 @@ public class SyncLyricAPI {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnection(Bot bot, String track, String artist) throws IOException, URISyntaxException {
+    private HttpURLConnection getMusixmatchConnection(Bot bot, String track, String artist) throws IOException, URISyntaxException {
         String query = "&q_track=" + URLEncoder.encode(track, StandardCharsets.UTF_8) + "&q_artist=" + URLEncoder.encode(artist, StandardCharsets.UTF_8);
         URL url = new URI(getAPI(bot,false) + query).toURL();
 
@@ -126,7 +170,7 @@ public class SyncLyricAPI {
     }
 
     @NotNull
-    private static HttpURLConnection getMusixmatchConnectionByIsrc(Bot bot, String isrc) throws IOException, URISyntaxException {
+    private HttpURLConnection getMusixmatchConnectionByIsrc(Bot bot, String isrc) throws IOException, URISyntaxException {
         String query = "&track_isrc=" + URLEncoder.encode(isrc, StandardCharsets.UTF_8);
         URL url = new URI(getAPI(bot,true) + query).toURL();
 
@@ -135,24 +179,5 @@ public class SyncLyricAPI {
         connection.setRequestProperty("Cookie", "AWSELB=55578B011601B1EF8BC274C33F9043CA947F99DCFF0A80541772015CA2B39C35C0F9E1C932D31725A7310BCAEB0C37431E024E2B45320B7F2C84490C2C97351FDE34690157");
         connection.setRequestProperty("Origin", "musixmatch.com");
         return connection;
-    }
-
-    @NotNull
-    private static JSONObject getJsonObjectFromConnection(HttpURLConnection connection) throws IOException {
-        JSONObject result;
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            reader.close();
-            result = new JSONObject(stringBuilder.toString());
-        } else {
-            throw new HttpResponseException(responseCode, "HTTP Request failed with response code");
-        }
-        return result;
     }
 }

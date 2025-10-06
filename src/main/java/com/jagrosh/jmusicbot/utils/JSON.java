@@ -1,10 +1,13 @@
 package com.jagrosh.jmusicbot.utils;
 
+import org.apache.http.client.HttpResponseException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -66,5 +69,24 @@ public class JSON {
                 Files.readAllBytes(Paths.get(path))
         );
         return new JSONObject(json);
+    }
+
+    @NotNull
+    public static JSONObject getJsonObjectFromConnection(HttpURLConnection connection) throws IOException {
+        JSONObject result;
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            reader.close();
+            result = new JSONObject(stringBuilder.toString());
+        } else {
+            throw new HttpResponseException(responseCode, "HTTP Request failed with response code" + connection.getResponseMessage());
+        }
+        return result;
     }
 }

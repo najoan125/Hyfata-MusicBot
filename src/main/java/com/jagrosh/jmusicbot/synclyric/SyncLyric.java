@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class SyncLyric {
     private final Bot bot;
@@ -22,6 +23,8 @@ public class SyncLyric {
     private String trackUri;
     private LinkedHashMap<Double, String> lyricLinesByTime;
     private ArrayList<Double> lyricTimestamps;
+    private List<String> translations;
+    private List<String> tlits;
     private int currentLyricIndex = 0;
     private double ping; // seconds
 
@@ -32,18 +35,21 @@ public class SyncLyric {
     }
 
     private void initTrack(AudioTrack track) throws Exception {
+        SyncLyricAPI api = new SyncLyricAPI();
         this.trackUri = track.getInfo().uri;
 
         if (track.getInfo().isrc != null) {
-            this.lyricLinesByTime = SyncLyricAPI.getLyricByIsrc(bot, track.getInfo().isrc);
+            this.lyricLinesByTime = api.getLyricByIsrc(bot, track.getInfo().isrc);
         } else {
-            this.lyricLinesByTime = SyncLyricAPI.getLyric(
+            this.lyricLinesByTime = api.getLyric(
                     bot,
                     track.getInfo().title,
                     track.getInfo().author.replace(" - Topic", "")
             );
         }
         this.lyricTimestamps = new ArrayList<>(lyricLinesByTime.keySet());
+        this.translations = api.getTranslations();
+        this.tlits = api.getTlits();
     }
 
     public MessageEditData getLyric(JDA jda, long ping) throws Exception {
@@ -106,7 +112,8 @@ public class SyncLyric {
         eb.setDescription(generateLyricString()); // sync lyric
 
         // playing text
-        mb.addContent("**")
+        mb.addContent("`오프셋: ").addContent(FormatUtil.secondsToMillis(this.ping) + "ms`\n")
+                .addContent("**")
                 .addContent(bot.getConfig().getSuccess()).addContent(" ")
                 .addContent(track.getInfo().author)
                 .addContent(" - ")
@@ -119,11 +126,20 @@ public class SyncLyric {
                 .addContent(FormatUtil.progressBar(progress, "http://a"))
                 .addContent(" `")
                 .addContent(TimeUtil.formatTime(track.getPosition())).addContent(" / ").addContent(TimeUtil.formatTime(track.getDuration()))
-                .addContent("`\n");
+                .addContent("`\n\n");
 
         // lyric
-        mb.addContent("\n`오프셋: ").addContent(FormatUtil.secondsToMillis(this.ping) + "ms`\n")
-                .addContent("가사 제공: [Musixmatch](https://www.musixmatch.com)");
+        if (currentLyricIndex >= 0) {
+            if (tlits != null) {
+                mb.addContent("**").addContent(tlits.get(currentLyricIndex)).addContent("**\n");
+            }
+            if (translations != null) {
+                mb.addContent(translations.get(currentLyricIndex)).addContent("\n");
+            }
+            if (tlits != null || translations != null)
+                mb.addContent("\n번역, 발음: [Papago](https://papago.naver.com)\n");
+        }
+        mb.addContent("가사 제공: [Musixmatch](https://www.musixmatch.com)");
         return MessageEditData.fromCreateData(mb.setEmbeds(eb.build()).build());
     }
 
