@@ -40,7 +40,9 @@ public class PapagoAPI {
                 .replaceAll("」", "")
                 .replaceAll(",", "")
                 .replaceAll("。", "")
-                .replaceAll("？", "")+ " ";
+                .replaceAll("？", "")
+                .replaceAll("（","")
+                .replaceAll("）","") + " ";
         JSONObject jsonResponse;
         try {
             jsonResponse = JSON.getJsonObjectFromConnection(getTlitConnection(lang, textToTranslate));
